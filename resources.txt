@@ -1,0 +1,4 @@
+Vex Curriculum Lesson Content: http://curriculum.vexrobotics.com/curriculum
+- Lifting mechanism
+- Drivetrain design
+- Mechanical power transmission
