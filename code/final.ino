@@ -166,28 +166,6 @@ void loop(){
 
     case 30:
 
-    // ==================== CASE 31-40 ====================
-
-    case 31:
-
-    case 32:
-
-    case 33:
-
-    case 34:
-
-    case 35:
-
-    case 36:
-
-    case 37:
-
-    case 38:
-
-    case 39:
-
-    case 40:
-
   }
 
 }
