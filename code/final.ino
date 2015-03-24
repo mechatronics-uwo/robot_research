@@ -14,6 +14,7 @@
 // 2500ms = Fast forward
 // 500ms = Fast Reverse
 // 200ms = Brake
+
 Servo servo_RightMotor;
 Servo servo_LeftMotor;
 unsigned int left_motor_speed;
@@ -163,6 +164,30 @@ void moveForward() {
   servo_RightMotor.writeMicroseconds(1850);
 }
 
+void moveBackwards(){
+  servo_LeftMotor.writeMicroseconds(1300);
+  servo_RightMotor.writeMicroseconds(1300);
+}
+
+void backUp(){
+  servo_LeftMotor.writeMicroseconds(1300);
+  servo_RightMotor.writeMicroseconds(1300);
+  delay(500);
+  setNeutral();
+  delay(100);
+}
+
+void setNeutral(){
+  servo_LeftMotor.writeMicroseconds(1500);
+  servo_RightMotor.writeMicroseconds(1500);
+}
+
+void brake(){
+  servo_LeftMotor.writeMicroseconds(200);
+  servo_RightMotor.writeMicroseconds(200);
+}
+
+// Pivoting will turn the robot 90 degrees without moving
 void pivotCounterClockwise() {
   servo_LeftMotor.writeMicroseconds(1500);
   servo_RightMotor.writeMicroseconds(1500);
@@ -170,8 +195,30 @@ void pivotCounterClockwise() {
   servo_LeftMotor.writeMicroseconds(1250);
   servo_RightMotor.writeMicroseconds(1750);
   delay(1500);
+  setNeutral();
+  delay(200);
+}
+
+void pivotClockwise() {
   servo_LeftMotor.writeMicroseconds(1500);
   servo_RightMotor.writeMicroseconds(1500);
+  delay(200);
+  servo_RightMotor.writeMicroseconds(1250);
+  servo_LeftMotor.writeMicroseconds(1750);
+  delay(1500);
+  setNeutral();
+  delay(200);
+}
+
+// Turning will turn the robot 90 degrees with slight movement
+void pivotCounterClockwise() {
+  servo_LeftMotor.writeMicroseconds(1500);
+  servo_RightMotor.writeMicroseconds(1500);
+  delay(200);
+  servo_LeftMotor.writeMicroseconds(1250);
+  servo_RightMotor.writeMicroseconds(1750);
+  delay(1500);
+  setNeutral();
   delay(200);
 
 }
@@ -183,35 +230,10 @@ void pivotClockwise() {
   servo_RightMotor.writeMicroseconds(1250);
   servo_LeftMotor.writeMicroseconds(1750);
   delay(1500);
-  servo_LeftMotor.writeMicroseconds(1500);
-  servo_RightMotor.writeMicroseconds(1500);
+  setNeutral();
   delay(200);
 }
 
-void pivotCounterClockwise() {
-  servo_LeftMotor.writeMicroseconds(1500);
-  servo_RightMotor.writeMicroseconds(1500);
-  delay(200);
-  servo_LeftMotor.writeMicroseconds(1250);
-  servo_RightMotor.writeMicroseconds(1750);
-  delay(1500);
-  servo_LeftMotor.writeMicroseconds(1500);
-  servo_RightMotor.writeMicroseconds(1500);
-  delay(200);
-
-}
-
-void pivotClockwise() {
-  servo_LeftMotor.writeMicroseconds(1500);
-  servo_RightMotor.writeMicroseconds(1500);
-  delay(200);
-  servo_RightMotor.writeMicroseconds(1250);
-  servo_LeftMotor.writeMicroseconds(1750);
-  delay(1500);
-  servo_LeftMotor.writeMicroseconds(1500);
-  servo_RightMotor.writeMicroseconds(1500);
-  delay(200);
-}
 
 // -------------------- TIME FUNCTIONS --------------------
 
