@@ -3,9 +3,9 @@
 // Prepared for: MSE 2202B, Dr. Naish
 // School: The University of Western Ontario
 
-// -------------------------------------------------------------
-// ------------------------- VARIABLES -------------------------
-// -------------------------------------------------------------
+// --------------------------------------------------------------
+// ------------------------- !VARIABLES -------------------------
+// --------------------------------------------------------------
 
 
 // -------------------- MOTORS --------------------
@@ -45,9 +45,9 @@ boolean can_start_waiting = false; // Used for time functions, do not change
 unsigned int step = 0;
 
 
-// *****************************************************************
-// ************************* PROGRAM SETUP *************************
-// *****************************************************************
+// ******************************************************************
+// ************************* PROGRAM !SETUP *************************
+// ******************************************************************
 void setup() {
 
 Serial.begin(9600);
@@ -66,9 +66,9 @@ pinMode(ULTRASONIC_OUT_PIN, INPUT);
 pinMode(ULTRASONIC_IN_PIN, OUTPUT);
 }
 
-// ****************************************************************
-// ************************* PROGRAM LOOP *************************
-// ****************************************************************
+// *****************************************************************
+// ************************* PROGRAM !LOOP *************************
+// *****************************************************************
 void loop(){
 
   switch (step){
@@ -81,19 +81,32 @@ void loop(){
 
     case 1:
       // Start case: Robot is in the middle of the room
-      // End case: Robot is in contact with the wall
       moveForward();
-      if (hitTable){
+      if (hitWall()){
         backUp();
-        step = 2;
+        pivotCounterClockwise();
       }
+      // End case: Robot is parallel to the wall
 
     case 2:
+      // Start case: Robot is parallel to the wall
+      smartMoveForward();
+      if (hitTable()){
+        backUp();
+        pivotCounterClockwise();
+        step = 5; // !NOTICE: fix this, Jump to the case where you're at the table
+      }
+      else if(hitWall()){
+        backUp();
+        pivotCounterClockwise();
+      }
+
+      // End case: In front of the table
+
+    case 3:
       servo_LeftMotor.writeMicroseconds(1800);
       servo_RightMotor.writeMicroseconds(1900);
       ping();
-
-    case 3:
 
     case 4:
 
@@ -180,9 +193,9 @@ void loop(){
 }
 
 
-// -------------------------------------------------------------
-// ------------------------- FUNCTIONS -------------------------
-// -------------------------------------------------------------
+// --------------------------------------------------------------
+// ------------------------- !FUNCTIONS -------------------------
+// --------------------------------------------------------------
 
 
 
@@ -230,11 +243,19 @@ boolean hitTable() {
   return (readBottomFrontButton && !readTopFrontButton)
 }
 
+boolean hitWall() {
+  return (readBottomFrontButton && readTopFrontButton)
+}
+
 
 // -------------------- MOVEMENT FUNCTIONS --------------------
 
+void smartMoveForward() {
+  // Detect if you move too far away from the wall
+}
+
 void moveForward() {
-  // !NOTICE! motor speed set slow for debugging purposes
+  // !NOTICE motor speed set slow for debugging purposes
   servo_LeftMotor.writeMicroseconds(1700);
   servo_RightMotor.writeMicroseconds(1850);
 }
@@ -286,8 +307,8 @@ void pivotClockwise() {
 }
 
 // Turning will turn the robot 90 degrees with slight movement
-// !NOTICE! Need to fix these functions
-void pivotCounterClockwise() {
+// !NOTICE Need to test and fix these functions
+void turnCounterClockwise() {
   servo_LeftMotor.writeMicroseconds(1500);
   servo_RightMotor.writeMicroseconds(1500);
   delay(200);
@@ -299,7 +320,7 @@ void pivotCounterClockwise() {
 
 }
 
-void pivotClockwise() {
+void turnClockwise() {
   servo_LeftMotor.writeMicroseconds(1500);
   servo_RightMotor.writeMicroseconds(1500);
   delay(200);
