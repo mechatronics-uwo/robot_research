@@ -3,9 +3,9 @@
 // Prepared for: MSE 2202B, Dr. Naish
 // School: The University of Western Ontario
 
-// ---------------------------------------------------
-// -------------------- VARIABLES --------------------
-// ---------------------------------------------------
+// -------------------------------------------------------------
+// ------------------------- VARIABLES -------------------------
+// -------------------------------------------------------------
 
 
 // -------------------- MOTORS --------------------
@@ -45,9 +45,9 @@ boolean can_start_waiting = false; // Used for time functions, do not change
 unsigned int step = 0;
 
 
-// ***********************************************
-// ******************** SETUP ********************
-// ***********************************************
+// *****************************************************************
+// ************************* PROGRAM SETUP *************************
+// *****************************************************************
 void setup() {
 
 Serial.begin(9600);
@@ -66,22 +66,27 @@ pinMode(ULTRASONIC_OUT_PIN, INPUT);
 pinMode(ULTRASONIC_IN_PIN, OUTPUT);
 }
 
-// ******************************************************
-// ******************** PROGRAM LOOP ********************
-// ******************************************************
+// ****************************************************************
+// ************************* PROGRAM LOOP *************************
+// ****************************************************************
 void loop(){
 
   switch (step){
 
-// ==================== CASE 1-10 ====================
+    // ==================== CASE 1-10 ====================
 
     case 0:
+      // -------- THIS CASE RESERVED FOR TESTING --------
       // -------- PASTE TEST CODE HERE, SET STEP = 0 --------
 
     case 1:
       // Start case: Robot is in the middle of the room
       // End case: Robot is in contact with the wall
       moveForward();
+      if (hitTable){
+        backUp();
+        step = 2;
+      }
 
     case 2:
       servo_LeftMotor.writeMicroseconds(1800);
@@ -98,16 +103,86 @@ void loop(){
 
     case 7:
 
-// ==================== CASE 11-20 ====================
+    case 8:
+
+    case 9:
+
+    case 10:
+
+  // ==================== CASE 11-20 ====================
+
+    case 11:
+
+    case 12:
+
+    case 13:
+
+    case 14:
+
+    case 15:
+
+    case 16:
+
+    case 17:
+
+    case 18:
+
+    case 19:
+
+    case 20:
+
+    // ==================== CASE 21-30 ====================
+
+    case 21:
+
+    case 22:
+
+    case 23:
+
+    case 24:
+
+    case 25:
+
+    case 26:
+
+    case 27:
+
+    case 28:
+
+    case 29:
+
+    case 30:
+
+    // ==================== CASE 31-40 ====================
+
+    case 31:
+
+    case 32:
+
+    case 33:
+
+    case 34:
+
+    case 35:
+
+    case 36:
+
+    case 37:
+
+    case 38:
+
+    case 39:
+
+    case 40:
 
   }
 
 }
 
 
-// ---------------------------------------------------
-// -------------------- FUNCTIONS --------------------
-// ---------------------------------------------------
+// -------------------------------------------------------------
+// ------------------------- FUNCTIONS -------------------------
+// -------------------------------------------------------------
 
 
 
@@ -152,7 +227,7 @@ boolean readBottomFrontButton() {
 }
 
 boolean hitTable() {
-  return (readBottomFrontButton && readBottomFrontButton)
+  return (readBottomFrontButton && !readTopFrontButton)
 }
 
 
@@ -211,6 +286,7 @@ void pivotClockwise() {
 }
 
 // Turning will turn the robot 90 degrees with slight movement
+// !NOTICE! Need to fix these functions
 void pivotCounterClockwise() {
   servo_LeftMotor.writeMicroseconds(1500);
   servo_RightMotor.writeMicroseconds(1500);
