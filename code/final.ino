@@ -1,25 +1,42 @@
 #include <Servo.h>
+// Authors: Danny, Tin, Daniel
+// Prepared for: MSE 2202B, Dr. Naish
+// School: The University of Western Ontario
+
+// ---------------------------------------------------
+// -------------------- VARIABLES --------------------
+// ---------------------------------------------------
+
+
 // -------------------- MOTORS --------------------
+
 // 1500ms = Neutral
 // 2500ms = Fast forward
 // 500ms = Fast Reverse
 // 200ms = Brake
 Servo servo_RightMotor;
 Servo servo_LeftMotor;
+unsigned int left_motor_speed;
+unsigned int right_motor_speed;
+unsigned int right_motor_stop = 1500;
+unsigned int left_motor_stop = 1500;
+const int RIGHT_MOTOR_PIN = 2;
+const int LEFT_MOTOR_PIN = 3;
 
+// -------------------- SENSORS --------------------
+const int FRONT_BOTTOM_LEVER_SWITCH_PIN = 4;
+const int FRONT_TOP_LEVER_SWITCH_PIN = 5;
 
-unsigned int Left_Motor_Speed;
-unsigned int Right_Motor_Speed;
-unsigned int Right_Motor_Stop = 1500;
-unsigned int Left_Motor_Stop = 1500;
-const int right_motor_address = 2;
-const int left_motor_address = 3;
-const int ultraSonic_In_address = 52;
-const int ultraSonic_Out_address = 53;
+const int ULTRASONIC_IN_PIN = 52;
+const int ULTRASONIC_OUT_PIN = 53;
 
 // -------------------- VARIABLES --------------------
 
-unsigned long Echo_Time;
+unsigned long echo_time;
+
+unsigned long time_previous = 0; // Used for time functions, do not change
+unsigned long time_elapsed = 0; // Used for time functions, do not change
+boolean can_start_waiting = false; // Used for time functions, do not change
 
 // -------------------- STEP COUNTER --------------------
 // NOTE: Step 0 is reserved for debugging
@@ -27,32 +44,43 @@ unsigned long Echo_Time;
 unsigned int step = 0;
 
 
-
-
+// ***********************************************
+// ******************** SETUP ********************
+// ***********************************************
 void setup() {
 
 Serial.begin(9600);
-//Set up motors
-pinMode(left_motor_address, OUTPUT);
-servo_LeftMotor.attach(left_motor_address);
-pinMode(right_motor_address, OUTPUT);
-servo_RightMotor.attach(right_motor_address);
+// Set-up motors
+pinMode(LEFT_MOTOR_PIN, OUTPUT);
+servo_LeftMotor.attach(LEFT_MOTOR_PIN);
+pinMode(RIGHT_MOTOR_PIN, OUTPUT);
+servo_RightMotor.attach(RIGHT_MOTOR_PIN);
 
-// set up ultrasonic
-pinMode(ultraSonic_Out_address, INPUT);
-pinMode(ultraSonic_In_address, OUTPUT);
+// Set-up buttons
+pinMode(FRONT_TOP_LEVER_SWITCH_PIN, INPUT);
+pinMode(FRONT_BOTTOM_LEVER_SWITCH_PIN, INPUT);
+
+// Set-up ultrasonic
+pinMode(ULTRASONIC_OUT_PIN, INPUT);
+pinMode(ULTRASONIC_IN_PIN, OUTPUT);
 }
 
+// ******************************************************
+// ******************** PROGRAM LOOP ********************
+// ******************************************************
 void loop(){
 
   switch (step){
 
+// ==================== CASE 1-10 ====================
+
     case 0:
-      // -------- TEST CODE HERE --------
+      // -------- PASTE TEST CODE HERE, SET STEP = 0 --------
 
     case 1:
-      // Start phase: Robot is in the middle of the room
-      // End phase: Robot  is parallel to table's edge
+      // Start case: Robot is in the middle of the room
+      // End case: Robot is in contact with the wall
+      moveForward();
 
     case 2:
       servo_LeftMotor.writeMicroseconds(1800);
@@ -69,55 +97,70 @@ void loop(){
 
     case 7:
 
+// ==================== CASE 11-20 ====================
+
   }
 
 }
 
+
+// ---------------------------------------------------
+// -------------------- FUNCTIONS --------------------
+// ---------------------------------------------------
+
+
+
 // -------------------- SENSOR FUNCTIONS --------------------
 
-// Ping Ultrasonic
+// Ping ultrasonic
 // Send the Ultrasonic Range Finder a 10 microsecond pulse per tech spec
 void ping(){
-digitalWrite(ultraSonic_In_address, HIGH);
+digitalWrite(ULTRASONIC_IN_PIN, HIGH);
 delayMicroseconds(10); //The 10 microsecond pause where the pulse in "high"
-digitalWrite(ultraSonic_In_address, LOW);
+digitalWrite(ULTRASONIC_IN_PIN, LOW);
 
-// Use command pulseIn to listen to Ultrasonic_Data pin to record the
+// Use command pulseIn to listen to ultrasonic_Data pin to record the
 // time that it takes from when the Pin goes HIGH until it goes LOW
-Echo_Time = pulseIn(ultraSonic_Out_address, HIGH, 10000);
+echo_time = pulseIn(ULTRASONIC_OUT_PIN, HIGH, 10000);
 
 // Print Sensor Readings
 Serial.print("Time (microseconds): ");
-Serial.print(Echo_Time, DEC);
+Serial.print(echo_time, DEC);
 Serial.print(", cm: ");
-Serial.println(Echo_Time / 58); //divide time by 58 to get distance in cm
+Serial.println(echo_time / 58); //divide time by 58 to get distance in cm
 }
+
+boolean readTopFrontButton() {
+  val = digitalRead(FRONT_TOP_LEVER_SWITCH_PIN);
+  if (val == HIGH) {
+    return true
+  }
+  else {
+    return false
+  }
+}
+
+boolean readBottomFrontButton() {
+  val = digitalRead(FRONT_BOTTOM_LEVER_SWITCH_PIN);
+  if (val == HIGH) {
+    return true
+  }
+  else {
+    return false
+  }
+}
+
+boolean hitTable() {
+  return (readBottomFrontButton && readBottomFrontButton)
+}
+
 
 // -------------------- MOVEMENT FUNCTIONS --------------------
 
-void pivotCounterClockwise() {
-  servo_LeftMotor.writeMicroseconds(1500);
-  servo_RightMotor.writeMicroseconds(1500);
-  delay(200);
-  servo_LeftMotor.writeMicroseconds(1250);
-  servo_RightMotor.writeMicroseconds(1750);
-  delay(1500);
-  servo_LeftMotor.writeMicroseconds(1500);
-  servo_RightMotor.writeMicroseconds(1500);
-  delay(200);
-
-}
-
-void pivotClockwise() {
-  servo_LeftMotor.writeMicroseconds(1500);
-  servo_RightMotor.writeMicroseconds(1500);
-  delay(200);
-  servo_RightMotor.writeMicroseconds(1250);
-  servo_LeftMotor.writeMicroseconds(1750);
-  delay(1500);
-  servo_LeftMotor.writeMicroseconds(1500);
-  servo_RightMotor.writeMicroseconds(1500);
-  delay(200);
+void moveForward() {
+  // !NOTICE! motor speed set slow for debugging purposes
+  servo_LeftMotor.writeMicroseconds(1700);
+  servo_RightMotor.writeMicroseconds(1850);
 }
 
 void pivotCounterClockwise() {
@@ -143,4 +186,48 @@ void pivotClockwise() {
   servo_LeftMotor.writeMicroseconds(1500);
   servo_RightMotor.writeMicroseconds(1500);
   delay(200);
+}
+
+void pivotCounterClockwise() {
+  servo_LeftMotor.writeMicroseconds(1500);
+  servo_RightMotor.writeMicroseconds(1500);
+  delay(200);
+  servo_LeftMotor.writeMicroseconds(1250);
+  servo_RightMotor.writeMicroseconds(1750);
+  delay(1500);
+  servo_LeftMotor.writeMicroseconds(1500);
+  servo_RightMotor.writeMicroseconds(1500);
+  delay(200);
+
+}
+
+void pivotClockwise() {
+  servo_LeftMotor.writeMicroseconds(1500);
+  servo_RightMotor.writeMicroseconds(1500);
+  delay(200);
+  servo_RightMotor.writeMicroseconds(1250);
+  servo_LeftMotor.writeMicroseconds(1750);
+  delay(1500);
+  servo_LeftMotor.writeMicroseconds(1500);
+  servo_RightMotor.writeMicroseconds(1500);
+  delay(200);
+}
+
+// -------------------- TIME FUNCTIONS --------------------
+
+void startWaiting(){
+  if(can_start_waiting){
+    time_previous = millis();
+  }
+}
+
+boolean waitMillisSecond(unsigned int interval){
+  time_elapsed = millis();
+  if ((time_elapsed - time_previous) > interval){
+    can_start_waiting = false;
+    return true; // Done waiting!
+  }
+  else {
+    return false; // Not done waiting!
+  }
 }
