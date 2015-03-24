@@ -182,19 +182,19 @@ void loop(){
 // Ping ultrasonic
 // Send the Ultrasonic Range Finder a 10 microsecond pulse per tech spec
 void ping(){
-digitalWrite(ULTRASONIC_IN_PIN, HIGH);
-delayMicroseconds(10); //The 10 microsecond pause where the pulse in "high"
-digitalWrite(ULTRASONIC_IN_PIN, LOW);
+  digitalWrite(ULTRASONIC_IN_PIN, HIGH);
+  delayMicroseconds(10); //The 10 microsecond pause where the pulse in "high"
+  digitalWrite(ULTRASONIC_IN_PIN, LOW);
 
-// Use command pulseIn to listen to ultrasonic_Data pin to record the
-// time that it takes from when the Pin goes HIGH until it goes LOW
-echo_time = pulseIn(ULTRASONIC_OUT_PIN, HIGH, 10000);
+  // Use command pulseIn to listen to ultrasonic_Data pin to record the
+  // time that it takes from when the Pin goes HIGH until it goes LOW
+  echo_time = pulseIn(ULTRASONIC_OUT_PIN, HIGH, 10000);
 
-// Print Sensor Readings
-Serial.print("Time (microseconds): ");
-Serial.print(echo_time, DEC);
-Serial.print(", cm: ");
-Serial.println(echo_time / 58); //divide time by 58 to get distance in cm
+  // Print Sensor Readings
+  Serial.print("Time (microseconds): ");
+  Serial.print(echo_time, DEC);
+  Serial.print(", cm: ");
+  Serial.println(echo_time / 58); //divide time by 58 to get distance in cm
 }
 
 boolean readTopFrontButton() {
