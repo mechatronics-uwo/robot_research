@@ -19,12 +19,15 @@
 // 500ms = Fast Reverse
 // 200ms = Brake
 
+Servo servo_TopMotor;
 Servo servo_RightMotor;
 Servo servo_LeftMotor;
+I2CEncoder encoder_TopMotor;
 I2CEncoder encoder_RightMotor;
 I2CEncoder encoder_LeftMotor;
 
 // -------------------- SENSORS --------------------
+const int TOP_MOTOR_PIN = 4;
 const int RIGHT_MOTOR_PIN = 2;
 const int LEFT_MOTOR_PIN = 3;
 
@@ -47,8 +50,8 @@ unsigned int Left_Motor_Stop = 1500;
 long leftEncoderStopTime = 0;
 long rightEncoderStopTime = 0;
 boolean val = false;
-int Left_Motor_Offset = -50;
-int Right_Motor_Offset = 50;
+int Left_Motor_Offset = 0;
+int Right_Motor_Offset = 0;
 
 unsigned long time_previous = 0; // Used for time functions, do not change
 unsigned long time_elapsed = 0; // Used for time functions, do not change
@@ -80,10 +83,12 @@ void setup() {
   Serial.begin(9600);
 
   // Set-up motors
+  pinMode(TOP_MOTOR_PIN)
   pinMode(LEFT_MOTOR_PIN, OUTPUT);
   servo_LeftMotor.attach(LEFT_MOTOR_PIN);
   pinMode(RIGHT_MOTOR_PIN, OUTPUT);
   servo_RightMotor.attach(RIGHT_MOTOR_PIN);
+
 
   // Set-up buttons
   pinMode(FRONT_TOP_LEVER_SWITCH_PIN, INPUT);
@@ -290,6 +295,21 @@ boolean hitWall() {
 
 // -------------------- MOVEMENT FUNCTIONS --------------------
 
+void allOfTin()
+{
+  currentReading = frontPing(); // update reading
+  integral += currentReading; // add reading to integral
+
+  output = pConstant * (currentReading - setPoint) + iConstant * integral + dConstant * (currentReading - lastReading);
+  lastReading = currentReading; // update last reading
+
+  // veer based on output
+  if (output > 0)
+    veerRight(200, abs(output));
+  else if (output < 0)
+    veerLeft(200, abs(output));
+}
+
 void followWall() // Follows the wall while repositioning self
 {
   if (frontPing() > 612)
@@ -313,8 +333,8 @@ void moveForward(long speedFactor)
 
 void moveBackwards(long speedFactor)
 {
-  Left_Motor_Speed = constrain((Left_Motor_Stop - speedFactor), 1500, 2100);
-  Right_Motor_Speed = constrain((Right_Motor_Stop - speedFactor), 1500, 2100);
+  Left_Motor_Speed = constrain((Left_Motor_Stop - speedFactor), 900, 1500);
+  Right_Motor_Speed = constrain((Right_Motor_Stop - speedFactor), 900, 1500);
   implementMotorSpeed();
 }
 
@@ -449,19 +469,4 @@ boolean waitMilliSecond(unsigned int interval) {
   else {
     return false; // Not done waiting!
   }
-}
-
-void allOfTin()
-{
-  currentReading = frontPing(); // update reading
-  integral += currentReading; // add reading to integral
-
-  output = pConstant * (currentReading - setPoint) + iConstant * integral + dConstant * (currentReading - lastReading);
-  lastReading = currentReading; // update last reading
-
-  // veer based on output
-  if (output > 0)
-    veerRight(200, abs(output));
-  else if (output < 0)
-    veerLeft(200, abs(output));
 }
