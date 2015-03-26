@@ -60,6 +60,17 @@ boolean can_start_waiting = false; // Used for time functions, do not change
 
 unsigned int step = 0;
 
+// Tin's Wall-following Attempt
+const int setPoint = 720;
+
+const int pConstant = 5;
+const int iConstant = 0;
+const int dConstant = 0;
+
+int output = 0;
+int currentReading = 0;
+int lastReading = 0;
+int integral = 0;
 
 // ******************************************************************
 // ************************* PROGRAM !SETUP *************************
@@ -440,3 +451,16 @@ boolean waitMillisSecond(unsigned int interval){
   }
 }
 
+void allOfTin()
+{
+	ping();
+	currentReading = echo_time[0];
+
+	output = pConstant*(currentReading - Setpoint) + iConstant*integral + pConstant*(currentReading - lastReading);
+	lastReading = currentReading;
+
+	if(output > 0)
+		veerRight(200,abs(output));
+	else if(output < 0)
+		veerLeft(200,abs(output));
+}
