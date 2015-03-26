@@ -234,12 +234,12 @@ int frontPing(){
   digitalWrite(ULTRASONIC_IN_PIN_FRONT, HIGH);
   delayMicroseconds(10); //The 10 microsecond pause where the pulse in "high"
   digitalWrite(ULTRASONIC_IN_PIN_FRONT, LOW);
-  ping_time = pulseIn(ULTRASONIC_OUT_PIN_FRONT, HIGH, 10000);
+  unsigned long ping_time = pulseIn(ULTRASONIC_OUT_PIN_FRONT, HIGH, 10000);
 
   Serial.print("cm: ");
-  Serial.print(echo_time[0] / 58); //divide time by 58 to get
+  Serial.print(ping_time / 58); //divide time by 58 to get
 
-  return ping_time
+  return ping_time;
 }
 
 int backPing(){
@@ -250,16 +250,16 @@ int backPing(){
 
   // Use command pulseIn to listen to ultrasonic_Data pin to record the
   // time that it takes from when the Pin goes HIGH until it goes LOW
-  ping_time = pulseIn(ULTRASONIC_OUT_PIN_BACK, HIGH, 10000);
+  unsigned long ping_time = pulseIn(ULTRASONIC_OUT_PIN_BACK, HIGH, 10000);
 
   // Print Sensor Readings
   //Serial.print("Time (microseconds): ");
   //Serial.print(echo_time[0], DEC);
   //distance in cm
   Serial.print("cm: ");
-  Serial.println(echo_time[1] / 58); //divide time by 58 to get distance in cm
+  Serial.println(ping_time / 58); //divide time by 58 to get distance in cm
 
-  return ping_time
+  return ping_time;
 }
 
 boolean hitTable() {
@@ -283,11 +283,11 @@ void followWall() // Follows the wall while repositioning self
 {
   if(frontPing() > 612)
   {
-    turnRightOnSpot(100);
+    pivotRight(100);
   }
   else if(frontPing () < 496)
   {
-   turnLeftOnSpot(100);
+   pivotLeft(100);
   }
   else
    moveForward(200);
@@ -430,7 +430,7 @@ void startWaiting(){
 }
 
 boolean waitMilliSecond(unsigned int interval){
-  time_elapsed = milli();
+  time_elapsed = millis();
   if ((time_elapsed - time_previous) > interval){
     can_start_waiting = false;
     return true; // Done waiting!
