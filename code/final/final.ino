@@ -61,6 +61,18 @@ unsigned long time_previous = 0; // Used for time functions, do not change
 unsigned long time_elapsed = 0; // Used for time functions, do not change
 boolean can_start_waiting = false; // Used for time functions, do not change
 
+// -------------------- PID --------------------
+const int setPoint = 720;
+
+const int pConstant = 5;
+const int iConstant = 0;
+const int dConstant = 0;
+
+int output = 0;
+int currentReading = 0;
+int lastReading = 0;
+int integral = 0;
+
 // -------------------- STEP COUNTER --------------------
 // NOTE: Step 0 is reserved for debugging
 
@@ -76,7 +88,7 @@ void setup() {
   Serial.begin(9600);
 
   // Set-up motors
-  pinMode(TOP_MOTOR_PIN)
+  pinMode(TOP_MOTOR_PIN, OUTPUT);
   pinMode(LEFT_MOTOR_PIN, OUTPUT);
   servo_LeftMotor.attach(LEFT_MOTOR_PIN);
   pinMode(RIGHT_MOTOR_PIN, OUTPUT);
@@ -122,13 +134,13 @@ void loop() {
 
     case 0:
       // RESERVED FOR TESTING, PASTE CODE HERE AND SET STEP = 0
-      moveBackDistance(300);
-      break;
+      hitTable();
+      hitWall();
 
     case 1:
       // Find the wall first
       moveForward(100);
-      if (hitTable) {
+      if (hitTable()) {
         setNeutral();
         step = 3;
       }
@@ -272,7 +284,7 @@ int backPing() {
   Serial.print(echo_time[0] / 58); //divide time by 58 to get distance in cm
   Serial.print("cm: ");
   Serial.println(echo_time[1] / 58); //divide time by 58 to get distance in cm
-  }
+
 }
 
 void getEncoderPos()
@@ -289,25 +301,29 @@ void getEncoderPos()
 
 boolean hitTable() {
 
-  if (FRONT_BOTTOM_LEVER_SWITCH_PIN == LOW && FRONT_TOP_LEVER_SWITCH_PIN == HIGH)
+  if (FRONT_BOTTOM_LEVER_SWITCH_PIN == LOW && FRONT_TOP_LEVER_SWITCH_PIN == HIGH){
+    Serial.print("Table");
     return true;
-  else
+  }
+  else{
     return false;
+  }
 }
 
 boolean hitWall() {
-  if (FRONT_BOTTOM_LEVER_SWITCH_PIN == LOW && FRONT_TOP_LEVER_SWITCH_PIN == LOW)
+  if (FRONT_BOTTOM_LEVER_SWITCH_PIN == LOW && FRONT_TOP_LEVER_SWITCH_PIN == LOW){
+    Serial.print("Wall");
     return true;
-    
-  else
+  }
+  else{
     return false;  
+  }
 }
 
 
 // -------------------- MOVEMENT FUNCTIONS --------------------
 
-void allOfTin()
-{
+void allOfTin(){
   currentReading = frontPing(); // update reading
   integral += currentReading; // add reading to integral
 
@@ -321,8 +337,6 @@ void allOfTin()
     veerLeft(200, abs(output));
 }
 
-
-}
 void moveForward(long speedFactor)
 {
   Left_Motor_Speed = constrain((Left_Motor_Stop + speedFactor), 1500, 2100);
@@ -468,4 +482,3 @@ boolean waitMilliSecond(unsigned int interval) {
     return false; // Not done waiting!
   }
 }
-
