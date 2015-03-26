@@ -78,14 +78,14 @@ void setup() {
   // Set-up buttons
   pinMode(FRONT_TOP_LEVER_SWITCH_PIN, INPUT);
   pinMode(FRONT_BOTTOM_LEVER_SWITCH_PIN, INPUT);
-  
+
   digitalWrite(FRONT_TOP_LEVER_SWITCH_PIN, HIGH);
   digitalWrite(FRONT_BOTTOM_LEVER_SWITCH_PIN, HIGH);
 
   // Set-up ultrasonic
   pinMode(ULTRASONIC_OUT_PIN_FRONT, INPUT);
   pinMode(ULTRASONIC_IN_PIN_FRONT, OUTPUT);
-  
+
   pinMode(ULTRASONIC_OUT_PIN_BACK, INPUT);
   pinMode(ULTRASONIC_IN_PIN_BACK, OUTPUT);
 
@@ -95,7 +95,7 @@ void setup() {
   encoder_LeftMotor.setReversed(false); // adjust for positive count when moving forward
   encoder_RightMotor.init(1.0 / 3.0*MOTOR_393_SPEED_ROTATIONS, MOTOR_393_TIME_DELTA);
   encoder_RightMotor.setReversed(true); // adjust for positive count when moving forward
-  
+
   encoder_LeftMotor.zero();
   encoder_RightMotor.zero();
 }
@@ -215,14 +215,23 @@ void loop(){
 
 // Ping ultrasonic
 // Send the Ultrasonic Range Finder a 10 microsecond pulse per tech spec
-void ping(){
+int ping(){
+}
+
+int frontPing(){
   //Front ultrasonic
   digitalWrite(ULTRASONIC_IN_PIN_FRONT, HIGH);
   delayMicroseconds(10); //The 10 microsecond pause where the pulse in "high"
   digitalWrite(ULTRASONIC_IN_PIN_FRONT, LOW);
-  echo_time[0] = pulseIn(ULTRASONIC_OUT_PIN_FRONT, HIGH, 10000);
-  if(waitMillisSecond(10))
-  {
+  ping_time = pulseIn(ULTRASONIC_OUT_PIN_FRONT, HIGH, 10000);
+
+  Serial.print("cm: ");
+  Serial.print(echo_time[0] / 58); //divide time by 58 to get
+
+  return ping_time
+}
+
+int backPing(){
   //Back ultrasonic
   digitalWrite(ULTRASONIC_IN_PIN_BACK, HIGH);
   delayMicroseconds(10); //The 10 microsecond pause where the pulse in "high"
@@ -230,16 +239,16 @@ void ping(){
 
   // Use command pulseIn to listen to ultrasonic_Data pin to record the
   // time that it takes from when the Pin goes HIGH until it goes LOW
-  echo_time[1] = pulseIn(ULTRASONIC_OUT_PIN_BACK, HIGH, 10000);
+  ping_time = pulseIn(ULTRASONIC_OUT_PIN_BACK, HIGH, 10000);
 
   // Print Sensor Readings
   //Serial.print("Time (microseconds): ");
   //Serial.print(echo_time[0], DEC);
-  Serial.print("cm: ");
-  Serial.print(echo_time[0] / 58); //divide time by 58 to get distance in cm
+  distance in cm
   Serial.print("cm: ");
   Serial.println(echo_time[1] / 58); //divide time by 58 to get distance in cm
-  }
+
+  return ping_time
 }
 
 boolean hitTable() {
@@ -423,14 +432,15 @@ void turnClockwise() {
 
 // -------------------- TIME FUNCTIONS --------------------
 
+// Call startWaiting first, and then waitMilliSecond
 void startWaiting(){
   if(can_start_waiting){
     time_previous = millis();
   }
 }
 
-boolean waitMillisSecond(unsigned int interval){
-  time_elapsed = millis();
+boolean waitMilliSecond(unsigned int interval){
+  time_elapsed = milli();
   if ((time_elapsed - time_previous) > interval){
     can_start_waiting = false;
     return true; // Done waiting!
