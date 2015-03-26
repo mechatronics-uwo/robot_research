@@ -109,20 +109,23 @@ void loop(){
     // ==================== CASE 1-10 ====================
 
   case 0:
-  // RESERVED FOR TESTING, PASTE CODE HERE AND SET STEP = 0
+    // RESERVED FOR TESTING, PASTE CODE HERE AND SET STEP = 0
+    backUp();
+    break;
 
   case 1:
     // Find the wall first
     moveForward(100);
     if(hitTable){
+      setNeutral();
       step = 3;
     }
     else if (hitWall){
       setNeutral();
-
       step = 2;
     }
     break;
+
   case 2:
       // Start case: Wall is in front of robot, robot is parallel to it
     moveForward(300);
@@ -252,7 +255,7 @@ int backPing(){
   // Print Sensor Readings
   //Serial.print("Time (microseconds): ");
   //Serial.print(echo_time[0], DEC);
-  distance in cm
+  //distance in cm
   Serial.print("cm: ");
   Serial.println(echo_time[1] / 58); //divide time by 58 to get distance in cm
 
@@ -260,7 +263,7 @@ int backPing(){
 }
 
 boolean hitTable() {
-  if (FRONT_TOP_LEVER_SWITCH_PIN==LOW && FRONT_TOP_LEVER_SWITCH_PIN==HIGH)
+  if (FRONT_BOTTOM_LEVER_SWITCH_PIN==LOW && FRONT_TOP_LEVER_SWITCH_PIN==HIGH)
     return true;
   else
     return false;
@@ -276,14 +279,8 @@ boolean hitWall() {
 
 // -------------------- MOVEMENT FUNCTIONS --------------------
 
-void smartMoveForward() {
-  // Detect if you move too far away from the wall
-}
-
-void followWall()
+void followWall() // Follows the wall while repositioning self
 {
-  ping();
-
   if(frontPing() > 612)
   {
     turnRightOnSpot(100);
@@ -309,6 +306,7 @@ void moveBackwards(long speedFactor)
   Right_Motor_Speed = constrain((Right_Motor_Stop - speedFactor), 1500, 2100);
   implementMotorSpeed();
 }
+
 void moveBackDistance(long distance)
 {
   leftEncoderStopTime = encoder_LeftMotor.getRawPosition();
@@ -318,6 +316,10 @@ void moveBackDistance(long distance)
     Right_Motor_Speed = constrain((Right_Motor_Stop - 300), 1500, 2100);
     implementMotorSpeed();
   }
+}
+
+void backUp(){
+  moveBackDistance(10);
 }
 
 void veerRight(long speedFactor, long intensity)
