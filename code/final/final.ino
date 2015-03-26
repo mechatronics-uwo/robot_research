@@ -18,11 +18,16 @@
 // 2500ms = Fast forward
 // 500ms = Fast Reverse
 // 200ms = Brake
-
+Servo servo_TopMotor;
 Servo servo_RightMotor;
 Servo servo_LeftMotor;
-I2CEncoder encoder_RightMotor;
+
+
+
 I2CEncoder encoder_LeftMotor;
+I2CEncoder encoder_TopMotor;
+I2CEncoder encoder_RightMotor;
+
 
 // -------------------- SENSORS --------------------
 const int RIGHT_MOTOR_PIN = 2;
@@ -48,8 +53,8 @@ unsigned int Left_Motor_Stop = 1500;
 long leftEncoderStopTime = 0;
 long rightEncoderStopTime = 0;
 boolean val = false;
-int Left_Motor_Offset = -50;
-int Right_Motor_Offset = 50;
+int Left_Motor_Offset = 0;
+int Right_Motor_Offset = 0;
 
 unsigned long time_previous = 0; // Used for time functions, do not change
 unsigned long time_elapsed = 0; // Used for time functions, do not change
@@ -90,7 +95,9 @@ void setup() {
   pinMode(ULTRASONIC_IN_PIN_BACK, OUTPUT);
 
 
-  //Set up encoder
+  //Set up encoders
+  encoder_TopMotor.init(1.0 / 3.0*MOTOR_393_SPEED_ROTATIONS, MOTOR_393_TIME_DELTA);
+  
   encoder_LeftMotor.init(1.0 / 3.0*MOTOR_393_SPEED_ROTATIONS, MOTOR_393_TIME_DELTA);
   encoder_LeftMotor.setReversed(false); // adjust for positive count when moving forward
   encoder_RightMotor.init(1.0 / 3.0*MOTOR_393_SPEED_ROTATIONS, MOTOR_393_TIME_DELTA);
@@ -98,6 +105,7 @@ void setup() {
   
   encoder_LeftMotor.zero();
   encoder_RightMotor.zero();
+  encoder_TopMotor.zero();
 }
 
 // *****************************************************************
@@ -110,8 +118,9 @@ void loop(){
     // ==================== CASE 1-10 ====================
 
   case 0:
-  while(1)
-    followWall();
+  while(1){  
+      moveBackwards(200);
+  }
    break;
     
   case 1:
@@ -249,6 +258,18 @@ void ping(){
   }
 }
 
+void getEncoderPos()
+{                       
+                        Serial.print("Rot: ");
+			Serial.println(encoder_TopMotor.getRawPosition());
+			Serial.print("Encoders L: ");
+			Serial.print(encoder_LeftMotor.getRawPosition());
+			Serial.print(", R: ");
+			Serial.print(encoder_RightMotor.getRawPosition());
+			
+  
+}
+
 boolean hitTable() {
   if (FRONT_TOP_LEVER_SWITCH_PIN==LOW && FRONT_TOP_LEVER_SWITCH_PIN==HIGH)
     return true;    
@@ -286,7 +307,7 @@ void followWall()
    turnLeftOnSpot(100);
   } 
   
-  else if
+  else
    moveForward(200); 
     
 
@@ -300,8 +321,8 @@ void moveForward(long speedFactor)
 
 void moveBackwards(long speedFactor)
 {
-  Left_Motor_Speed = constrain((Left_Motor_Stop - speedFactor), 1500, 2100);
-  Right_Motor_Speed = constrain((Right_Motor_Stop - speedFactor), 1500, 2100);
+  Left_Motor_Speed = constrain((Left_Motor_Stop - speedFactor), 900, 1500);
+  Right_Motor_Speed = constrain((Right_Motor_Stop - speedFactor), 900, 1500);
   implementMotorSpeed();
 }
 void moveBackDistance(long distance)
@@ -384,29 +405,8 @@ void brake(){
   Right_Motor_Speed = 200;
   implementMotorSpeed();
 }
-/*
-// Pivoting will turn the robot 90 degrees without moving
-void pivotCounterClockwise() {
-  servo_LeftMotor.writeMicroseconds(1500);
-  servo_RightMotor.writeMicroseconds(1500);
-  delay(200);
-  servo_LeftMotor.writeMicroseconds(1250);
-  servo_RightMotor.writeMicroseconds(1750);
-  delay(1500);
-  setNeutral();
-  delay(200);
-}
 
-void pivotClockwise() {
-  servo_LeftMotor.writeMicroseconds(1500);
-  servo_RightMotor.writeMicroseconds(1500);
-  delay(200);
-  servo_RightMotor.writeMicroseconds(1250);
-  servo_LeftMotor.writeMicroseconds(1750);
-  delay(1500);
-  setNeutral();
-  delay(200);
-}
+// Pivoting will turn the robot 90 degrees without moving
 
 // Turning will turn the robot 90 degrees with slight movement
 // !NOTICE Need to test and fix these functions
@@ -422,18 +422,13 @@ void turnCounterClockwise() {
 
 }
 
-void turnClockwise() {
-  servo_LeftMotor.writeMicroseconds(1500);
-  servo_RightMotor.writeMicroseconds(1500);
-  delay(200);
-  servo_RightMotor.writeMicroseconds(1250);
-  servo_LeftMotor.writeMicroseconds(1750);
-  delay(1500);
-  setNeutral();
-  delay(200);
+void turnClockwise(long speedFactor) {
+  Left_Motor_Speed = constrain((Left_Motor_Stop + speedFactor), 1500, 2100);
+  Right_Motor_Speed = Left_Motor_Stop;
+  implementMotorSpeed();
 }
 
-*/
+
 // -------------------- TIME FUNCTIONS --------------------
 
 void startWaiting(){
