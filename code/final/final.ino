@@ -39,12 +39,11 @@ const int ULTRASONIC_OUT_PIN_BACK = 49;
 
 // -------------------- VARIABLES --------------------
 
-unsigned long echo_time[2];//0 is front timer, 1 is back timer
-
 unsigned int Left_Motor_Speed;
 unsigned int Right_Motor_Speed;
 unsigned int Right_Motor_Stop = 1500;
 unsigned int Left_Motor_Stop = 1500;
+
 long leftEncoderStopTime = 0;
 long rightEncoderStopTime = 0;
 boolean val = false;
@@ -89,14 +88,14 @@ void setup() {
   // Set-up buttons
   pinMode(FRONT_TOP_LEVER_SWITCH_PIN, INPUT);
   pinMode(FRONT_BOTTOM_LEVER_SWITCH_PIN, INPUT);
-  
+
   digitalWrite(FRONT_TOP_LEVER_SWITCH_PIN, HIGH);
   digitalWrite(FRONT_BOTTOM_LEVER_SWITCH_PIN, HIGH);
 
   // Set-up ultrasonic
   pinMode(ULTRASONIC_OUT_PIN_FRONT, INPUT);
   pinMode(ULTRASONIC_IN_PIN_FRONT, OUTPUT);
-  
+
   pinMode(ULTRASONIC_OUT_PIN_BACK, INPUT);
   pinMode(ULTRASONIC_IN_PIN_BACK, OUTPUT);
 
@@ -106,7 +105,7 @@ void setup() {
   encoder_LeftMotor.setReversed(false); // adjust for positive count when moving forward
   encoder_RightMotor.init(1.0 / 3.0*MOTOR_393_SPEED_ROTATIONS, MOTOR_393_TIME_DELTA);
   encoder_RightMotor.setReversed(true); // adjust for positive count when moving forward
-  
+
   encoder_LeftMotor.zero();
   encoder_RightMotor.zero();
 }
@@ -121,13 +120,25 @@ void loop(){
     // ==================== CASE 1-10 ====================
 
   case 0:
-  // RESERVED FOR TESTING, PASTE CODE HERE
+    // RESERVED FOR TESTING, PASTE CODE HERE AND SET STEP = 0
+    moveBackDistance(300);
+    break;
 
   case 1:
-    followWall();
-     break;
+    // Find the wall first
+    moveForward(100);
+    if(hitTable){
+      setNeutral();
+      step = 3;
+    }
+    else if (hitWall){
+      setNeutral();
+      step = 2;
+    }
+    break;
+
   case 2:
-      // Start case: Robot is in the middle of the room
+      // Start case: Wall is in front of robot, robot is parallel to it
     moveForward(300);
     if (hitWall()){
       step++;
@@ -226,14 +237,23 @@ void loop(){
 
 // Ping ultrasonic
 // Send the Ultrasonic Range Finder a 10 microsecond pulse per tech spec
-void ping(){
+int ping(){
+}
+
+int frontPing(){
   //Front ultrasonic
   digitalWrite(ULTRASONIC_IN_PIN_FRONT, HIGH);
   delayMicroseconds(10); //The 10 microsecond pause where the pulse in "high"
   digitalWrite(ULTRASONIC_IN_PIN_FRONT, LOW);
-  echo_time[0] = pulseIn(ULTRASONIC_OUT_PIN_FRONT, HIGH, 10000);
-  if(waitMillisSecond(10))
-  {
+  unsigned long ping_time = pulseIn(ULTRASONIC_OUT_PIN_FRONT, HIGH, 10000);
+
+  Serial.print("cm: ");
+  Serial.print(ping_time / 58); //divide time by 58 to get
+
+  return ping_time;
+}
+
+int backPing(){
   //Back ultrasonic
   digitalWrite(ULTRASONIC_IN_PIN_BACK, HIGH);
   delayMicroseconds(10); //The 10 microsecond pause where the pulse in "high"
@@ -241,20 +261,20 @@ void ping(){
 
   // Use command pulseIn to listen to ultrasonic_Data pin to record the
   // time that it takes from when the Pin goes HIGH until it goes LOW
-  echo_time[1] = pulseIn(ULTRASONIC_OUT_PIN_BACK, HIGH, 10000);
+  unsigned long ping_time = pulseIn(ULTRASONIC_OUT_PIN_BACK, HIGH, 10000);
 
   // Print Sensor Readings
   //Serial.print("Time (microseconds): ");
   //Serial.print(echo_time[0], DEC);
+  //distance in cm
   Serial.print("cm: ");
-  Serial.print(echo_time[0] / 58); //divide time by 58 to get distance in cm
-  Serial.print("cm: ");
-  Serial.println(echo_time[1] / 58); //divide time by 58 to get distance in cm
-  }
+  Serial.println(ping_time / 58); //divide time by 58 to get distance in cm
+
+  return ping_time;
 }
 
 boolean hitTable() {
-  if (FRONT_TOP_LEVER_SWITCH_PIN==LOW && FRONT_TOP_LEVER_SWITCH_PIN==HIGH)
+  if (FRONT_BOTTOM_LEVER_SWITCH_PIN==LOW && FRONT_TOP_LEVER_SWITCH_PIN==HIGH)
     return true;
   else
     return false;
@@ -270,24 +290,18 @@ boolean hitWall() {
 
 // -------------------- MOVEMENT FUNCTIONS --------------------
 
-void smartMoveForward() {
-  // Detect if you move too far away from the wall
-}
-
-void followWall()
+void followWall() // Follows the wall while repositioning self
 {
-  ping();
-
-  if(echo_time[0]>612)
+  if(frontPing() > 612)
   {
-    turnRightOnSpot(100);
+    pivotRight(100);
   }
-  else if(echo_time[0]<496)
+  else if(frontPing () < 496)
   {
-   turnLeftOnSpot(100);
+   pivotLeft(100);
   }
-  else if
-   xmoveForward(200);
+  else
+   moveForward(200);
 }
 
 void moveForward(long speedFactor)
@@ -303,6 +317,7 @@ void moveBackwards(long speedFactor)
   Right_Motor_Speed = constrain((Right_Motor_Stop - speedFactor), 1500, 2100);
   implementMotorSpeed();
 }
+
 void moveBackDistance(long distance)
 {
   leftEncoderStopTime = encoder_LeftMotor.getRawPosition();
@@ -312,8 +327,12 @@ void moveBackDistance(long distance)
     Right_Motor_Speed = constrain((Right_Motor_Stop - 300), 1500, 2100);
     implementMotorSpeed();
   }
-  
 }
+
+void backUp(){
+  moveBackDistance(500);
+}
+
 void veerRight(long speedFactor, long intensity)
 {
   Left_Motor_Speed = constrain((Left_Motor_Stop + speedFactor + intensity), 1500, 2100);
@@ -328,13 +347,14 @@ void veerLeft(long speedFactor, long intensity)
   implementMotorSpeed();
 }
 
-void turnLeftOnSpot(long speedFactor)
+// Pivoting will turn the robot 90 degrees without moving
+void pivotLeft(long speedFactor)
 {
   Left_Motor_Speed = constrain((Left_Motor_Stop - speedFactor), 900, 1500);
   Right_Motor_Speed = constrain((Right_Motor_Stop + speedFactor), 1500, 2100);
   implementMotorSpeed();
 }
-void turnRightOnSpot(long speedFactor)
+void pivotRight(long speedFactor)
 {
   Left_Motor_Speed = constrain((Left_Motor_Stop + speedFactor), 1500, 2100);
   Right_Motor_Speed = constrain((Right_Motor_Stop - speedFactor), 900, 1500);
@@ -366,7 +386,7 @@ boolean doneRightTurn()
     return false;
 }
 void implementMotorSpeed()
-{	
+{
   servo_LeftMotor.writeMicroseconds(constrain((Left_Motor_Speed + Left_Motor_Offset), 900, 2100));
   servo_RightMotor.writeMicroseconds(constrain((Right_Motor_Speed + Right_Motor_Offset), 900, 2100));
 }
@@ -384,28 +404,7 @@ void brake(){
   implementMotorSpeed();
 }
 
-// Pivoting will turn the robot 90 degrees without moving
-void pivotCounterClockwise() {
-  servo_LeftMotor.writeMicroseconds(1500);
-  servo_RightMotor.writeMicroseconds(1500);
-  delay(200);
-  servo_LeftMotor.writeMicroseconds(1250);
-  servo_RightMotor.writeMicroseconds(1750);
-  delay(1500);
-  setNeutral();
-  delay(200);
-}
 
-void pivotClockwise() {
-  servo_LeftMotor.writeMicroseconds(1500);
-  servo_RightMotor.writeMicroseconds(1500);
-  delay(200);
-  servo_RightMotor.writeMicroseconds(1250);
-  servo_LeftMotor.writeMicroseconds(1750);
-  delay(1500);
-  setNeutral();
-  delay(200);
-}
 
 // Turning will turn the robot 90 degrees with slight movement
 // !NOTICE Need to test and fix these functions
@@ -434,13 +433,14 @@ void turnClockwise() {
 
 // -------------------- TIME FUNCTIONS --------------------
 
+// Call startWaiting first, and then waitMilliSecond
 void startWaiting(){
   if(can_start_waiting){
     time_previous = millis();
   }
 }
 
-boolean waitMillisSecond(unsigned int interval){
+boolean waitMilliSecond(unsigned int interval){
   time_elapsed = millis();
   if ((time_elapsed - time_previous) > interval){
     can_start_waiting = false;
