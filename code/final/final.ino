@@ -275,16 +275,11 @@ int backPing() {
 
   // Use command pulseIn to listen to ultrasonic_Data pin to record the
   // time that it takes from when the Pin goes HIGH until it goes LOW
-  echo_time[1] = pulseIn(ULTRASONIC_OUT_PIN_BACK, HIGH, 10000);
+  unsigned long ping_time = pulseIn(ULTRASONIC_OUT_PIN_BACK, HIGH, 10000);
 
-  // Print Sensor Readings
-  //Serial.print("Time (microseconds): ");
-  //Serial.print(echo_time[0], DEC);
   Serial.print("cm: ");
-  Serial.print(echo_time[0] / 58); //divide time by 58 to get distance in cm
-  Serial.print("cm: ");
-  Serial.println(echo_time[1] / 58); //divide time by 58 to get distance in cm
-
+  Serial.println(ping_time / 58); //divide time by 58 to get distance in cm
+  return ping_time;
 }
 
 void getEncoderPos()
