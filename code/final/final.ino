@@ -110,24 +110,19 @@ void loop(){
     // ==================== CASE 1-10 ====================
 
   case 0:
-  while(1)
-    followWall();
-   break;
-    
+  // RESERVED FOR TESTING, PASTE CODE HERE
+
   case 1:
-    // Start case: Robot is in the middle of the room
+    followWall();
+     break;
+  case 2:
+      // Start case: Robot is in the middle of the room
     moveForward(300);
     if (hitWall()){
       step++;
     }
     // End case: Robot is hit the wall
-
-  case 2:
-    //Start case: At wall
-    //Action: Moving back a little
-    
-
-
+    break;
   case 3:
 
 
@@ -226,8 +221,6 @@ void ping(){
   delayMicroseconds(10); //The 10 microsecond pause where the pulse in "high"
   digitalWrite(ULTRASONIC_IN_PIN_FRONT, LOW);
   echo_time[0] = pulseIn(ULTRASONIC_OUT_PIN_FRONT, HIGH, 10000);
-  
-  
   if(waitMillisSecond(10))
   {
   //Back ultrasonic
@@ -251,8 +244,7 @@ void ping(){
 
 boolean hitTable() {
   if (FRONT_TOP_LEVER_SWITCH_PIN==LOW && FRONT_TOP_LEVER_SWITCH_PIN==HIGH)
-    return true;    
-    
+    return true;
   else
     return false;
 }
@@ -260,9 +252,8 @@ boolean hitTable() {
 boolean hitWall() {
   if (FRONT_BOTTOM_LEVER_SWITCH_PIN==LOW && FRONT_TOP_LEVER_SWITCH_PIN==LOW)
     return true;
-    
   else
-    return false;  
+    return false;
 }
 
 
@@ -279,18 +270,15 @@ void followWall()
   if(echo_time[0]>612)
   {
     turnRightOnSpot(100);
-  }  
-  
+  }
   else if(echo_time[0]<496)
   {
    turnLeftOnSpot(100);
-  } 
-  
+  }
   else if
-   moveForward(200); 
-    
-
+   xmoveForward(200);
 }
+
 void moveForward(long speedFactor)
 {
   Left_Motor_Speed = constrain((Left_Motor_Stop + speedFactor), 1500, 2100);
@@ -384,7 +372,7 @@ void brake(){
   Right_Motor_Speed = 200;
   implementMotorSpeed();
 }
-/*
+
 // Pivoting will turn the robot 90 degrees without moving
 void pivotCounterClockwise() {
   servo_LeftMotor.writeMicroseconds(1500);
@@ -433,7 +421,6 @@ void turnClockwise() {
   delay(200);
 }
 
-*/
 // -------------------- TIME FUNCTIONS --------------------
 
 void startWaiting(){
