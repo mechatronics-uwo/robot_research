@@ -138,7 +138,6 @@ void loop() {
       hitWall();
       Serial.println(digitalRead(FRONT_BOTTOM_LEVER_SWITCH_PIN));
       // Serial.println(digitalRead(FRONT_TOP_LEVER_SWITCH_PIN));
-      
       break;
 
     case 1:
@@ -162,79 +161,99 @@ void loop() {
       }
       // End case: Robot is hit the wall
       break;
+
     case 3:
+      break;
 
     case 4:
+      break;
 
     case 5:
+      break;
 
     case 6:
+      break;
 
     case 7:
+      break;
 
     case 8:
+      break;
 
     case 9:
+      break;
 
     case 10:
+      break;
 
     // ==================== CASE 11-20 ====================
 
     case 11:/*
     // Start case: Robot is parallel to the wall
-    smartMoveForward();
-    if (hitTable()){
-      backUp();
-      pivotCounterClockwise();
-      step = 5; // !NOTICE: fix this, Jump to the case where you're at the table
-    }
-    else if(hitWall()){
-      backUp();
-      pivotCounterClockwise();
-    }
+
 
     // End case: In front of the table
     */
+      break;
+
     case 12:
       servo_LeftMotor.writeMicroseconds(1800);
       servo_RightMotor.writeMicroseconds(1900);
       ping();
+      break;
 
     case 13:
+      break;
 
     case 14:
+      break;
 
     case 15:
+      break;
 
     case 16:
+      break;
 
     case 17:
+      break;
 
     case 18:
+      break;
 
     case 19:
+      break;
 
     case 20:
+      break;
 
     // ==================== CASE 21-30 ====================
 
     case 21:
+      break;
 
     case 22:
+      break;
 
     case 23:
+      break;
 
     case 24:
+      break;
 
     case 25:
+      break;
 
     case 26:
+      break;
 
     case 27:
+      break;
 
     case 28:
+      break;
 
     case 29:
+      break;
 
     case 30:
       break;
@@ -301,7 +320,6 @@ void getEncoderPos()
 boolean hitTable() {
   int bottom_lever = digitalRead(FRONT_BOTTOM_LEVER_SWITCH_PIN);
   int top_lever = digitalRead(FRONT_TOP_LEVER_SWITCH_PIN);
-
   if ((bottom_lever == LOW) && (top_lever == HIGH)){
     Serial.println("Table");
     return true;
@@ -315,8 +333,6 @@ boolean hitTable() {
 boolean hitWall() {
   int bottom_lever = digitalRead(FRONT_BOTTOM_LEVER_SWITCH_PIN);
   int top_lever = digitalRead(FRONT_TOP_LEVER_SWITCH_PIN);
-
-
   if ((bottom_lever == LOW) && (top_lever == LOW)){
     Serial.println("Wall");
     return true;
