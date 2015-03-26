@@ -284,16 +284,16 @@ void followWall()
 {
   ping();
 
-  if(echo_time[0]>612)
+  if(frontPing() > 612)
   {
     turnRightOnSpot(100);
   }
-  else if(echo_time[0]<496)
+  else if(frontPing () < 496)
   {
    turnLeftOnSpot(100);
   }
-  else if
-   xmoveForward(200);
+  else
+   moveForward(200);
 }
 
 void moveForward(long speedFactor)
@@ -319,6 +319,7 @@ void moveBackDistance(long distance)
     implementMotorSpeed();
   }
 }
+
 void veerRight(long speedFactor, long intensity)
 {
   Left_Motor_Speed = constrain((Left_Motor_Stop + speedFactor + intensity), 1500, 2100);
