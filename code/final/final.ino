@@ -110,7 +110,7 @@ void loop(){
 
   case 0:
     // RESERVED FOR TESTING, PASTE CODE HERE AND SET STEP = 0
-    backUp();
+    moveBackDistance(300);
     break;
 
   case 1:
@@ -319,7 +319,7 @@ void moveBackDistance(long distance)
 }
 
 void backUp(){
-  moveBackDistance(10);
+  moveBackDistance(500);
 }
 
 void veerRight(long speedFactor, long intensity)
