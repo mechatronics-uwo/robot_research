@@ -96,8 +96,8 @@ void setup() {
 
 
   // Set-up buttons
-  pinMode(FRONT_TOP_LEVER_SWITCH_PIN, INPUT);
-  pinMode(FRONT_BOTTOM_LEVER_SWITCH_PIN, INPUT);
+  pinMode(FRONT_TOP_LEVER_SWITCH_PIN, INPUT_PULLUP);
+  pinMode(FRONT_BOTTOM_LEVER_SWITCH_PIN, INPUT_PULLUP);
   
   digitalWrite(FRONT_TOP_LEVER_SWITCH_PIN, HIGH);
   digitalWrite(FRONT_BOTTOM_LEVER_SWITCH_PIN, HIGH);
@@ -136,6 +136,10 @@ void loop() {
       // RESERVED FOR TESTING, PASTE CODE HERE AND SET STEP = 0
       hitTable();
       hitWall();
+      Serial.println(digitalRead(FRONT_BOTTOM_LEVER_SWITCH_PIN));
+      // Serial.println(digitalRead(FRONT_TOP_LEVER_SWITCH_PIN));
+      
+      break;
 
     case 1:
       // Find the wall first
@@ -283,7 +287,7 @@ int backPing() {
 }
 
 void getEncoderPos()
-{                       
+{
                         Serial.print("Rot: ");
 			Serial.println(encoder_TopMotor.getRawPosition());
 			Serial.print("Encoders L: ");
@@ -295,23 +299,31 @@ void getEncoderPos()
 }
 
 boolean hitTable() {
+  int bottom_lever = digitalRead(FRONT_BOTTOM_LEVER_SWITCH_PIN);
+  int top_lever = digitalRead(FRONT_TOP_LEVER_SWITCH_PIN);
 
-  if (FRONT_BOTTOM_LEVER_SWITCH_PIN == LOW && FRONT_TOP_LEVER_SWITCH_PIN == HIGH){
-    Serial.print("Table");
+  if ((bottom_lever == LOW) && (top_lever == HIGH)){
+    Serial.println("Table");
     return true;
   }
   else{
     return false;
+    Serial.println("Nothing");
   }
 }
 
 boolean hitWall() {
-  if (FRONT_BOTTOM_LEVER_SWITCH_PIN == LOW && FRONT_TOP_LEVER_SWITCH_PIN == LOW){
-    Serial.print("Wall");
+  int bottom_lever = digitalRead(FRONT_BOTTOM_LEVER_SWITCH_PIN);
+  int top_lever = digitalRead(FRONT_TOP_LEVER_SWITCH_PIN);
+
+
+  if ((bottom_lever == LOW) && (top_lever == LOW)){
+    Serial.println("Wall");
     return true;
   }
   else{
-    return false;  
+    return false;
+    Serial.println("Nothing");
   }
 }
 
