@@ -138,7 +138,7 @@ void loop() {
 
     case 0:
       // RESERVED FOR TESTING, PASTE CODE HERE AND SET STAGE = 0
-      turnTLeftAngle(360);
+      turnLeftAngle(360);
             stage++;
       break;
 
@@ -350,13 +350,24 @@ void allOfTin(){
 }
 
 // Forward and reverse movement functions
-void turnTLeftAngle(long angle)
+void turnLeftAngle(long angle)
 {
-    calcLeftTurn(1900, angle);     
+    calcLeftTurn(2000, angle);     
     
     while (!doneLeftTurn())
     {
       turnLeftOnSpot(200); 
+    } 
+    setNeutral();
+}
+
+void turnRightAngle(long angle)
+{
+    calcRightTurn(2000, angle);     
+    
+    while (!doneRightTurn())
+    {
+      turnRightOnSpot(200); 
     } 
     setNeutral();
 }
