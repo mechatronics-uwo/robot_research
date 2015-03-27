@@ -53,19 +53,16 @@ unsigned int Right_Motor_Stop = 1500;
 unsigned int Left_Motor_Stop = 1500;
 long leftEncoderStopTime = 0;
 long rightEncoderStopTime = 0;
-boolean loopStarted = false;
+boolean loopStarted = false;// start loop for turning
 int Left_Motor_Offset = 0;
-int Right_Motor_Offset = 0;
+int Right_Motor_Offset = 25;
 
 unsigned long time_previous = 0; // Used for time functions, do not change
 unsigned long time_elapsed = 0; // Used for time functions, do not change
 boolean can_start_waiting = false; // Used for time functions, do not change
 
-<<<<<<< HEAD
-// -------------------- stage COUNTER --------------------
-// NOTE: stage 0 is reserved for debugging
 
-=======
+
 // -------------------- PID --------------------
 const int setPoint = 720;
 
@@ -81,7 +78,7 @@ int integral = 0;
 // -------------------- STAGE COUNTER --------------------
 // NOTE: Stage 0 is reserved for debugging
 
->>>>>>> origin/master
+
 unsigned int stage = 0;
 
 
@@ -94,11 +91,8 @@ void setup() {
   Serial.begin(9600);
 
   // Set-up motors
-<<<<<<< HEAD
-  pinMode(TOP_MOTOR_PIN,OUTPUT);
-=======
+
   pinMode(TOP_MOTOR_PIN, OUTPUT);
->>>>>>> origin/master
   pinMode(LEFT_MOTOR_PIN, OUTPUT);
   servo_LeftMotor.attach(LEFT_MOTOR_PIN);
   pinMode(RIGHT_MOTOR_PIN, OUTPUT);
@@ -106,15 +100,10 @@ void setup() {
 
 
   // Set-up buttons
-<<<<<<< HEAD
-  pinMode(FRONT_TOP_LEVER_SWITCH_PIN, INPUT);
-  pinMode(FRONT_BOTTOM_LEVER_SWITCH_PIN, INPUT);
 
-=======
   pinMode(FRONT_TOP_LEVER_SWITCH_PIN, INPUT_PULLUP);
   pinMode(FRONT_BOTTOM_LEVER_SWITCH_PIN, INPUT_PULLUP);
-  
->>>>>>> origin/master
+
   digitalWrite(FRONT_TOP_LEVER_SWITCH_PIN, HIGH);
   digitalWrite(FRONT_BOTTOM_LEVER_SWITCH_PIN, HIGH);
 
@@ -147,85 +136,26 @@ void loop() {
 
     // ==================== CASE 1-10 ====================
 
-
-<<<<<<< HEAD
-  case 0:
-    
-    if (!loopStarted)
-    {
-      loopStarted = true;
-      calcLeftTurn(2300, 360);
-      turnLeftOnSpot(150); // same turn speed as before
-    }
-    else if (doneLeftTurn())
-    {
-      loopStarted = false;
-      setNeutral();
-    }
-    break;
-
-  case 1:
-    // Find the wall first
-    moveForward(100);
-    if (hitTable) {
-      setNeutral();
-      stage = 3;
-    }
-    else if (hitWall) {
-      setNeutral();
-      stage = 2;
-    }
-    break;
-
-  case 2:
-    // Start case: Wall is in front of robot, robot is parallel to it
-    moveForward(300);
-    if (hitWall()) {
-      stage++;
-    }
-    // End case: Robot is hit the wall
-    break;
-  case 3:
-
-  case 4:
-
-  case 5:
-
-  case 6:
-
-  case 7:
-
-  case 8:
-
-  case 9:
-
-  case 10:
-=======
     case 0:
       // RESERVED FOR TESTING, PASTE CODE HERE AND SET STAGE = 0
+      turnTLeftAngle(360);
+            stage++;
+      break;
 
     case 1:
       // Case status: DONE by Daniel
       // Start case: Robot is in the middle of the room
-      moveForwardFixed();
-      if(hitTable()){
-        backUp();
-        stage = 30;
-      }
-      else if (hitWall()){
+      moveForward(300);
+      if(hitWall()){
         backUp();
         stage = 30;
       }
       break;
       // End case: Robot is parallel to the wall
-      break;
 
     case 2:
       // Start case: Wall is in front of robot, robot is parallel to it
-      moveForward(300);
-      if (hitWall()) {
-        stage++;
-      }
+          
       // End case: Robot is hit the wall
       break;
 
@@ -252,77 +182,14 @@ void loop() {
 
     case 10:
       break;
->>>>>>> origin/master
+
 
     // ==================== CASE 11-20 ====================
 
-  case 11:/*
-    // Start case: Robot is parallel to the wall
-<<<<<<< HEAD
-     smartMoveForward();
-     if (hitTable()){
-     backUp();
-     pivotCounterClockwise();
-     stage = 5; // !NOTICE: fix this, Jump to the case where you're at the table
-     }
-     else if(hitWall()){
-     backUp();
-     pivotCounterClockwise();
-     }
-     
-     // End case: In front of the table
-     */
-  case 12:
-    servo_LeftMotor.writeMicroseconds(1800);
-    servo_RightMotor.writeMicroseconds(1900);
-    //ping();
-
-  case 13:
-
-  case 14:
-
-  case 15:
-
-  case 16:
-
-  case 17:
-
-  case 18:
-
-  case 19:
-
-  case 20:
-
-    // ==================== CASE 21-30 ====================
-
-  case 21:
-
-  case 22:
-
-  case 23:
-
-  case 24:
-
-  case 25:
-
-  case 26:
-
-  case 27:
-
-  case 28:
-
-  case 29:
-=======
-
-
-    // End case: In front of the table
-    */
+    case 11:
       break;
 
     case 12:
-      servo_LeftMotor.writeMicroseconds(1800);
-      servo_RightMotor.writeMicroseconds(1900);
-      ping();
       break;
 
     case 13:
@@ -377,7 +244,7 @@ void loop() {
 
     case 29:
       break;
->>>>>>> origin/master
+
 
   case 30:
     break;
@@ -420,35 +287,18 @@ int backPing() {
 
   // Use command pulseIn to listen to ultrasonic_Data pin to record the
   // time that it takes from when the Pin goes HIGH until it goes LOW
-<<<<<<< HEAD
-  unsigned long front_ping = pulseIn(ULTRASONIC_OUT_PIN_BACK, HIGH, 10000);
-=======
+
   unsigned long ping_time = pulseIn(ULTRASONIC_OUT_PIN_BACK, HIGH, 10000);
->>>>>>> origin/master
+
 
   Serial.print("cm: ");
-<<<<<<< HEAD
-  Serial.println(echo_time[1] / 58); //divide time by 58 to get distance in cm
-
-=======
   Serial.println(ping_time / 58); //divide time by 58 to get distance in cm
   return ping_time;
->>>>>>> origin/master
+
 }
 
 
 void getEncoderPos()
-<<<<<<< HEAD
-{                       
-  Serial.print("Rot: ");
-  Serial.println(encoder_TopMotor.getRawPosition());
-  Serial.print("Encoders L: ");
-  Serial.print(encoder_LeftMotor.getRawPosition());
-  Serial.print(", R: ");
-  Serial.print(encoder_RightMotor.getRawPosition());
-
-
-=======
 {
                         Serial.print("Rot: ");
 			Serial.println(encoder_TopMotor.getRawPosition());
@@ -457,8 +307,7 @@ void getEncoderPos()
 			Serial.print(", R: ");
 			Serial.print(encoder_RightMotor.getRawPosition());
 			
-  
->>>>>>> origin/master
+
 }
 
 boolean hitTable() {
@@ -477,55 +326,40 @@ boolean hitTable() {
 boolean hitWall() {
   int bottom_lever = digitalRead(FRONT_BOTTOM_LEVER_SWITCH_PIN);
   int top_lever = digitalRead(FRONT_TOP_LEVER_SWITCH_PIN);
-  if (top_lever == LOW){
+  if ((top_lever == LOW) && (bottom_lever == LOW)){
     Serial.println("Wall");
     return true;
-<<<<<<< HEAD
 
-  else
-    return false;  
-=======
   }
   else{
     Serial.println("Nothing");
     return false;
   }
->>>>>>> origin/master
+
 }
 
 
 // -------------------- MOVEMENT FUNCTIONS --------------------
-<<<<<<< HEAD
-/*
-void allOfTin()
- {
- currentReading = frontPing(); // update reading
- integral += currentReading; // add reading to integral
- 
- output = pConstant * (currentReading - setPoint) + iConstant * integral + dConstant * (currentReading - lastReading);
- lastReading = currentReading; // update last reading
- 
- // veer based on output
- if (output > 0)
- veerRight(200, abs(output));
- else if (output < 0)
- veerLeft(200, abs(output));
- }
- */
-=======
 
 
 // Smart movement functions
 void allOfTin(){
   currentReading = frontPing(); // update reading
   integral += currentReading; // add reading to integral
->>>>>>> origin/master
 
+}
 
-<<<<<<< HEAD
-=======
 // Forward and reverse movement functions
-
+void turnTLeftAngle(long angle)
+{
+    calcLeftTurn(1900, angle);     
+    
+    while (!doneLeftTurn())
+    {
+      turnLeftOnSpot(200); 
+    } 
+    setNeutral();
+}
 void moveForwardFixed(){
   Left_Motor_Speed = 1700;
   Right_Motor_Speed = 1700;
@@ -538,7 +372,7 @@ void moveBackwardsFixed(){
   implementMotorSpeed();
 }
 
->>>>>>> origin/master
+
 void moveForward(long speedFactor)
 {
   Left_Motor_Speed = constrain((Left_Motor_Stop + speedFactor), 1500, 2100);
@@ -683,8 +517,5 @@ boolean waitMilliSecond(unsigned int interval) {
     return false; // Not done waiting!
   }
 }
-<<<<<<< HEAD
 
 
-=======
->>>>>>> origin/master
