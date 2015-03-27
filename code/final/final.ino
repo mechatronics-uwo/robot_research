@@ -73,10 +73,10 @@ int currentReading = 0;
 int lastReading = 0;
 int integral = 0;
 
-// -------------------- STEP COUNTER --------------------
-// NOTE: Step 0 is reserved for debugging
+// -------------------- STAGE COUNTER --------------------
+// NOTE: Stage 0 is reserved for debugging
 
-unsigned int step = 0;
+unsigned int stage = 0;
 
 
 // ******************************************************************
@@ -127,17 +127,30 @@ void setup() {
 // *****************************************************************
 void loop() {
 
-  switch (step) {
+  switch (stage) {
 
     // ==================== CASE 1-10 ====================
 
 
     case 0:
-      // RESERVED FOR TESTING, PASTE CODE HERE AND SET STEP = 0
-      hitTable();
-      hitWall();
-      Serial.println(digitalRead(FRONT_BOTTOM_LEVER_SWITCH_PIN));
-      // Serial.println(digitalRead(FRONT_TOP_LEVER_SWITCH_PIN));
+      // RESERVED FOR TESTING, PASTE CODE HERE AND SET STAGE = 0
+      moveForwardFixed();
+      if(hitTable()){
+        setNeutral();
+        delay(1500);
+        moveBackwardsFixed();
+        delay(2000);
+        setNeutral();
+        stage = 30;
+      }
+      else if (hitWall()){
+        setNeutral();
+        delay(1500);
+        moveBackwardsFixed();
+        delay(2000);
+        setNeutral();
+        stage = 30;
+      }
       break;
 
     case 1:
@@ -145,11 +158,11 @@ void loop() {
       moveForward(100);
       if (hitTable()) {
         setNeutral();
-        step = 3;
+        stage = 3;
       }
       else if (hitWall) {
         setNeutral();
-        step = 2;
+        stage = 2;
       }
       break;
 
@@ -157,7 +170,7 @@ void loop() {
       // Start case: Wall is in front of robot, robot is parallel to it
       moveForward(300);
       if (hitWall()) {
-        step++;
+        stage++;
       }
       // End case: Robot is hit the wall
       break;
@@ -325,21 +338,21 @@ boolean hitTable() {
     return true;
   }
   else{
-    return false;
     Serial.println("Nothing");
+    return false;
   }
 }
 
 boolean hitWall() {
   int bottom_lever = digitalRead(FRONT_BOTTOM_LEVER_SWITCH_PIN);
   int top_lever = digitalRead(FRONT_TOP_LEVER_SWITCH_PIN);
-  if ((bottom_lever == LOW) && (top_lever == LOW)){
+  if (top_lever == LOW){
     Serial.println("Wall");
     return true;
   }
   else{
-    return false;
     Serial.println("Nothing");
+    return false;
   }
 }
 
@@ -358,6 +371,18 @@ void allOfTin(){
     veerRight(200, abs(output));
   else if (output < 0)
     veerLeft(200, abs(output));
+}
+
+void moveForwardFixed(){
+  Left_Motor_Speed = 1700;
+  Right_Motor_Speed = 1700;
+  implementMotorSpeed();
+}
+
+void moveBackwardsFixed(){
+  Left_Motor_Speed = 1300;
+  Right_Motor_Speed = 1300;
+  implementMotorSpeed();
 }
 
 void moveForward(long speedFactor)
