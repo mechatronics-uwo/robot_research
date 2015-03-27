@@ -134,36 +134,21 @@ void loop() {
 
     case 0:
       // RESERVED FOR TESTING, PASTE CODE HERE AND SET STAGE = 0
+
+    case 1:
+      // Case status: DONE by Daniel
+      // Start case: Robot is in the middle of the room
       moveForwardFixed();
       if(hitTable()){
-        setNeutral();
-        delay(1500);
-        moveBackwardsFixed();
-        delay(2000);
-        setNeutral();
+        backUp();
         stage = 30;
       }
       else if (hitWall()){
-        setNeutral();
-        delay(1500);
-        moveBackwardsFixed();
-        delay(2000);
-        setNeutral();
+        backUp();
         stage = 30;
       }
       break;
-
-    case 1:
-      // Find the wall first
-      moveForward(100);
-      if (hitTable()) {
-        setNeutral();
-        stage = 3;
-      }
-      else if (hitWall) {
-        setNeutral();
-        stage = 2;
-      }
+      // End case: Robot is parallel to the wall
       break;
 
     case 2:
@@ -359,6 +344,8 @@ boolean hitWall() {
 
 // -------------------- MOVEMENT FUNCTIONS --------------------
 
+
+// Smart movement functions
 void allOfTin(){
   currentReading = frontPing(); // update reading
   integral += currentReading; // add reading to integral
@@ -372,6 +359,8 @@ void allOfTin(){
   else if (output < 0)
     veerLeft(200, abs(output));
 }
+
+// Forward and reverse movement functions
 
 void moveForwardFixed(){
   Left_Motor_Speed = 1700;
@@ -410,10 +399,15 @@ void moveBackDistance(long distance)
 
 }
 
-
 void backUp() {
-  moveBackDistance(500);
+  setNeutral();
+  delay(1000);
+  moveBackwardsFixed();
+  delay(1500);
+  setNeutral();
 }
+
+// Turn functions
 
 void veerRight(long speedFactor, long intensity)
 {
@@ -466,8 +460,24 @@ boolean doneRightTurn()
   else
     return false;
 }
+
+void turnClockwise(long speedFactor) {
+  Left_Motor_Speed = constrain((Left_Motor_Stop + speedFactor), 1500, 2100);
+  Right_Motor_Speed = Left_Motor_Stop;
+  implementMotorSpeed();
+}
+
+void pivotLeft() {
+
+}
+
+void pivotRight() {
+}
+
+// Implementation movement functions
+
 void implementMotorSpeed()
-{	
+{
   servo_LeftMotor.writeMicroseconds(constrain((Left_Motor_Speed + Left_Motor_Offset), 900, 2100));
   servo_RightMotor.writeMicroseconds(constrain((Right_Motor_Speed + Right_Motor_Offset), 900, 2100));
 }
@@ -482,28 +492,6 @@ void setNeutral() {
 void brake() {
   Left_Motor_Speed = 200;
   Right_Motor_Speed = 200;
-  implementMotorSpeed();
-}
-
-// Pivoting will turn the robot 90 degrees without moving
-
-// Turning will turn the robot 90 degrees with slight movement
-// !NOTICE Need to test and fix these functions
-void turnCounterClockwise() {
-  servo_LeftMotor.writeMicroseconds(1500);
-  servo_RightMotor.writeMicroseconds(1500);
-  delay(200);
-  servo_LeftMotor.writeMicroseconds(1250);
-  servo_RightMotor.writeMicroseconds(1750);
-  delay(1500);
-  setNeutral();
-  delay(200);
-
-}
-
-void turnClockwise(long speedFactor) {
-  Left_Motor_Speed = constrain((Left_Motor_Stop + speedFactor), 1500, 2100);
-  Right_Motor_Speed = Left_Motor_Stop;
   implementMotorSpeed();
 }
 
