@@ -19,10 +19,9 @@
 // 500ms = Fast Reverse
 // 200ms = Brake
 
-Servo servo_TopMotor;
 Servo servo_RightMotor;
+Servo servo_TopMotor;
 Servo servo_LeftMotor;
-
 
 I2CEncoder encoder_TopMotor;
 I2CEncoder encoder_LeftMotor;
@@ -30,9 +29,9 @@ I2CEncoder encoder_RightMotor;
 
 
 // -------------------- SENSORS --------------------
-const int TOP_MOTOR_PIN = 4;
-const int RIGHT_MOTOR_PIN = 2;
+
 const int LEFT_MOTOR_PIN = 3;
+const int RIGHT_MOTOR_PIN = 2;
 
 const int FRONT_BOTTOM_LEVER_SWITCH_PIN = 4;
 const int FRONT_TOP_LEVER_SWITCH_PIN = 5;
@@ -42,6 +41,8 @@ const int ULTRASONIC_OUT_PIN_FRONT = 53;
 
 const int ULTRASONIC_IN_PIN_BACK = 48;
 const int ULTRASONIC_OUT_PIN_BACK = 49;
+
+const int right_light_sensor = A1;
 
 // -------------------- VARIABLES --------------------
 
@@ -92,7 +93,6 @@ void setup() {
 
   // Set-up motors
 
-  pinMode(TOP_MOTOR_PIN, OUTPUT);
   pinMode(LEFT_MOTOR_PIN, OUTPUT);
   servo_LeftMotor.attach(LEFT_MOTOR_PIN);
   pinMode(RIGHT_MOTOR_PIN, OUTPUT);
@@ -117,14 +117,19 @@ void setup() {
 
 
   //Set up encoder
+  
+  encoder_TopMotor.init(1.0 / 3.0 * MOTOR_393_SPEED_ROTATIONS, MOTOR_393_TIME_DELTA);
+  
   encoder_LeftMotor.init(1.0 / 3.0 * MOTOR_393_SPEED_ROTATIONS, MOTOR_393_TIME_DELTA);
   encoder_LeftMotor.setReversed(false); // adjust for positive count when moving forward
+  
   encoder_RightMotor.init(1.0 / 3.0 * MOTOR_393_SPEED_ROTATIONS, MOTOR_393_TIME_DELTA);
   encoder_RightMotor.setReversed(true); // adjust for positive count when moving forward
 
+  encoder_TopMotor.zero();
   encoder_LeftMotor.zero();
   encoder_RightMotor.zero();
-  encoder_TopMotor.zero();
+  
 }
 
 // *****************************************************************
@@ -155,7 +160,7 @@ void loop() {
 
     case 2:
       // Start case: Wall is in front of robot, robot is parallel to it
-          
+         
       // End case: Robot is hit the wall
       break;
 
@@ -352,7 +357,7 @@ void allOfTin(){
 // Forward and reverse movement functions
 void turnLeftAngle(long angle)
 {
-    calcLeftTurn(2000, angle);     
+    calcLeftTurn(2300, angle);     
     
     while (!doneLeftTurn())
     {
