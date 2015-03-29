@@ -54,7 +54,11 @@ const int right_bottom_light_sensor = A1;
 
 int light_value=0;
 int next_light_value=0;
+<<<<<<< HEAD
+int count=0;//counts the lights
+=======
 
+>>>>>>> origin/master
 unsigned int Left_Motor_Speed;
 unsigned int Right_Motor_Speed;
 unsigned int Right_Motor_Stop = 1500;
@@ -473,6 +477,23 @@ void allOfTin()
      veerLeft(100, (setPoint - currentReading));*/
 }
 // Forward and reverse movement functions
+
+void countLight()
+{
+      
+      light_value = analogRead(right_light_sensor);
+      moveForward(150);
+      next_light_value = analogRead(right_light_sensor);
+      
+      if((next_light_value < light_value) && (next_light_value < 50))
+      {        
+        moveFowardDistace(1000);        
+        count++;
+               
+      }
+  
+}
+
 void turnLeftAngle(long angle)
 {
     calcLeftTurn(2300, angle);
