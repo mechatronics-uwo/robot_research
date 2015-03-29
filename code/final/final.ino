@@ -157,12 +157,9 @@ void loop() {
 
     case 0:
       // RESERVED FOR TESTING, PASTE CODE HERE AND SET STAGE = 0
-      moveForward(200);
-      if(hitWall()){
-        setNeutral();
-        moveBackDistance(300);
-        turnLeftAngle(90);
-        stage = 30;
+      startWaiting();
+      if (waitMilliSecond(3000)){
+        Serial.println("Waited");
       }
       break;
 
@@ -173,13 +170,13 @@ void loop() {
       if(hitWall()){
         setNeutral();
         moveBackDistance(500);
-        turnLeftAngle(90);
+        turnLeftAngle(87);
         stage = 1;
       }
       else if(hitTable()){
         setNeutral();
         moveBackDistance(500);
-        turnLeftAngle(90);
+        turnLeftAngle(87);
         stage = 2;
       }
       // End case: Robot is parallel to the wall
@@ -348,7 +345,7 @@ float frontPing() {
   float ping_time = pulseIn(ULTRASONIC_OUT_PIN_FRONT, HIGH, 10000);
 
   Serial.print("cm: ");
-  Serial.println(ping_time / 58); //divide time by 58 to get
+  Serial.println(ping_time); //divide time by 58 to get
 
   return ping_time;
 }
@@ -366,7 +363,7 @@ float backPing() {
 
 
   Serial.print("cm: ");
-  Serial.println(ping_time / 58); //divide time by 58 to get distance in cm
+  Serial.println(ping_time); //divide time by 58 to get distance in cm
   return ping_time;
 
 }
@@ -486,7 +483,7 @@ void countLight()
       
       if((next_light_value < light_value) && (next_light_value < 50))
       {        
-        moveFowardDistace(1000);        
+        moveFowardDistance(1000);        
         count++;
                
       }
@@ -526,9 +523,34 @@ void moveBackwardsFixed(){
 }
 
 void smartMoveForwards(){
-  float front_ping = frontPing();
-  delay(10);
-  float back_ping = backPing();
+  // Keep between 600 and 250 for ping
+  startWaiting();
+  float front_ping;
+  float back_ping;
+  if (waitMilliSecond(3000)){
+    front_ping = frontPing();
+    delay(10);
+    back_ping = backPing();
+    if ((back_ping - front_ping) > 400){
+      moveForwardFixed();
+      delay(1000);
+      setNeutral();
+      turnLeftAngle(15);
+      Serial.println("First case");
+    }
+    else if (front_ping > 600){
+    veerRight(200, 100);
+      Serial.println("Second case");
+    }
+    else if (front_ping < 250){
+      veerLeft(200, 100);
+      Serial.println("Third case");
+    }
+    else {
+    moveForward(200);
+      Serial.println("Fourth case");
+    }
+  }
 }
 
 void moveForward(long speedFactor)
