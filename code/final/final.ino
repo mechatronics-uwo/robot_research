@@ -65,14 +65,13 @@ const int right_light_sensor = A0;
 const int right_bottom_light_sensor = A1;
 
 // -------------------- VARIABLES --------------------
-
-unsigned long echo_time[2];//0 is front timer, 1 is back timer
-
 int light_value=0;
 int next_light_value=0;
 
 int count=0;//counts the lights
 
+
+// Motor variables
 unsigned int Left_Motor_Speed;
 unsigned int Right_Motor_Speed;
 unsigned int Right_Motor_Stop = 1500;
@@ -156,12 +155,7 @@ void loop() {
 
     case 0:
       // RESERVED FOR TESTING, PASTE CODE HERE AND SET STAGE = 0
-
-      smartMoveForwards();
-      if (hitWall()){
-        setNeutral();
-        stage = 30;
-      }
+      stage = 1;
       break;
 
     case 1:
@@ -170,13 +164,13 @@ void loop() {
       moveForward(200);
       if(hitWall()){
         setNeutral();
-        moveBackDistance(500);
+        moveBackDistance(300);
         turnLeftAngle(87);
         stage = 2;
       }
       else if(hitTable()){
         setNeutral();
-        moveBackDistance(500);
+        moveBackDistance(300);
         turnLeftAngle(87);
         stage = 3;
       }
@@ -184,21 +178,25 @@ void loop() {
       // End case: Robot is parallel to the wall
 
     case 2:
+      // Case status: IN PROGRESS by Daniel
       // Start case: Wall is in front of robot, robot is parallel to it
+      smartMoveForwards();
+      if (hitWall()){
+        setNeutral();
         moveBackDistance(300);
-        turnLeftAngle(90);
+        turnLeftAngle(87);
+      }
+      else if(hitTable()){
+        setNeutral();
+        moveBackDistance(300);
+        turnLeftAngle(87);
         stage = 3;
+      }
       // End case: Table is in front of robot, robot is parallel to it
       break;
 
     case 3:
-      followWall();
-      
-      if(hitTable())
-        stage = 30;
-        
-      else if(hitWall())
-        stage=2; 
+      setNeutral();
       break;
       
     case 4:
@@ -393,10 +391,18 @@ void getEncoderPos()
 
 boolean hitTable() {
   int bottom_lever = digitalRead(FRONT_BOTTOM_LEVER_SWITCH_PIN);
-  int top_lever = digitalRead(FRONT_TOP_LEVER_SWITCH_PIN);
-  if ((bottom_lever == LOW) && (top_lever == HIGH)){
-    Serial.println("Table");
-    return true;
+  
+  if (bottom_lever == LOW){
+    delay(300);
+    int top_lever = digitalRead(FRONT_TOP_LEVER_SWITCH_PIN);
+    if (top_lever == HIGH){
+      Serial.println("Table");
+      return true;
+    }
+    else {
+      Serial.println("Nothing");
+      return false;
+    }
   }
   else{
     Serial.println("Nothing");
@@ -482,14 +488,14 @@ void smartMoveForwards(){
       reAlign(front_ping);
       Serial.println("Realigning");
     }
-    else if (front_ping > 700){
-      veerRight(200, 100);
+    else if (front_ping > 900){
+      veerRight(100, 200);
       Serial.println("Too far, need to veer right");
     }
-    else if (front_ping < 450){
-      setNeutral();
-      turnLeftAngle(10);
-      veerLeft(200, 100);
+    else if (front_ping < 650){
+//      setNeutral();
+//      turnLeftAngle(10);
+      veerLeft(100, 200);
       Serial.println("Too close, need to veer left");
     }
     else {
