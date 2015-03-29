@@ -90,7 +90,7 @@ float integral = 0;
 // NOTE: Stage 0 is reserved for debugging
 
 
-unsigned int stage = 1;
+unsigned int stage = 0;
 
 
 // ******************************************************************
@@ -154,16 +154,30 @@ void loop() {
 
     case 0:
       // RESERVED FOR TESTING, PASTE CODE HERE AND SET STAGE = 0
-      moveBackDistance(100);
-      stage=30;
+      moveForward(200);
+      if(hitWall()){
+        setNeutral();
+        moveBackDistance(300);
+        turnLeftAngle(90);
+        stage = 30;
+      }
       break;
 
     case 1:
       // Case status: DONE by Daniel
       // Start case: Robot is in the middle of the room
-      moveForward(350);
-      if(hitWall()){        
-        stage++;
+      moveForward(200);
+      if(hitWall()){
+        setNeutral();
+        moveBackDistance(500);
+        turnLeftAngle(90);
+        stage = 1;
+      }
+      else if(hitTable()){
+        setNeutral();
+        moveBackDistance(500);
+        turnLeftAngle(90);
+        stage = 2;
       }
       // End case: Robot is parallel to the wall
 
@@ -322,13 +336,13 @@ void loop() {
 // Ping ultrasonic
 // Send the Ultrasonic Range Finder a 10 microsecond pulse per tech spec
 
-int frontPing() {
+float frontPing() {
   //Front ultrasonic
   digitalWrite(ULTRASONIC_IN_PIN_FRONT, HIGH);
   delayMicroseconds(10); //The 10 microsecond pause where the pulse in "high"
   digitalWrite(ULTRASONIC_IN_PIN_FRONT, LOW);
 
-  unsigned long ping_time = pulseIn(ULTRASONIC_OUT_PIN_FRONT, HIGH, 10000);
+  float ping_time = pulseIn(ULTRASONIC_OUT_PIN_FRONT, HIGH, 10000);
 
   Serial.print("cm: ");
   Serial.println(ping_time / 58); //divide time by 58 to get
@@ -336,7 +350,7 @@ int frontPing() {
   return ping_time;
 }
 
-int backPing() {
+float backPing() {
   //Back ultrasonic
   digitalWrite(ULTRASONIC_IN_PIN_BACK, HIGH);
   delayMicroseconds(10); //The 10 microsecond pause where the pulse in "high"
@@ -345,7 +359,7 @@ int backPing() {
   // Use command pulseIn to listen to ultrasonic_Data pin to record the
   // time that it takes from when the Pin goes HIGH until it goes LOW
 
-  unsigned long ping_time = pulseIn(ULTRASONIC_OUT_PIN_BACK, HIGH, 10000);
+  float ping_time = pulseIn(ULTRASONIC_OUT_PIN_BACK, HIGH, 10000);
 
 
   Serial.print("cm: ");
@@ -389,7 +403,7 @@ boolean hitTable() {
 
 boolean hitWall() {
   int top_lever = digitalRead(FRONT_TOP_LEVER_SWITCH_PIN);
-  if ((top_lever == LOW) && (bottom_lever == LOW)){
+  if (top_lever == LOW){
     Serial.println("Wall");
     return true;
 
@@ -491,6 +505,11 @@ void moveBackwardsFixed(){
   implementMotorSpeed();
 }
 
+void smartMoveForwards(){
+  float front_ping = frontPing();
+  delay(10);
+  float back_ping = backPing();
+}
 
 void moveForward(long speedFactor)
 {
