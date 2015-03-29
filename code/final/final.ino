@@ -70,7 +70,13 @@ unsigned long echo_time[2];//0 is front timer, 1 is back timer
 
 int light_value=0;
 int next_light_value=0;
+<<<<<<< HEAD
 int count=0;//counts the lights
+=======
+
+int count=0;//counts the lights
+
+>>>>>>> origin/master
 unsigned int Left_Motor_Speed;
 unsigned int Right_Motor_Speed;
 unsigned int Right_Motor_Stop = 1500;
@@ -91,9 +97,13 @@ boolean can_start_waiting = false; // Used for time functions, do not change
 // -------------------- STAGE COUNTER --------------------
 // NOTE: Stage 0 is reserved for debugging
 
+<<<<<<< HEAD
 
 unsigned int stage = 21;
 
+=======
+unsigned int stage = 0;
+>>>>>>> origin/master
 
 // ******************************************************************
 // ************************* PROGRAM !SETUP *************************
@@ -156,8 +166,17 @@ void loop() {
 
     case 0:
       // RESERVED FOR TESTING, PASTE CODE HERE AND SET STAGE = 0
+<<<<<<< HEAD
       moveForward(300);
       
+=======
+
+      smartMoveForwards();
+      if (hitWall()){
+        setNeutral();
+        stage = 30;
+      }
+>>>>>>> origin/master
       break;
 
     case 1:
@@ -174,9 +193,14 @@ void loop() {
       // Start case: Wall is in front of robot, robot is parallel to it
         moveBackDistance(300);
         turnLeftAngle(90);
+<<<<<<< HEAD
         
         stage++;
       // End case: Robot is hit the wall
+=======
+        stage = 3;
+      // End case: Table is in front of robot, robot is parallel to it
+>>>>>>> origin/master
       break;
 
     case 3:
@@ -343,12 +367,19 @@ int frontPing() {
   delayMicroseconds(10); //The 10 microsecond pause where the pulse in "high"
   digitalWrite(ULTRASONIC_IN_PIN_FRONT, LOW);
 
+<<<<<<< HEAD
   unsigned long ping_time1 = pulseIn(ULTRASONIC_OUT_PIN_FRONT, HIGH, 10000);
 
   // Serial.print("front: ");
   // Serial.println(ping_time1); //divide time by 58 to get
+=======
+  float ping_time = pulseIn(ULTRASONIC_OUT_PIN_FRONT, HIGH, 10000);
 
-  return ping_time1;
+  Serial.print("cm: ");
+  Serial.println(ping_time); //divide time by 58 to get
+>>>>>>> origin/master
+
+  return ping_time;
 }
 
 int backPing() {
@@ -359,24 +390,31 @@ int backPing() {
 
   // Use command pulseIn to listen to ultrasonic_Data pin to record the
   // time that it takes from when the Pin goes HIGH until it goes LOW
+<<<<<<< HEAD
   unsigned long ping_time2 = pulseIn(ULTRASONIC_OUT_PIN_BACK, HIGH, 10000);
 
   // Serial.print("back: ");
   // Serial.println(ping_time2); //divide time by 58 to get distance in cm
   return ping_time2;
+=======
+  float ping_time = pulseIn(ULTRASONIC_OUT_PIN_BACK, HIGH, 10000);
+
+
+  Serial.print("cm: ");
+  Serial.println(ping_time); //divide time by 58 to get distance in cm
+  return ping_time;
+>>>>>>> origin/master
 }
 
 
 void getEncoderPos()
 {
-                        Serial.print("Rot: ");
+      Serial.print("Rot: ");
 			Serial.println(encoder_TopMotor.getRawPosition());
 			Serial.print("Encoders L: ");
 			Serial.print(encoder_LeftMotor.getRawPosition());
 			Serial.print(", R: ");
 			Serial.print(encoder_RightMotor.getRawPosition());
-			
-
 }
 
 boolean hitTable() {
@@ -415,38 +453,37 @@ boolean hitWall() {
 
 void countLight()
 {
-      
-      light_value = analogRead(right_light_sensor); 
-      next_light_value = analogRead(right_light_sensor);     
+      light_value = analogRead(right_light_sensor);
+      next_light_value = analogRead(right_light_sensor);
       if((next_light_value < light_value) && (next_light_value < 50))
+<<<<<<< HEAD
       {        
         moveFowardDistance(1100);        
+=======
+      {
+        moveFowardDistance(1000);
+>>>>>>> origin/master
         count++;
-               
       }
-      
-  
 }
 
 void turnLeftAngle(long angle)
 {
-    calcLeftTurn(2300, angle);     
-    
+    calcLeftTurn(2300, angle);
     while (!doneLeftTurn())
     {
-      turnLeftOnSpot(200); 
-    } 
+      turnLeftOnSpot(200);
+    }
     setNeutral();
 }
 
 void turnRightAngle(long angle)
 {
-    calcRightTurn(2300, angle);     
-    
+    calcRightTurn(2300, angle);
     while (!doneRightTurn())
     {
-      turnRightOnSpot(200); 
-    } 
+      turnRightOnSpot(200);
+    }
     setNeutral();
 }
 void moveForwardFixed(){
@@ -461,6 +498,56 @@ void moveBackwardsFixed(){
   implementMotorSpeed();
 }
 
+<<<<<<< HEAD
+=======
+void smartMoveForwards(){
+  // Keep between 800 and 450 for ping
+  startWaiting();
+
+  float front_ping;
+  float back_ping;
+
+  if (waitMilliSecond(250)){
+    front_ping = frontPing();
+    delay(10);
+    back_ping = backPing();
+
+    if ((back_ping - front_ping) > 400){
+      reAlign(front_ping);
+      Serial.println("Realigning");
+    }
+    else if (front_ping > 700){
+      veerRight(200, 100);
+      Serial.println("Too far, need to veer right");
+    }
+    else if (front_ping < 450){
+      setNeutral();
+      turnLeftAngle(10);
+      veerLeft(200, 100);
+      Serial.println("Too close, need to veer left");
+    }
+    else {
+      moveForward(200);
+      Serial.println("Everything's perfect");
+    }
+  }
+}
+
+void reAlign(float ping_value){
+    float front_ping = ping_value;
+    if (front_ping < 300){
+      setNeutral();
+      turnLeftAngle(25);
+      moveForward(200);
+    }
+    else{
+      moveForward(200);
+      delay(1000);
+      setNeutral();
+      turnLeftAngle(20);
+    }
+}
+>>>>>>> origin/master
 
 void moveForward(long speedFactor)
 {
@@ -484,7 +571,6 @@ void moveBackDistance(long distance)
   {
     Serial.println(leftEncoderStopTime);
     Serial.println(encoder_LeftMotor.getRawPosition());
-    
     Left_Motor_Speed = constrain((Left_Motor_Stop - 200), 900, 1500);
     Right_Motor_Speed = constrain((Right_Motor_Stop - 200), 900, 1500);
     implementMotorSpeed();
@@ -495,9 +581,8 @@ void moveBackDistance(long distance)
 void moveFowardDistance(long distance)
 {
   leftEncoderStopTime = encoder_LeftMotor.getRawPosition();
-  
   while ((leftEncoderStopTime + distance) > encoder_LeftMotor.getRawPosition())
-  {    
+  {
     Left_Motor_Speed = constrain((Left_Motor_Stop + 200), 1500, 2100);
     Right_Motor_Speed = constrain((Right_Motor_Stop + 200), 1500, 2100);
     implementMotorSpeed();
