@@ -70,7 +70,6 @@ int next_light_value=0;
 
 int count=0;//counts the lights
 
-
 // Motor variables
 unsigned int Left_Motor_Speed;
 unsigned int Right_Motor_Speed;
@@ -84,7 +83,7 @@ int Right_Motor_Offset = 30;
 
 unsigned long time_previous = 0; // Used for time functions, do not change
 unsigned long time_elapsed = 0; // Used for time functions, do not change
-boolean can_start_waiting = true; // Used for time functions, do not change
+boolean can_start_waiting = false; // Used for time functions, do not change
 
 
 
@@ -291,8 +290,7 @@ void loop() {
     // ==================== CASE 21-30 ====================
 
     case 21:
-      updateUltrasonics();
-      followWall();
+      moveForward(200);
       countLight();
       
       if(count==1)
@@ -348,12 +346,13 @@ void loop() {
 // Ping ultrasonic
 // Send the Ultrasonic Range Finder a 10 microsecond pulse per tech spec
 
-float frontPing() {
+int frontPing() {
   //Front ultrasonic
   digitalWrite(ULTRASONIC_IN_PIN_FRONT, HIGH);
   delayMicroseconds(10); //The 10 microsecond pause where the pulse in "high"
   digitalWrite(ULTRASONIC_IN_PIN_FRONT, LOW);
-
+  // Serial.print("front: ");
+  // Serial.println(ping_time1); //divide time by 58 to get
   float ping_time = pulseIn(ULTRASONIC_OUT_PIN_FRONT, HIGH, 10000);
 
   Serial.print("cm: ");
@@ -362,7 +361,7 @@ float frontPing() {
   return ping_time;
 }
 
-float backPing() {
+int backPing() {
   //Back ultrasonic
   digitalWrite(ULTRASONIC_IN_PIN_BACK, HIGH);
   delayMicroseconds(10); //The 10 microsecond pause where the pulse in "high"
@@ -370,6 +369,8 @@ float backPing() {
 
   // Use command pulseIn to listen to ultrasonic_Data pin to record the
   // time that it takes from when the Pin goes HIGH until it goes LOW
+  // Serial.print("back: ");
+  // Serial.println(ping_time2); //divide time by 58 to get distance in cm
   float ping_time = pulseIn(ULTRASONIC_OUT_PIN_BACK, HIGH, 10000);
 
 
@@ -413,12 +414,13 @@ boolean hitTable() {
 boolean hitWall() {
   int bottom_lever = digitalRead(FRONT_BOTTOM_LEVER_SWITCH_PIN);
   int top_lever = digitalRead(FRONT_TOP_LEVER_SWITCH_PIN);
-  if (top_lever == LOW){
+  if ((top_lever == LOW) && (bottom_lever == LOW)){
     Serial.println("Wall");
     return true;
 
   }
   else{
+    Serial.println("Nothing");
     return false;
   }
 
@@ -663,17 +665,16 @@ void brake() {
 // Call startWaiting first, and then waitMilliSecond
 void startWaiting() {
   if (can_start_waiting) {
-    Serial.println("Started waiting");
+
     time_previous = millis();
-    can_start_waiting = false; //Toggle false to stop it from resetting the timer until it's done waiting
   }
 }
 
-boolean waitMilliSecond(unsigned long interval) {
+boolean waitMilliSecond(unsigned int interval) {
 
   time_elapsed = millis();
   if ((time_elapsed - time_previous) > interval) {
-    can_start_waiting = true;
+    can_start_waiting = false;
     return true; // Done waiting!
   }
   else {
