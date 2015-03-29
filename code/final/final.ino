@@ -527,15 +527,15 @@ void smartMoveForwards(){
   startWaiting();
   float front_ping;
   float back_ping;
-  if (waitMilliSecond(1000)){
+  if (waitMilliSecond(250)){
     front_ping = frontPing();
     delay(10);
     back_ping = backPing();
-    if ((back_ping - front_ping) > 600){
+    if ((back_ping - front_ping) > 400){
       reAlign(front_ping);
       Serial.println("Realigning");
     }
-    else if (front_ping > 800){
+    else if (front_ping > 700){
       veerRight(200, 100);
       Serial.println("Too far, need to veer right");
     }
