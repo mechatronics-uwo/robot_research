@@ -70,7 +70,7 @@ int Right_Motor_Offset = 25;
 
 unsigned long time_previous = 0; // Used for time functions, do not change
 unsigned long time_elapsed = 0; // Used for time functions, do not change
-boolean can_start_waiting = false; // Used for time functions, do not change
+boolean can_start_waiting = true; // Used for time functions, do not change
 
 
 
@@ -718,14 +718,15 @@ void startWaiting() {
   if (can_start_waiting) {
 
     time_previous = millis();
+    can_start_waiting = false;
   }
 }
 
-boolean waitMilliSecond(unsigned int interval) {
+boolean waitMilliSecond(unsigned long interval) {
 
   time_elapsed = millis();
   if ((time_elapsed - time_previous) > interval) {
-    can_start_waiting = false;
+    can_start_waiting = true;
     return true; // Done waiting!
   }
   else {
