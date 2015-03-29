@@ -133,6 +133,7 @@ void loop() {
     case 0:
       // RESERVED FOR TESTING, PASTE CODE HERE AND SET STAGE = 0
       getEncoderPos();
+      stage = 30;
       break;
     case 1:
       // Case status: DONE by Daniel
