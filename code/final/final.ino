@@ -45,8 +45,6 @@ const int ULTRASONIC_OUT_PIN_BACK = 49;
 
 // -------------------- VARIABLES --------------------
 
-unsigned long echo_time[2];//0 is front timer, 1 is back timer
-
 unsigned int Left_Motor_Speed;
 unsigned int Right_Motor_Speed;
 unsigned int Right_Motor_Stop = 1500;
@@ -134,29 +132,27 @@ void loop() {
 
     case 0:
       // RESERVED FOR TESTING, PASTE CODE HERE AND SET STAGE = 0
-
+      getEncoderPos();
+      break;
     case 1:
       // Case status: DONE by Daniel
       // Start case: Robot is in the middle of the room
       moveForwardFixed();
       if(hitTable()){
         backUp();
+        pivotLeft();
         stage = 30;
       }
       else if (hitWall()){
         backUp();
-        stage = 30;
+        pivotLeft();
+        stage = 0;
       }
-      break;
       // End case: Robot is parallel to the wall
       break;
 
     case 2:
       // Start case: Wall is in front of robot, robot is parallel to it
-      moveForward(300);
-      if (hitWall()) {
-        stage++;
-      }
       // End case: Robot is hit the wall
       break;
 
@@ -305,22 +301,29 @@ int backPing() {
 
 void getEncoderPos()
 {
-                        Serial.print("Rot: ");
-			Serial.println(encoder_TopMotor.getRawPosition());
+//                        Serial.print("Rot: ");
+//			Serial.println(encoder_TopMotor.getRawPosition());
 			Serial.print("Encoders L: ");
 			Serial.print(encoder_LeftMotor.getRawPosition());
 			Serial.print(", R: ");
-			Serial.print(encoder_RightMotor.getRawPosition());
+			Serial.println(encoder_RightMotor.getRawPosition());
 			
   
 }
 
 boolean hitTable() {
   int bottom_lever = digitalRead(FRONT_BOTTOM_LEVER_SWITCH_PIN);
-  int top_lever = digitalRead(FRONT_TOP_LEVER_SWITCH_PIN);
-  if ((bottom_lever == LOW) && (top_lever == HIGH)){
-    Serial.println("Table");
-    return true;
+  if (bottom_lever == LOW){
+    delay(300);
+    int top_lever = digitalRead(FRONT_TOP_LEVER_SWITCH_PIN);
+    if(top_lever == HIGH){
+      Serial.println("Table");
+      return true;
+    }
+    else{
+      Serial.println("Nothing");
+      return false;
+    }
   }
   else{
     Serial.println("Nothing");
@@ -329,7 +332,6 @@ boolean hitTable() {
 }
 
 boolean hitWall() {
-  int bottom_lever = digitalRead(FRONT_BOTTOM_LEVER_SWITCH_PIN);
   int top_lever = digitalRead(FRONT_TOP_LEVER_SWITCH_PIN);
   if (top_lever == LOW){
     Serial.println("Wall");
@@ -403,8 +405,9 @@ void backUp() {
   setNeutral();
   delay(1000);
   moveBackwardsFixed();
-  delay(1500);
+  delay(500);
   setNeutral();
+  delay(50);
 }
 
 // Turn functions
@@ -468,12 +471,22 @@ void turnClockwise(long speedFactor) {
 }
 
 void pivotLeft() {
-
+  servo_LeftMotor.writeMicroseconds(1300);
+  servo_RightMotor.writeMicroseconds(1700);
+  delay(1450);
+  setNeutral();
 }
 
 void pivotRight() {
+  servo_LeftMotor.writeMicroseconds(1700);
+  servo_RightMotor.writeMicroseconds(1300);
+  delay(1450);
+  setNeutral();
 }
 
+void pivotLeftEncoder(){
+  long left_encoder_reading = encoder_LeftMotor.getRawPosition();
+}
 // Implementation movement functions
 
 void implementMotorSpeed()
