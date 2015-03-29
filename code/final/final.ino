@@ -171,13 +171,13 @@ void loop() {
         setNeutral();
         moveBackDistance(500);
         turnLeftAngle(87);
-        stage = 1;
+        stage = 2;
       }
       else if(hitTable()){
         setNeutral();
         moveBackDistance(500);
         turnLeftAngle(87);
-        stage = 2;
+        stage = 3;
       }
       // End case: Robot is parallel to the wall
 
@@ -185,8 +185,8 @@ void loop() {
       // Start case: Wall is in front of robot, robot is parallel to it
         moveBackDistance(300);
         turnLeftAngle(90);
-        stage++;
-      // End case: Robot is hit the wall
+        stage = 3;
+      // End case: Table is in front of robot, robot is parallel to it
       break;
 
     case 3:
@@ -531,15 +531,12 @@ void smartMoveForwards(){
     front_ping = frontPing();
     delay(10);
     back_ping = backPing();
-    if ((back_ping - front_ping) > 400){
-      moveForwardFixed();
-      delay(1000);
-      setNeutral();
-      turnLeftAngle(15);
+    if ((back_ping - front_ping) > 600){
+      reAlign();
       Serial.println("First case");
     }
     else if (front_ping > 600){
-    veerRight(200, 100);
+      veerRight(200, 100);
       Serial.println("Second case");
     }
     else if (front_ping < 250){
@@ -551,6 +548,13 @@ void smartMoveForwards(){
       Serial.println("Fourth case");
     }
   }
+}
+
+void reAlign(){
+    moveForwardFixed();
+    delay(1000);
+    setNeutral();
+    turnLeftAngle(15);
 }
 
 void moveForward(long speedFactor)
