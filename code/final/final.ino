@@ -54,11 +54,10 @@ const int right_bottom_light_sensor = A1;
 
 int light_value=0;
 int next_light_value=0;
-<<<<<<< HEAD
-int count=0;//counts the lights
-=======
 
->>>>>>> origin/master
+int count=0;//counts the lights
+
+
 unsigned int Left_Motor_Speed;
 unsigned int Right_Motor_Speed;
 unsigned int Right_Motor_Stop = 1500;
