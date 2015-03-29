@@ -157,9 +157,10 @@ void loop() {
 
     case 0:
       // RESERVED FOR TESTING, PASTE CODE HERE AND SET STAGE = 0
-      startWaiting();
-      if (waitMilliSecond(3000)){
-        Serial.println("Waited");
+      smartMoveForwards();
+      if (hitWall()){
+        setNeutral();
+        stage = 30;
       }
       break;
 
@@ -409,7 +410,6 @@ boolean hitWall() {
 
   }
   else{
-    Serial.println("Nothing");
     return false;
   }
 
@@ -523,38 +523,48 @@ void moveBackwardsFixed(){
 }
 
 void smartMoveForwards(){
-  // Keep between 600 and 250 for ping
+  // Keep between 800 and 450 for ping
   startWaiting();
   float front_ping;
   float back_ping;
-  if (waitMilliSecond(3000)){
+  if (waitMilliSecond(1000)){
     front_ping = frontPing();
     delay(10);
     back_ping = backPing();
     if ((back_ping - front_ping) > 600){
-      reAlign();
-      Serial.println("First case");
+      reAlign(front_ping);
+      Serial.println("Realigning");
     }
-    else if (front_ping > 600){
+    else if (front_ping > 800){
       veerRight(200, 100);
-      Serial.println("Second case");
+      Serial.println("Too far, need to veer right");
     }
-    else if (front_ping < 250){
+    else if (front_ping < 450){
+      setNeutral();
+      turnLeftAngle(10);
       veerLeft(200, 100);
-      Serial.println("Third case");
+      Serial.println("Too close, need to veer left");
     }
     else {
-    moveForward(200);
-      Serial.println("Fourth case");
+      moveForward(200);
+      Serial.println("Everything's perfect");
     }
   }
 }
 
-void reAlign(){
-    moveForwardFixed();
-    delay(1000);
-    setNeutral();
-    turnLeftAngle(15);
+void reAlign(float ping_value){
+    float front_ping = ping_value;
+    if (front_ping < 300){
+      setNeutral();
+      turnLeftAngle(25);
+      moveForward(200);
+    }
+    else{
+      moveForward(200);
+      delay(1000);
+      setNeutral();
+      turnLeftAngle(20);
+    }
 }
 
 void moveForward(long speedFactor)
@@ -720,9 +730,9 @@ void brake() {
 // Call startWaiting first, and then waitMilliSecond
 void startWaiting() {
   if (can_start_waiting) {
-
+    Serial.println("Started waiting");
     time_previous = millis();
-    can_start_waiting = false;
+    can_start_waiting = false; //Toggle false to stop it from resetting the timer until it's done waiting
   }
 }
 
