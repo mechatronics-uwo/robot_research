@@ -91,7 +91,7 @@ boolean can_start_waiting = false; // Used for time functions, do not change
 // -------------------- STAGE COUNTER --------------------
 // NOTE: Stage 0 is reserved for debugging
 
-unsigned int stage = 0;
+unsigned int stage = 21;
 
 // ******************************************************************
 // ************************* PROGRAM !SETUP *************************
@@ -154,7 +154,7 @@ void loop() {
 
     case 0:
       // RESERVED FOR TESTING, PASTE CODE HERE AND SET STAGE = 0
-      stage = 1;
+      Serial.println(analogRead(right_light_sensor));
       break;
 
     case 1:
@@ -290,7 +290,7 @@ void loop() {
     // ==================== CASE 21-30 ====================
 
     case 21:
-      moveForward(200);
+      smartMoveForwards();
       countLight();
       
       if(count==1)
@@ -303,7 +303,14 @@ void loop() {
       break;
 
     case 22:
-      moveForward(500);    
+      moveForward(500);
+     if(hitWall()){
+        setNeutral();
+        moveBackDistance(300);
+        turnLeftAngle(87);
+        stage = 2;
+      }  
+        
       break;
 
     case 23:
@@ -434,9 +441,9 @@ boolean hitWall() {
 
 void countLight()
 {
-      light_value = analogRead(right_light_sensor);
+      //light_value = analogRead(right_light_sensor);
       next_light_value = analogRead(right_light_sensor);
-      if((next_light_value < light_value) && (next_light_value < 50))
+      if(next_light_value < 50)
       {
         moveFowardDistance(1000);
         count++;
