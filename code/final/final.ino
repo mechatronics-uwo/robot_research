@@ -98,7 +98,7 @@ boolean can_start_waiting = false; // Used for time functions, do not change
 // -------------------- STAGE COUNTER --------------------
 // NOTE: Stage 0 is reserved for debugging
 
-unsigned int stage = 21;
+unsigned int stage = 0;
 
 // ******************************************************************
 // ************************* PROGRAM !SETUP *************************
@@ -160,7 +160,12 @@ void loop() {
 
     case 0:
       // RESERVED FOR TESTING, PASTE CODE HERE AND SET STAGE = 0
-      Serial.println(analogRead(right_light_sensor));
+      pivotAlign();
+      delay(500);
+      detectLongWall();
+      delay(700);
+      turnRightAngle(87);
+      stage=30;
       break;
 
     case 1:
@@ -204,23 +209,43 @@ void loop() {
       // Case status: IN PROGRESS by Daniel
       // Start case: Robot is parallel to table, need to determine if we're aligned to the short or the long edge
       setNeutral();
+      pivotAlign();
+      moveBackDistance(500);
+      stage = 4;
+
       break;
-      // Robot is parallel to the long edge of the table
+      // Robot is parallel to the table, ready to scan for the light
 
     case 4:
       // Case status: IN PROGRESS by Daniel
       // Start case: Robot is parallel to the long edge of the table
-
+      setNeutral();
+      if (detectLongWall()){
+        setNeutral();
+        stage = 6;
+      }
+      else{
+        setNeutral();
+        stage = 5;
+      }
 
       break;
       // End case: Water bottle is directly in front of the arm
 
     case 5:
+      // Start case: Robot has escaped the short edge of the table
+      moveForwardDistance(600);
+      delay(500);
+      turnRightAngle(87);
+      delay(500);
+      moveForwardDistance(600);
       break;
 
     case 6:
+      // Start case: Robot is parallel to the long edge of the table
       break;
 
+      // End case: Robot is directly perpendicular to the bottle
     case 7:
       break;
 
@@ -266,7 +291,7 @@ void loop() {
          if(blinking)
            backUp();
          else
-           moveFowardDistance(300);
+           moveForwardDistance(300);
       }
       break;
 
@@ -360,16 +385,11 @@ void loop() {
 
 // -------------------- SENSOR FUNCTIONS --------------------
 
-// Ping ultrasonic
-// Send the Ultrasonic Range Finder a 10 microsecond pulse per tech spec
-
 float frontPing() {
   //Front ultrasonic
   digitalWrite(ULTRASONIC_IN_PIN_FRONT, HIGH);
   delayMicroseconds(10); //The 10 microsecond pause where the pulse in "high"
   digitalWrite(ULTRASONIC_IN_PIN_FRONT, LOW);
-  // Serial.print("front: ");
-  // Serial.println(ping_time1); //divide time by 58 to get
   float ping_time = pulseIn(ULTRASONIC_OUT_PIN_FRONT, HIGH, 10000);
 
   Serial.print("cm: ");
@@ -378,21 +398,16 @@ float frontPing() {
   return ping_time;
 }
 
-float backPing() {
+float backPing(){
   //Back ultrasonic
   digitalWrite(ULTRASONIC_IN_PIN_BACK, HIGH);
   delayMicroseconds(10); //The 10 microsecond pause where the pulse in "high"
   digitalWrite(ULTRASONIC_IN_PIN_BACK, LOW);
-
-  // Use command pulseIn to listen to ultrasonic_Data pin to record the
-  // time that it takes from when the Pin goes HIGH until it goes LOW
-  // Serial.print("back: ");
-  // Serial.println(ping_time2); //divide time by 58 to get distance in cm
   float ping_time = pulseIn(ULTRASONIC_OUT_PIN_BACK, HIGH, 10000);
 
-
   Serial.print("cm: ");
-  Serial.println(ping_time); //divide time by 58 to get distance in cm
+  Serial.println(ping_time);
+
   return ping_time;
 }
 
@@ -409,17 +424,16 @@ float armPing(){
 }
 
 
-void getEncoderPos()
-{
-      Serial.print("Rot: ");
-			Serial.println(encoder_TopMotor.getRawPosition());
-			Serial.print("Encoders L: ");
-			Serial.print(encoder_LeftMotor.getRawPosition());
-			Serial.print(", R: ");
-			Serial.print(encoder_RightMotor.getRawPosition());
+void getEncoderPos(){
+  Serial.print("Rot: ");
+	Serial.println(encoder_TopMotor.getRawPosition());
+	Serial.print("Encoders L: ");
+	Serial.print(encoder_LeftMotor.getRawPosition());
+	Serial.print(", R: ");
+	Serial.print(encoder_RightMotor.getRawPosition());
 }
 
-boolean hitTable() {
+boolean hitTable(){
   int bottom_lever = digitalRead(FRONT_BOTTOM_LEVER_SWITCH_PIN);
 
   if (bottom_lever == LOW){
@@ -440,13 +454,12 @@ boolean hitTable() {
   }
 }
 
-boolean hitWall() {
+boolean hitWall(){
   int bottom_lever = digitalRead(FRONT_BOTTOM_LEVER_SWITCH_PIN);
   int top_lever = digitalRead(FRONT_TOP_LEVER_SWITCH_PIN);
   if ((top_lever == LOW) && (bottom_lever == LOW)){
     Serial.println("Wall");
     return true;
-
   }
   else{
     Serial.println("Nothing");
@@ -455,30 +468,48 @@ boolean hitWall() {
 
 }
 
-boolean detectBottle(){
-  // Continually read the sensor on the arm
-  // return true if found the bottle
+float armPingNumberOfTimes(int number_of_times){
+  float total_ping_value;
+  float arm_ping;
+  float times_counter;
+  times_counter = number_of_times;
+  while (times_counter != 0){
+    arm_ping = armPing();
+    total_ping_value += arm_ping;
+    times_counter -= 1;
+    delay(100);
+    Serial.println("Pinged the arm sensor");
+  }
+  return total_ping_value;
+}
+
+void countLight(){
+  //light_value = analogRead(right_light_sensor);
+  next_light_value = analogRead(right_light_sensor);
+  if(next_light_value < 50)
+  {
+    moveForwardDistance(1000);
+    count++;
+  }
+}
+
+boolean detectLight(){
+  int light_value;
+  light_value = analogRead(right_light_sensor);
+  Serial.print("Light value: ");
+  Serial.println(light_value);
+  if (light_value < 50){
+    return true;
+  }
+  else{
+    return false;
+  }
 }
 
 
 // -------------------- MOVEMENT FUNCTIONS --------------------
 
-
-// Smart movement functions
-
-void countLight()
-{
-      //light_value = analogRead(right_light_sensor);
-      next_light_value = analogRead(right_light_sensor);
-      if(next_light_value < 50)
-      {
-        moveFowardDistance(1000);
-        count++;
-      }
-}
-
-void turnLeftAngle(long angle)
-{
+void turnLeftAngle(long angle){
     calcLeftTurn(2300, angle);
     while (!doneLeftTurn())
     {
@@ -487,8 +518,7 @@ void turnLeftAngle(long angle)
     setNeutral();
 }
 
-void turnRightAngle(long angle)
-{
+void turnRightAngle(long angle){
     calcRightTurn(2300, angle);
     while (!doneRightTurn())
     {
@@ -496,6 +526,7 @@ void turnRightAngle(long angle)
     }
     setNeutral();
 }
+
 void moveForwardFixed(){
   Left_Motor_Speed = 1700;
   Right_Motor_Speed = 1700;
@@ -556,6 +587,29 @@ void reAlign(float ping_value){
     }
 }
 
+void pivotAlign(){ //Aligns the robot parallel to whatever's on the right
+  float front_ping;
+  float back_ping;
+
+  front_ping = frontPing();
+  back_ping = backPing();
+
+  if (((front_ping - back_ping) < 50) && ((front_ping - back_ping) > (-50))){
+    Serial.println("Everything's OK");
+    return;
+  }
+  else if (front_ping > back_ping){
+    Serial.println("Gotta pivot right");
+    turnRightAngle(2);
+  }
+  else if (back_ping > front_ping){
+    Serial.println("Gotta pivot left");
+    turnLeftAngle(2);
+  }
+  delay(50);
+  pivotAlign();
+}
+
 void moveForward(long speedFactor)
 {
   Left_Motor_Speed = constrain((Left_Motor_Stop + speedFactor), 1500, 2100);
@@ -563,14 +617,13 @@ void moveForward(long speedFactor)
   implementMotorSpeed();
 }
 
-void moveBackwards(long speedFactor)
-{
+void moveBackwards(long speedFactor){
   Left_Motor_Speed = constrain((Left_Motor_Stop - speedFactor), 900, 1500);
   Right_Motor_Speed = constrain((Right_Motor_Stop - speedFactor), 900, 1500);
   implementMotorSpeed();
 }
-void moveBackDistance(long distance)
-{
+
+void moveBackDistance(long distance){
   leftEncoderStopTime = encoder_LeftMotor.getRawPosition();
   leftEncoderStopTime -= distance;
 
@@ -583,10 +636,9 @@ void moveBackDistance(long distance)
     implementMotorSpeed();
   }
   setNeutral();
-
 }
-void moveFowardDistance(long distance)
-{
+
+void moveForwardDistance(long distance){
   leftEncoderStopTime = encoder_LeftMotor.getRawPosition();
   while ((leftEncoderStopTime + distance) > encoder_LeftMotor.getRawPosition())
   {
@@ -597,7 +649,7 @@ void moveFowardDistance(long distance)
   setNeutral();
 }
 
-void backUp() {
+void backUp(){
   setNeutral();
   moveBackwardsFixed();
   delay(1500);
@@ -606,59 +658,50 @@ void backUp() {
 
 // Turn functions
 
-void veerRight(long speedFactor, long intensity)
-{
+void veerRight(long speedFactor, long intensity){
   Left_Motor_Speed = constrain((Left_Motor_Stop + speedFactor + intensity), 1500, 2100);
   Right_Motor_Speed = constrain((Right_Motor_Stop + speedFactor), 1500, 2100);
   implementMotorSpeed();
 }
 
-void veerLeft(long speedFactor, long intensity)
-{
+void veerLeft(long speedFactor, long intensity){
   Left_Motor_Speed = constrain((Left_Motor_Stop + speedFactor), 1500, 2100);
   Right_Motor_Speed = constrain((Right_Motor_Stop + speedFactor + intensity), 1500, 2100);
   implementMotorSpeed();
 }
 
-void turnLeftOnSpot(long speedFactor)
-{
+void turnLeftOnSpot(long speedFactor){
   Left_Motor_Speed = constrain((Left_Motor_Stop - speedFactor), 900, 1500);
   Right_Motor_Speed = constrain((Right_Motor_Stop + speedFactor), 1500, 2100);
   implementMotorSpeed();
 }
-void turnRightOnSpot(long speedFactor)
-{
+void turnRightOnSpot(long speedFactor){
   Left_Motor_Speed = constrain((Left_Motor_Stop + speedFactor), 1500, 2100);
   Right_Motor_Speed = constrain((Right_Motor_Stop - speedFactor), 900, 1500);
   implementMotorSpeed();
 }
-void calcLeftTurn(long fullCircle, int angle) // full circle should be around 2800
-{
+void calcLeftTurn(long fullCircle, int angle){ // full circle should be around 2800
   rightEncoderStopTime = encoder_RightMotor.getRawPosition();
   rightEncoderStopTime += (fullCircle * angle) / 360;
 }
-void calcRightTurn(long fullCircle, int angle)
-{
+void calcRightTurn(long fullCircle, int angle){
   leftEncoderStopTime = encoder_LeftMotor.getRawPosition();
   leftEncoderStopTime += (fullCircle * angle) / 360;
 }
 
-boolean doneLeftTurn()
-{
+boolean doneLeftTurn(){
   if (encoder_RightMotor.getRawPosition() > rightEncoderStopTime)
     return true;
   else
     return false;
 }
-boolean doneRightTurn()
-{
+boolean doneRightTurn(){
   if (encoder_LeftMotor.getRawPosition() > leftEncoderStopTime)
     return true;
   else
     return false;
 }
-boolean doneReverse()
-{
+boolean doneReverse(){
   if (encoder_LeftMotor.getRawPosition() < leftEncoderStopTime)
     return true;
   else
@@ -673,20 +716,18 @@ void turnClockwise(long speedFactor) {
 
 // Implementation movement functions
 
-void implementMotorSpeed()
-{
+void implementMotorSpeed(){
   servo_LeftMotor.writeMicroseconds(constrain((Left_Motor_Speed + Left_Motor_Offset), 900, 2100));
   servo_RightMotor.writeMicroseconds(constrain((Right_Motor_Speed + Right_Motor_Offset), 900, 2100));
 }
 
-void setNeutral() {
+void setNeutral(){
   Left_Motor_Speed = 1500;
-  Right_Motor_Speed = 1500; 
+  Right_Motor_Speed = 1500;
   implementMotorSpeed();
-
 }
 
-void brake() {
+void brake(){
   Left_Motor_Speed = 200;
   Right_Motor_Speed = 200;
   implementMotorSpeed();
@@ -697,15 +738,13 @@ void brake() {
 
 
 // Call startWaiting first, and then waitMilliSecond
-void startWaiting() {
+void startWaiting(){
   if (can_start_waiting) {
-
     time_previous = millis();
   }
 }
 
 boolean waitMilliSecond(unsigned int interval) {
-
   time_elapsed = millis();
   if ((time_elapsed - time_previous) > interval) {
     can_start_waiting = false;
@@ -746,7 +785,66 @@ void retractArm(){
 }
 
 
+// -------------------- COMBINED FUNCTIONS --------------------
 
+boolean findBottle(){
+  // Continually read the sensor on the arm
+  // return true if found the bottle
+  float arm_ping;
+  float average_background_ping = (armPingNumberOfTimes(10) / 10);
+
+  while(true){
+    arm_ping = armPing();
+    if (arm_ping == 0){
+      continue;
+    }
+    else if ((average_background_ping - arm_ping) > 500){
+      Serial.println("Bottle detected");
+      return true;
+    }
+    else if (hitWall()){
+      Serial.println("Hit the wall");
+      return false;
+    }
+    else{
+      moveForwardDistance(500);
+      delay(500);
+    }
+  }
+}
+
+boolean detectLongWall(){
+  float back_ping;
+//  float average;
+  if (detectLight()){
+    Serial.println("Long edge of the table detected, ending loop");
+    return true;
+  }
+  back_ping = backPing();
+
+  while (detectObjectRight()){
+    moveForwardDistance(400);
+    delay(500);
+  }
+  return false;
+}
+
+boolean detectObjectRight(){
+  float back_ping;
+  back_ping = backPing();
+  while (back_ping == 0){ // Re-ping if a null value is returned
+    back_ping = backPing();
+    delay(50);
+  }
+  if (back_ping < 3000){
+    Serial.println("Object detected");
+    return true;
+  }
+  else {
+    Serial.println("No object detected");
+    return false;
+  }
+}
 
 // -------------------- WALL-FOLLOWING --------------------
 
@@ -756,7 +854,6 @@ void updateUltrasonics() // updates both ultrasonics, should only be used once p
   delay(10);
   backReading = (float)backPing();
   delay(10);
-  
 }
 
 float perpMinimum() // returns minimum perpendicular distance to wall
