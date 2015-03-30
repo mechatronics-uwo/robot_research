@@ -20,12 +20,14 @@
 // 200ms = Brake
 
 Servo servo_RightMotor;
-Servo servo_TopMotor;
+Servo servo_RotMotor;//above 1500 is clockwise
 Servo servo_LeftMotor;
+Servo servo_ExtendMotor;//above 1500 is retract
+Servo servo_VerticleMotor;//Above 1500 is up
+Servo servo_ClawMotor;//Above 1500 is open
 
 I2CEncoder encoder_RightMotor;
-
-I2CEncoder encoder_TopMotor;
+I2CEncoder encoder_RotMotor;
 I2CEncoder encoder_LeftMotor;
 
 
@@ -51,6 +53,10 @@ float perpAdd = 0;
 
 const int LEFT_MOTOR_PIN = 3;
 const int RIGHT_MOTOR_PIN = 2;
+const int ROT_MOTOR_PIN = 6;
+const int EXTEND_MOTOR_PIN = 7;
+const int VERTICLE_MOTOR_PIN = 8;
+const int CLAW_MOTOR_PIN = 9;
 
 const int FRONT_BOTTOM_LEVER_SWITCH_PIN = 4;
 const int FRONT_TOP_LEVER_SWITCH_PIN = 5;
@@ -91,7 +97,7 @@ boolean can_start_waiting = false; // Used for time functions, do not change
 // -------------------- STAGE COUNTER --------------------
 // NOTE: Stage 0 is reserved for debugging
 
-unsigned int stage = 21;
+unsigned int stage = 0;
 
 // ******************************************************************
 // ************************* PROGRAM !SETUP *************************
@@ -107,6 +113,14 @@ void setup() {
   servo_LeftMotor.attach(LEFT_MOTOR_PIN);
   pinMode(RIGHT_MOTOR_PIN, OUTPUT);
   servo_RightMotor.attach(RIGHT_MOTOR_PIN);
+  pinMode(ROT_MOTOR_PIN, OUTPUT);
+  servo_RotMotor.attach(ROT_MOTOR_PIN);
+  pinMode(EXTEND_MOTOR_PIN, OUTPUT);
+  servo_ExtendMotor.attach(EXTEND_MOTOR_PIN);
+  pinMode(VERTICLE_MOTOR_PIN, OUTPUT);
+  servo_VerticleMotor.attach(VERTICLE_MOTOR_PIN);
+  pinMode(CLAW_MOTOR_PIN, OUTPUT);
+  servo_ClawMotor.attach(CLAW_MOTOR_PIN);
 
 
   // Set-up buttons
@@ -128,7 +142,7 @@ void setup() {
 
   //Set up encoder
   
-  encoder_TopMotor.init(1.0 / 3.0 * MOTOR_393_SPEED_ROTATIONS, MOTOR_393_TIME_DELTA);
+  encoder_RotMotor.init(1.0 / 3.0 * MOTOR_393_SPEED_ROTATIONS, MOTOR_393_TIME_DELTA);
   
   encoder_LeftMotor.init(1.0 / 3.0 * MOTOR_393_SPEED_ROTATIONS, MOTOR_393_TIME_DELTA);
   encoder_LeftMotor.setReversed(false); // adjust for positive count when moving forward
@@ -136,7 +150,7 @@ void setup() {
   encoder_RightMotor.init(1.0 / 3.0 * MOTOR_393_SPEED_ROTATIONS, MOTOR_393_TIME_DELTA);
   encoder_RightMotor.setReversed(true); // adjust for positive count when moving forward
 
-  encoder_TopMotor.zero();
+  encoder_RotMotor.zero();
   encoder_LeftMotor.zero();
   encoder_RightMotor.zero();
   
@@ -154,7 +168,11 @@ void loop() {
 
     case 0:
       // RESERVED FOR TESTING, PASTE CODE HERE AND SET STAGE = 0
-      Serial.println(analogRead(right_light_sensor));
+       
+       
+       servo_ClawMotor.writeMicroseconds(1900);
+       
+
       break;
 
     case 1:
@@ -195,7 +213,7 @@ void loop() {
       break;
 
     case 3:
-      setNeutral();
+      
       break;
       
     case 4:
@@ -360,12 +378,12 @@ int frontPing() {
   digitalWrite(ULTRASONIC_IN_PIN_FRONT, LOW);
   // Serial.print("front: ");
   // Serial.println(ping_time1); //divide time by 58 to get
-  float ping_time = pulseIn(ULTRASONIC_OUT_PIN_FRONT, HIGH, 10000);
+  float ping_time1 = pulseIn(ULTRASONIC_OUT_PIN_FRONT, HIGH, 10000);
 
-  Serial.print("cm: ");
-  Serial.println(ping_time); //divide time by 58 to get
+  //Serial.print("cm: ");
+  //Serial.println(ping_time); //divide time by 58 to get
 
-  return ping_time;
+  return ping_time1;
 }
 
 int backPing() {
@@ -381,8 +399,8 @@ int backPing() {
   float ping_time = pulseIn(ULTRASONIC_OUT_PIN_BACK, HIGH, 10000);
 
 
-  Serial.print("cm: ");
-  Serial.println(ping_time); //divide time by 58 to get distance in cm
+  //Serial.print("cm: ");
+  //Serial.println(ping_time); //divide time by 58 to get distance in cm
   return ping_time;
 }
 
@@ -390,7 +408,7 @@ int backPing() {
 void getEncoderPos()
 {
       Serial.print("Rot: ");
-			Serial.println(encoder_TopMotor.getRawPosition());
+			Serial.println(encoder_RotMotor.getRawPosition());
 			Serial.print("Encoders L: ");
 			Serial.print(encoder_LeftMotor.getRawPosition());
 			Serial.print(", R: ");
@@ -695,6 +713,7 @@ void updateUltrasonics() // updates both ultrasonics, should only be used once p
 {
   frontReading = (float)frontPing();
   delay(10);
+  Serial.println(backReading/70);
   backReading = (float)backPing();
   delay(10);
   
