@@ -49,18 +49,25 @@ float perpAdd = 0;
 
 // -------------------- SENSORS --------------------
 
+// Motor pins
 const int LEFT_MOTOR_PIN = 3;
 const int RIGHT_MOTOR_PIN = 2;
 
+// Switch pins
 const int FRONT_BOTTOM_LEVER_SWITCH_PIN = 4;
 const int FRONT_TOP_LEVER_SWITCH_PIN = 5;
 
+// Ultrasonic pins
 const int ULTRASONIC_IN_PIN_FRONT = 52;
 const int ULTRASONIC_OUT_PIN_FRONT = 53;
 
 const int ULTRASONIC_IN_PIN_BACK = 50;
 const int ULTRASONIC_OUT_PIN_BACK = 51;
 
+const int ULTRASONIC_IN_PIN_ARM = 48;
+const int ULTRASONIC_OUT_PIN_ARM = 49;
+
+// Light sensor pins
 const int right_light_sensor = A0;
 const int right_bottom_light_sensor = A1;
 
@@ -110,7 +117,6 @@ void setup() {
 
 
   // Set-up buttons
-
   pinMode(FRONT_TOP_LEVER_SWITCH_PIN, INPUT_PULLUP);
   pinMode(FRONT_BOTTOM_LEVER_SWITCH_PIN, INPUT_PULLUP);
 
@@ -124,22 +130,22 @@ void setup() {
   pinMode(ULTRASONIC_OUT_PIN_BACK, INPUT);
   pinMode(ULTRASONIC_IN_PIN_BACK, OUTPUT);
 
-
+  pinMode(ULTRASONIC_OUT_PIN_ARM, INPUT);
+  pinMode(ULTRASONIC_IN_PIN_ARM, OUTPUT);
 
   //Set up encoder
-  
   encoder_TopMotor.init(1.0 / 3.0 * MOTOR_393_SPEED_ROTATIONS, MOTOR_393_TIME_DELTA);
-  
+
   encoder_LeftMotor.init(1.0 / 3.0 * MOTOR_393_SPEED_ROTATIONS, MOTOR_393_TIME_DELTA);
   encoder_LeftMotor.setReversed(false); // adjust for positive count when moving forward
-  
+
   encoder_RightMotor.init(1.0 / 3.0 * MOTOR_393_SPEED_ROTATIONS, MOTOR_393_TIME_DELTA);
   encoder_RightMotor.setReversed(true); // adjust for positive count when moving forward
 
   encoder_TopMotor.zero();
   encoder_LeftMotor.zero();
   encoder_RightMotor.zero();
-  
+
 }
 
 // *****************************************************************
@@ -154,7 +160,8 @@ void loop() {
 
     case 0:
       // RESERVED FOR TESTING, PASTE CODE HERE AND SET STAGE = 0
-      stage = 1;
+      frontPing();
+      delay(500);
       break;
 
     case 1:
@@ -177,7 +184,7 @@ void loop() {
       // End case: Robot is parallel to the wall
 
     case 2:
-      // Case status: IN PROGRESS by Daniel
+      // Case status: COMPLETE by Daniel
       // Start case: Wall is in front of robot, robot is parallel to it
       smartMoveForwards();
       if (hitWall()){
@@ -191,16 +198,23 @@ void loop() {
         turnLeftAngle(87);
         stage = 3;
       }
-      // End case: Table is in front of robot, robot is parallel to it
       break;
+      // End case: Robot is parallel to table
 
     case 3:
+      // Case status: IN PROGRESS by Daniel
+      // Start case: Robot is parallel to table, need to determine if we're aligned to the short or the long edge
       setNeutral();
       break;
-      
+      // Robot is parallel to the long edge of the table
+
     case 4:
+      // Case status: IN PROGRESS by Daniel
+      // Start case: Robot is parallel to the long edge of the table
+
 
       break;
+      // End case: Water bottle is directly in front of the arm
 
     case 5:
       break;
@@ -224,40 +238,37 @@ void loop() {
     // ==================== CASE 11-20 ====================
 
     case 11:
-    
-     
+
       light_value = analogRead(right_light_sensor);
       moveForward(150);
       next_light_value = analogRead(right_light_sensor);
-      
+
       if((next_light_value < light_value) && (next_light_value < 50))
-      {        
-        setNeutral();        
+      {
+        setNeutral();
         light_value = analogRead(right_light_sensor);
         next_light_value = analogRead(right_light_sensor);
         boolean blinking=false;
         unsigned long begin_time=millis();
-         
+
          do
          {
-          
+
           light_value = analogRead(right_light_sensor);
           delay(100);
           next_light_value = analogRead(right_light_sensor);
-          
-          
+
           if((next_light_value - light_value) >= 20)
            blinking = true;
          }
-         
+
          while(((millis() - begin_time) < 2000));
-              
+
          if(blinking)
            backUp();
          else
            moveFowardDistance(300);
-               
-      }    
+      }
       break;
 
     case 12:
@@ -346,7 +357,7 @@ void loop() {
 // Ping ultrasonic
 // Send the Ultrasonic Range Finder a 10 microsecond pulse per tech spec
 
-int frontPing() {
+float frontPing() {
   //Front ultrasonic
   digitalWrite(ULTRASONIC_IN_PIN_FRONT, HIGH);
   delayMicroseconds(10); //The 10 microsecond pause where the pulse in "high"
@@ -361,7 +372,7 @@ int frontPing() {
   return ping_time;
 }
 
-int backPing() {
+float backPing() {
   //Back ultrasonic
   digitalWrite(ULTRASONIC_IN_PIN_BACK, HIGH);
   delayMicroseconds(10); //The 10 microsecond pause where the pulse in "high"
@@ -379,6 +390,18 @@ int backPing() {
   return ping_time;
 }
 
+float armPing(){
+  digitalWrite(ULTRASONIC_IN_PIN_ARM, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(ULTRASONIC_IN_PIN_ARM, LOW);
+  float ping_time = pulseIn(ULTRASONIC_OUT_PIN_ARM, HIGH, 10000);
+
+  Serial.print("CM: ");
+  Serial.println(ping_time);
+
+  return ping_time;
+}
+
 
 void getEncoderPos()
 {
@@ -392,7 +415,7 @@ void getEncoderPos()
 
 boolean hitTable() {
   int bottom_lever = digitalRead(FRONT_BOTTOM_LEVER_SWITCH_PIN);
-  
+
   if (bottom_lever == LOW){
     delay(300);
     int top_lever = digitalRead(FRONT_TOP_LEVER_SWITCH_PIN);
@@ -424,6 +447,11 @@ boolean hitWall() {
     return false;
   }
 
+}
+
+boolean detectBottle(){
+  // Continually read the sensor on the arm
+  // return true if found the bottle
 }
 
 
@@ -539,7 +567,7 @@ void moveBackDistance(long distance)
 {
   leftEncoderStopTime = encoder_LeftMotor.getRawPosition();
   leftEncoderStopTime -= distance;
-  
+
   while (encoder_LeftMotor.getRawPosition() > leftEncoderStopTime)
   {
     Serial.println(leftEncoderStopTime);
@@ -681,6 +709,38 @@ boolean waitMilliSecond(unsigned int interval) {
     return false; // Not done waiting!
   }
 }
+
+// -------------------- ARM FUNCTIONS --------------------
+void raiseArm(){
+
+}
+
+void lowerArm(){
+
+}
+
+void pivotArmLeft(long encoder_count){
+
+}
+
+void pivotArmRight(long encoder_count){
+
+}
+
+void pivotArmPerpendicular(){
+  pivotArmLeft(100); // Dummy value
+}
+
+void extendArm(){
+
+}
+
+void retractArm(){
+
+}
+
+
+
 
 // -------------------- WALL-FOLLOWING --------------------
 
