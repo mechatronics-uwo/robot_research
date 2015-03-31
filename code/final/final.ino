@@ -803,6 +803,7 @@ void retractArm(){
 
 // -------------------- COMBINED FUNCTIONS --------------------
 
+// Moves forward continuously and scans for a water bottle. Returns true if it detects the bottle, or false if it doesn't
 boolean findBottle(){
   // Continually read the sensor on the arm and move forwards
   // return true if found the bottle
@@ -824,6 +825,11 @@ boolean findBottle(){
       setNeutral();
       return false;
     }
+    else if (!detectObjectRight){
+      Serial.println("Drove past the table");
+      setNeutral();
+      return false;
+    }
     else{
       Serial.println("Moving forward");
       moveForward(100);
@@ -832,6 +838,7 @@ boolean findBottle(){
   }
 }
 
+// Moves forward continuously and scans for a light source. Returns true if it detects a light source, or false if it doesn't
 boolean detectLongSide(){
   while (detectObjectRight()){
     if (detectLight()){
@@ -852,6 +859,7 @@ boolean detectLongSide(){
   return false;
 }
 
+// Returns true if there's an object on the right, otherwise it returns false
 boolean detectObjectRight(){
   float back_ping;
   back_ping = backPing();
@@ -869,6 +877,7 @@ boolean detectObjectRight(){
   }
 }
 
+// Aligns the robot parallel to whatever's on the right approximately 15 centimeters away
 void parallelPark(){
   float front_ping;
   front_ping = frontPing();
