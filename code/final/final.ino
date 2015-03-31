@@ -171,28 +171,22 @@ void loop() {
     // ==================== CASE 1-10 ====================
     case 0:
       // RESERVED FOR TESTING, PASTE CODE HERE AND SET STAGE = 0
+      
       /* To test:
-      detectLight
-      detectLongSide
       findBottle
       */
-      pivotAlign();
-      if (detectLongSide() == false){
-        setNeutral();
-        stage = 30;
-      }
-      if (detectLight()){
-        setNeutral();
-        stage = 30;
-      }
+      frontPing();
+      backPing();
+      delay(1000);
+      
     break;
 
     case 1:
       // Case status: COMPLETE by Daniel
       // Start case: Robot is in the middle of the room, unaligned
       pivotAlign();
-      delay(100);
-      stage=1;
+      delay(500);
+      stage = 2;
       break;
       // End case: robot is in the middle of the room, parallel to the wall or table
 
@@ -238,11 +232,9 @@ void loop() {
       // Start case: Robot is parallel to table, need to move all the way to the back to the wall
       setNeutral();
       pivotAlign();
-      moveBackDistance(500);
-
-      // Testing
+      backUp();
       setNeutral();
-      stage = 30;
+      stage = 5;
 
       break;
       // Robot is parallel to the table, at the far back, ready to scan for the light
@@ -250,7 +242,6 @@ void loop() {
     case 5:
       // Case status: IN PROGRESS by Daniel
       // Start case: Robot is parallel to the table, need to determine whether or not we're parallel to the long edge
-      setNeutral();
       if(detectLongSide()){
         setNeutral();
         stage = 7;
@@ -266,19 +257,19 @@ void loop() {
     case 6:
       // Case status: IN PROGRESS by Daniel
       // Start case: Robot has escaped the short edge of the table
-      moveForwardDistance(600);
+      moveForwardDistance(170);
       delay(500);
-      turnRightAngle(87);
+      turnRightAngle(93);
       delay(500);
-      while(!detectLight()){
-        moveForwardDistance(600);
-      }
-      setNeutral();
       stage = 7;
       break;
 
     case 7:
       // case status: IN PROGRESS by Daniel
+      while(!detectLight()){
+        moveForward(100);
+      }
+      setNeutral();
       // Start case: Robot is parallel to the long edge of the table
       break;
 
@@ -560,6 +551,10 @@ void smartMoveForwards(){
 
   float front_ping;
   float back_ping;
+  
+  front_ping = frontPing();
+  delay(10);
+  back_ping = backPing();
 
   if (waitMilliSecond(250)){
     while (front_ping < 5){
@@ -568,10 +563,6 @@ void smartMoveForwards(){
     while (back_ping < 5){
       back_ping = backPing();
     }
-
-    front_ping = frontPing();
-    delay(10);
-    back_ping = backPing();
 
     if ((back_ping - front_ping) > 400){
       reAlign(front_ping);
@@ -615,21 +606,21 @@ void pivotAlign(){ //Aligns the robot parallel to whatever's on the right
 
   front_ping = frontPing();
   back_ping = backPing();
-
-  if (((front_ping - back_ping) < 50) && ((front_ping - back_ping) > (-50))){
-    Serial.println("Everything's OK");
-    return;
+  
+  while ((abs(front_ping - back_ping)) > 100){   
+    if (front_ping > back_ping){
+      Serial.println("Gotta pivot right");
+      turnRightAngle(2);
+    }
+    else if (back_ping > front_ping){
+      Serial.println("Gotta pivot left");
+      turnLeftAngle(2);
+    }
+    delay(50);
+    front_ping = frontPing();
+    back_ping = backPing();
   }
-  else if (front_ping > back_ping){
-    Serial.println("Gotta pivot right");
-    turnRightAngle(2);
-  }
-  else if (back_ping > front_ping){
-    Serial.println("Gotta pivot left");
-    turnLeftAngle(2);
-  }
-  delay(50);
-  pivotAlign();
+  Serial.println("Everything OK");
 }
 
 void moveForward(long speedFactor)
@@ -841,6 +832,11 @@ boolean detectLongSide(){
       Serial.println("Long edge of the table detected, ending loop");
       setNeutral();
       return true;
+    }
+    if (hitWall()){
+      Serial.println("Hit the wall, ending loop");
+      setNeutral();
+      return false;
     }
     Serial.println("Moving forward");
     moveForward(100);
