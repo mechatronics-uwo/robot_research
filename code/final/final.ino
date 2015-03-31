@@ -157,37 +157,46 @@ void loop() {
   switch (stage) {
 
     // ==================== CASE 1-10 ====================
-
     case 0:
       // RESERVED FOR TESTING, PASTE CODE HERE AND SET STAGE = 0
-      pivotAlign();
-      delay(500);
-      detectLongWall();
-      delay(700);
-      turnRightAngle(87);
-      stage=30;
-      break;
+      /* To test:
+      detectLongWall
+      detectObjectRight
+      findBottle
+      detectLight
+      */
+      stage=1;
+    break;
 
     case 1:
       // Case status: DONE by Daniel
-      // Start case: Robot is in the middle of the room
+      // Start case: Robot is in the middle of the room, unaligned
+      pivotAlign();
+      delay(100);
+      stage=1;
+      break;
+      // End case: robot is in the middle of the room, parallel to the wall or table
+
+    case 2:
+      // Case status: DONE by Daniel
+      // Start case: Robot is in the middle of the room, parallel to the wall or table
       moveForward(200);
       if(hitWall()){
         setNeutral();
         moveBackDistance(300);
         turnLeftAngle(87);
-        stage = 2;
+        stage = 3;
       }
       else if(hitTable()){
         setNeutral();
         moveBackDistance(300);
         turnLeftAngle(87);
-        stage = 3;
+        stage = 4;
       }
       break;
       // End case: Robot is parallel to the wall
 
-    case 2:
+    case 3:
       // Case status: COMPLETE by Daniel
       // Start case: Wall is in front of robot, robot is parallel to it
       smartMoveForwards();
@@ -200,55 +209,58 @@ void loop() {
         setNeutral();
         moveBackDistance(300);
         turnLeftAngle(87);
-        stage = 3;
+        stage = 4;
       }
       break;
       // End case: Robot is parallel to table
 
-    case 3:
+    case 4:
       // Case status: IN PROGRESS by Daniel
-      // Start case: Robot is parallel to table, need to determine if we're aligned to the short or the long edge
+      // Start case: Robot is parallel to table, need to move all the way to the back to the wall
       setNeutral();
       pivotAlign();
       moveBackDistance(500);
-      stage = 4;
+      stage = 5;
 
       break;
-      // Robot is parallel to the table, ready to scan for the light
+      // Robot is parallel to the table, at the far back, ready to scan for the light
 
-    case 4:
+    case 5:
       // Case status: IN PROGRESS by Daniel
-      // Start case: Robot is parallel to the long edge of the table
+      // Start case: Robot is parallel to the table, need to determine whether or not we're parallel to the long edge
       setNeutral();
       if (detectLongWall()){
         setNeutral();
-        stage = 6;
+        stage = 7;
       }
       else{
         setNeutral();
-        stage = 5;
+        stage = 6;
       }
 
       break;
-      // End case: Water bottle is directly in front of the arm
+      // End case: Robot is parallel to the long edge of the table
 
-    case 5:
+    case 6:
+      // Case status: IN PROGRESS by Daniel
       // Start case: Robot has escaped the short edge of the table
       moveForwardDistance(600);
       delay(500);
       turnRightAngle(87);
       delay(500);
-      moveForwardDistance(600);
+      while(!detectLight()){
+        moveForwardDistance(600);
+      }
+      setNeutral();
+      stage = 7;
       break;
 
-    case 6:
+    case 7:
+      // case status: IN PROGRESS by Daniel
       // Start case: Robot is parallel to the long edge of the table
       break;
 
-      // End case: Robot is directly perpendicular to the bottle
-    case 7:
-      break;
-
+      // End case: Robot has arm raised and perpendicular to itself
     case 8:
       break;
 
@@ -262,7 +274,6 @@ void loop() {
     // ==================== CASE 11-20 ====================
 
     case 11:
-
       light_value = analogRead(right_light_sensor);
       moveForward(150);
       next_light_value = analogRead(right_light_sensor);
@@ -327,7 +338,7 @@ void loop() {
     case 21:
       smartMoveForwards();
       countLight();
-      
+
       if(count==1)
       {
         turnRightAngle(90);
@@ -344,8 +355,8 @@ void loop() {
         moveBackDistance(300);
         turnLeftAngle(87);
         stage = 2;
-      }  
-        
+      }
+
       break;
 
     case 23:
@@ -547,6 +558,13 @@ void smartMoveForwards(){
   float back_ping;
 
   if (waitMilliSecond(250)){
+    while (front_ping < 5){
+      front_ping = frontPing();
+    }
+    while (back_ping < 5){
+      back_ping = backPing();
+    }
+
     front_ping = frontPing();
     delay(10);
     back_ping = backPing();
