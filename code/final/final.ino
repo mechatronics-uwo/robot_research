@@ -42,6 +42,9 @@ const int CLAW_MOTOR_PIN = 9;
 const int FRONT_BOTTOM_LEVER_SWITCH_PIN = 4;
 const int FRONT_TOP_LEVER_SWITCH_PIN = 5;
 
+const int TOP_BACK_LEVER_SWITCH_PIN = 10;
+const int TOP_FRONT_LEVER_SWITCH_PIN = 11;
+
 const int ULTRASONIC_IN_PIN_FRONT = 52;
 const int ULTRASONIC_OUT_PIN_FRONT = 53;
 
@@ -63,10 +66,15 @@ int count = 0;//counts the lights
 // Motor variables
 unsigned int Left_Motor_Speed;
 unsigned int Right_Motor_Speed;
+unsigned int Verticle_Motor_Speed;
+
 unsigned int Right_Motor_Stop = 1500;
 unsigned int Left_Motor_Stop = 1500;
+
 long leftEncoderStopTime = 0;
 long rightEncoderStopTime = 0;
+long rotEncoderStopTime=0;
+
 boolean loopStarted = false;// Start loop for turning
 int Left_Motor_Offset = 0;
 int Right_Motor_Offset = 30;
@@ -112,6 +120,9 @@ void setup(){
 
   pinMode(FRONT_TOP_LEVER_SWITCH_PIN, INPUT_PULLUP);
   pinMode(FRONT_BOTTOM_LEVER_SWITCH_PIN, INPUT_PULLUP);
+
+  pinMode(TOP_BACK_LEVER_SWITCH_PIN, INPUT_PULLUP);
+  pinMode(TOP_FRONT_LEVER_SWITCH_PIN, INPUT_PULLUP);
 
   digitalWrite(FRONT_TOP_LEVER_SWITCH_PIN, HIGH);
   digitalWrite(FRONT_BOTTOM_LEVER_SWITCH_PIN, HIGH);
@@ -368,7 +379,7 @@ void loop() {
 
 
 
-// -------------------- SENSOR FUNCTIONS --------------------
+// -------------------- !SENSOR FUNCTIONS --------------------
 
 
 float frontPing() {
@@ -454,6 +465,30 @@ boolean hitWall(){
   }
 }
 
+boolean hitTopBack(){
+  int topBackLever = digitalRead(TOP_BACK_LEVER_SWITCH_PIN);
+  if (topBackLever == LOW){
+    Serial.println("Back");
+    return true;
+  }
+  else{
+    Serial.println("Nothing");
+    return false;
+  }
+}
+
+boolean hitTopFront(){
+  int topBackLever = digitalRead(TOP_FRONT_LEVER_SWITCH_PIN);
+  if (topBackLever == LOW){
+    Serial.println("Front");
+    return true;
+  }
+  else{
+    Serial.println("Nothing");
+    return false;
+  }
+}
+
 float armPingNumberOfTimes(int number_of_times){
   float total_ping_value;
   float arm_ping;
@@ -513,7 +548,7 @@ boolean detectBottomLight(){
 }
 
 
-// -------------------- MOVEMENT FUNCTIONS --------------------
+// -------------------- !MOVEMENT FUNCTIONS --------------------
 
 void turnLeftAngle(long angle){
   calcLeftTurn(2300, angle);
@@ -789,39 +824,73 @@ boolean waitMilliSecond(unsigned int interval) {
   }
 }
 
-// -------------------- ARM FUNCTIONS --------------------
-void raiseArm(){
+// -------------------- !ARM FUNCTIONS --------------------
 
+void rotateAmount(long pos){
+  if(encoder_RotMotor.getRawPosition() < (pos - 10))
+    servo_RotMotor.writeMicroseconds(1700);
+
+  else if(encoder_RotMotor.getRawPosition() > (pos + 10))
+    servo_RotMotor.writeMicroseconds(1300);
+  else
+    servo_RotMotor.writeMicroseconds(1500);
 }
 
-void lowerArm(){
-
+void rotatePerpendicular(){
+  if(encoder_RotMotor.getRawPosition() < 740)
+    servo_RotMotor.writeMicroseconds(1700);
+  else if(encoder_RotMotor.getRawPosition() > 760)
+    servo_RotMotor.writeMicroseconds(1300);
+  else
+    servo_RotMotor.writeMicroseconds(1500);
 }
 
-void pivotArmLeft(long encoder_count){
-
+void rotateParallel(){
+  if(encoder_RotMotor.getRawPosition() < -10)
+    servo_RotMotor.writeMicroseconds(1700);
+  else if(encoder_RotMotor.getRawPosition() > 10)
+    servo_RotMotor.writeMicroseconds(1300);
+  else
+    servo_RotMotor.writeMicroseconds(1500);
 }
 
-void pivotArmRight(long encoder_count){
-
+void moveUp(){
+  servo_VerticleMotor.writeMicroseconds(1900);
 }
 
-void pivotArmPerpendicular(){
-  pivotArmLeft(100); // Dummy value
+void moveDown(){
+  servo_VerticleMotor.writeMicroseconds(1250);
 }
 
-void extendArm(){
-
+void moveOut(){
+  servo_ExtendMotor.writeMicroseconds(1250);
 }
 
-void retractArm(){
-
+void moveIn(){
+  servo_ExtendMotor.writeMicroseconds(1800);
 }
 
-// -------------------- AUDIO FEEDBACK FUNCTIONS --------------------
+void horizontalStop(){
+  servo_ExtendMotor.writeMicroseconds(1500);
+}
+
+void openClaw(){
+  servo_ClawMotor.writeMicroseconds(1650);
+}
+
+void closeClaw(){
+  servo_ClawMotor.writeMicroseconds(1400);
+}
+
+void calcRotTurn(long fullCircle, int angle){
+  rotEncoderStopTime = encoder_LeftMotor.getRawPosition();
+  rotEncoderStopTime = (fullCircle * angle) / 360;
+}
+
+// ------------------- !AUDIO FEEDBACK FUNCTIONS -------------------
 
 
-// -------------------- COMBINED FUNCTIONS --------------------
+// -------------------- !COMBINED FUNCTIONS --------------------
 
 // Moves forward continuously and scans for a water bottle. Returns true if it detects the bottle, or false if it doesn't
 boolean findBottle(){
