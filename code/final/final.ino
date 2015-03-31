@@ -172,11 +172,11 @@ void loop() {
     case 0:
       // RESERVED FOR TESTING, PASTE CODE HERE AND SET STAGE = 0
       /* To test:
+      parallelPark
       findBottle
       */
-      frontPing();
-      backPing();
-      delay(1000);
+      parallelPark();
+      stage = 30;
 
     break;
 
@@ -259,9 +259,9 @@ void loop() {
     case 7:
       // Case status: IN PROGRESS by Daniel
       // Start case: Robot has escaped the short edge of the table
-      moveForwardDistance(170);
+      moveForwardDistance(180);
       delay(500);
-      turnRightAngle(93);
+      turnRightAngle(92);
       delay(500);
       stage = 8;
 
@@ -278,14 +278,20 @@ void loop() {
       break;
 
     case 9:
+      parallelPark();
+      setNeutral();
+      stage = 10;
 
       break;
 
     case 10:
+      while(!detectLight()){
+        moveBackwards(100);
+      }
+      setNeutral();
+      stage = 11;
 
       break;
-
-
 
     // ==================== STAGE 11-20 ====================
 
@@ -480,6 +486,7 @@ float armPingNumberOfTimes(int number_of_times){
     delay(100);
     Serial.println("Pinged the arm sensor");
   }
+  Serial.println("Done armPingNumberOfTimes");
   return total_ping_value;
 }
 
@@ -797,28 +804,31 @@ void retractArm(){
 // -------------------- COMBINED FUNCTIONS --------------------
 
 boolean findBottle(){
-  // Continually read the sensor on the arm
+  // Continually read the sensor on the arm and move forwards
   // return true if found the bottle
   float arm_ping;
   float average_background_ping = (armPingNumberOfTimes(10) / 10);
 
-  arm_ping = armPing();
-
-  while (arm_ping < 5){
+  while(true){
     arm_ping = armPing();
-  }
-  if ((average_background_ping - arm_ping) > 500){
-    Serial.println("Bottle detected");
-    return true;
-  }
-  else if (hitWall()){
-    Serial.println("Hit the wall");
-    return false;
-  }
-  else{
-    Serial.println("Moving forward");
-    moveForwardDistance(500);
-    delay(500);
+    while (arm_ping < 5){
+      arm_ping = armPing();
+    }
+    if ((average_background_ping - arm_ping) > 500){
+      Serial.println("Bottle detected");
+      setNeutral();
+      return true;
+    }
+    else if (hitWall()){
+      Serial.println("Hit the wall");
+      setNeutral();
+      return false;
+    }
+    else{
+      Serial.println("Moving forward");
+      moveForward(100);
+      delay(250);
+    }
   }
 }
 
@@ -856,6 +866,25 @@ boolean detectObjectRight(){
   else {
     Serial.println("No object detected");
     return false;
+  }
+}
+
+void parallelPark(){
+  float front_ping;
+  front_ping = frontPing();
+
+  while ((abs(front_ping - 1000) > 75)){
+    if (front_ping > 1000){
+    turnRightAngle(10);
+    delay(250);
+    }
+    else if (front_ping < 1000){
+      turnLeftAngle(10);
+      delay(250);
+    }
+    moveForwardDistance(100);
+    pivotAlign();
+    front_ping = frontPing();
   }
 }
 
