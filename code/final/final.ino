@@ -812,8 +812,9 @@ boolean findBottle(){
 
   while(true){
     arm_ping = armPing();
-    while (arm_ping < 5){
+    while (arm_ping < 5){ // Re-ping if a null value is returned
       arm_ping = armPing();
+      delay(10);
     }
     if ((average_background_ping - arm_ping) > 500){
       Serial.println("Bottle detected");
@@ -897,52 +898,3 @@ void parallelPark(){
   }
 }
 
-// -------------------- WALL-FOLLOWING --------------------
-
-void updateUltrasonics(){ // updates both ultrasonics, should only be used once per iteration
-  frontReading = (float)frontPing();
-  delay(10);
-  Serial.println(backReading/70);
-  backReading = (float)backPing();
-  delay(10);
-}
-
-float perpMinimum(){ // returns minimum perpendicular distance to wall
-  if (frontReading < backReading) // toward
-    return (frontReading * sensorDistance) / (sqrt((float)sensorDistance * sensorDistance + (frontReading - backReading) * (frontReading - backReading)));
-  else // away
-    return (backReading * sensorDistance) / (sqrt((float)sensorDistance * sensorDistance + (frontReading - backReading) * (frontReading - backReading)));
-}
-
-float perpAverage(){ // returns average perpendicular distance to wall
-  //perpAdd = (sensorDistance / 2) / (sqrt((float)sensorDistance * sensorDistance + (frontReading - backReading) * (frontReading - backReading)));
-  //return perpMinimum() + perpAdd;
-  return (frontReading + backReading)/2;
-}
-
-boolean square(){ // returns turn if square
-  if (abs(frontReading - backReading) < deltaTolerance)
-    return true;
-  else
-    return false;
-}
-
-void followWall(){ // corrects robot so it is parallel to the wall and returns true if in tolerance
-  // follow
-  if(perpAverage() > 1000 || perpAverage() < 800)
-  {
-    if (perpAverage() > 1000) // if straight enough, go straight
-      veerRight(speedConstant, rightConstant);
-    else if (perpAverage() < 800) // if straight enough, go straight
-      veerLeft(speedConstant, rightConstant);
-  }
-  else
-  {
-    if (frontReading < backReading) // if going toward, turn left
-      veerLeft(speedConstant, leftConstant);
-    else if (frontReading > backReading)  // if going away, turn right
-      veerRight(speedConstant, rightConstant);
-    else
-      moveForward(150);
-  }
-}
