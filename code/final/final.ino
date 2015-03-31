@@ -70,14 +70,14 @@ const int ULTRASONIC_OUT_PIN_BACK = 51;
 const int ULTRASONIC_IN_PIN_TOP = 49;
 const int ULTRASONIC_OUT_PIN_TOP = 48;
 
-const int right_light_sensor = A0;
-const int right_bottom_light_sensor = A1;
+const int RIGHT_LIGHT_SENSOR = A0;
+const int RIGHT_BOTTOM_LIGHT_SENSOR = A1;
 
 // -------------------- VARIABLES --------------------
-int light_value=0;
-int next_light_value=0;
+int light_value = 0;
+int next_light_value = 0;
 
-int count=0;//counts the lights
+int count = 0;//counts the lights
 
 // Motor variables
 unsigned int Left_Motor_Speed;
@@ -90,9 +90,10 @@ boolean loopStarted = false;// start loop for turning
 int Left_Motor_Offset = 0;
 int Right_Motor_Offset = 30;
 
-unsigned long time_previous = 0; // Used for time functions, do not change
-unsigned long time_elapsed = 0; // Used for time functions, do not change
-boolean can_start_waiting = false; // Used for time functions, do not change
+// Used for time functions, do not change
+unsigned long time_previous = 0;
+unsigned long time_elapsed = 0;
+boolean can_start_waiting = false; // Time function flag
 
 
 
@@ -105,7 +106,7 @@ unsigned int stage = 0;
 // ******************************************************************
 // ************************* PROGRAM !SETUP *************************
 // ******************************************************************
-void setup() {
+void setup(){
 
   Wire.begin();
   Serial.begin(9600);
@@ -140,26 +141,24 @@ void setup() {
 
   pinMode(ULTRASONIC_OUT_PIN_BACK, INPUT);
   pinMode(ULTRASONIC_IN_PIN_BACK, OUTPUT);
-  
+
   pinMode(ULTRASONIC_OUT_PIN_TOP, INPUT);
   pinMode(ULTRASONIC_IN_PIN_TOP, OUTPUT);
 
 
 
-  //Set up encoder
-  
+  //Set up encoders
   encoder_RotMotor.init(1.0 / 3.0 * MOTOR_393_SPEED_ROTATIONS, MOTOR_393_TIME_DELTA);
-  
+
   encoder_LeftMotor.init(1.0 / 3.0 * MOTOR_393_SPEED_ROTATIONS, MOTOR_393_TIME_DELTA);
   encoder_LeftMotor.setReversed(false); // adjust for positive count when moving forward
-  
+
   encoder_RightMotor.init(1.0 / 3.0 * MOTOR_393_SPEED_ROTATIONS, MOTOR_393_TIME_DELTA);
   encoder_RightMotor.setReversed(true); // adjust for positive count when moving forward
 
   encoder_RotMotor.zero();
   encoder_LeftMotor.zero();
   encoder_RightMotor.zero();
-  
 }
 
 // *****************************************************************
@@ -167,21 +166,21 @@ void setup() {
 // *****************************************************************
 void loop() {
 
-
   switch (stage) {
 
     // ==================== CASE 1-10 ====================
     case 0:
       // RESERVED FOR TESTING, PASTE CODE HERE AND SET STAGE = 0
       /* To test:
-      detectLongWall
-      detectObjectRight
-      findBottle
       detectLight
+      detectLongWall
+      findBottle
       */
-      stage=1;
+      if (detectLongWall() == false){
+        setNeutral();
+        stage = 30;
+      }
     break;
-
 
     case 1:
       // Case status: COMPLETE by Daniel
@@ -235,7 +234,10 @@ void loop() {
       setNeutral();
       pivotAlign();
       moveBackDistance(500);
-      stage = 5;
+
+      // Testing
+      setNeutral();
+      stage = 30;
 
       break;
       // Robot is parallel to the table, at the far back, ready to scan for the light
@@ -244,7 +246,7 @@ void loop() {
       // Case status: IN PROGRESS by Daniel
       // Start case: Robot is parallel to the table, need to determine whether or not we're parallel to the long edge
       setNeutral();
-      if (detectLongWall()){
+      if(detectLongWall()){
         setNeutral();
         stage = 7;
       }
@@ -277,51 +279,29 @@ void loop() {
 
       // End case: Robot has arm raised and perpendicular to itself
     case 8:
+      // Start case: Robot has arm raised and perpendicular to itself, and is also parallel to the long edge of the table
       break;
+      // End case: Water bottle is directly in front of the robot's claw
 
     case 9:
+      // Start case: Water bottle is directly in front of the robot's claw
       break;
 
+      // End case: Robot is holding the water bottle
     case 10:
+      // Start case: Robot is holding the water bottle, parallel to the long edge of the table
+
       break;
+      // End case: Robot has its arm retracted
 
 
     // ==================== CASE 11-20 ====================
 
     case 11:
-      light_value = analogRead(right_light_sensor);
-      moveForward(150);
-      next_light_value = analogRead(right_light_sensor);
-      
-      if((next_light_value < light_value) && (next_light_value < 50))
-      {        
-        setNeutral();        
-        light_value = analogRead(right_light_sensor);
-        next_light_value = analogRead(right_light_sensor);
-        boolean blinking=false;
-        unsigned long begin_time=millis();
-         
-         do
-         {
-          
-          light_value = analogRead(right_light_sensor);
-          delay(100);
-          next_light_value = analogRead(right_light_sensor);
-          
-          
-          if((next_light_value - light_value) >= 20)
-           blinking = true;
-         }
-         
-         while(((millis() - begin_time) < 2000));
-              
-         if(blinking)
-           backUp();
-         else
-           moveForwardDistance(300);
-      }
-      break;
+      // Robot has its arm retracted
 
+      break;
+      // Robot is now in front of the door
     case 12:
       break;
 
@@ -360,7 +340,7 @@ void loop() {
         turnRightAngle(90);
         moveBackDistance(500);
         count=0;
-        stage++;
+        stage = 22;
       }
       break;
 
@@ -414,7 +394,7 @@ void loop() {
 
 
 float frontPing() {
-  //Front ultrasonic
+  // Front ultrasonic
   digitalWrite(ULTRASONIC_IN_PIN_FRONT, HIGH);
   delayMicroseconds(10);
   digitalWrite(ULTRASONIC_IN_PIN_FRONT, LOW);
@@ -428,34 +408,28 @@ float frontPing() {
 
 
 float backPing(){
-  //Back ultrasonic
+  // Back ultrasonic
   digitalWrite(ULTRASONIC_IN_PIN_BACK, HIGH);
   delayMicroseconds(10); //The 10 microsecond pause where the pulse in "high"
   digitalWrite(ULTRASONIC_IN_PIN_BACK, LOW);
 
   float ping_time = pulseIn(ULTRASONIC_OUT_PIN_BACK, HIGH, 10000);
 
-  Serial.print("cm: ");
   Serial.println(ping_time);
 
   return ping_time;
 }
 
-int topPing() {
-  //Back ultrasonic
+float armPing() {
+  // Top ultrasonic
   digitalWrite(ULTRASONIC_IN_PIN_TOP, HIGH);
-  delayMicroseconds(10); //The 10 microsecond pause where the pulse in "high"
+  delayMicroseconds(10);
   digitalWrite(ULTRASONIC_IN_PIN_TOP, LOW);
 
-  // Use command pulseIn to listen to ultrasonic_Data pin to record the
-  // time that it takes from when the Pin goes HIGH until it goes LOW
-  // Serial.print("back: ");
-  // Serial.println(ping_time2); //divide time by 58 to get distance in cm
   float ping_time = pulseIn(ULTRASONIC_OUT_PIN_TOP, HIGH, 10000);
 
+  Serial.println(ping_time);
 
-  //Serial.print("cm: ");
-  Serial.println(ping_time); //divide time by 58 to get distance in cm
   return ping_time;
 }
 
@@ -500,7 +474,6 @@ boolean hitWall(){
     Serial.println("Nothing");
     return false;
   }
-
 }
 
 float armPingNumberOfTimes(int number_of_times){
@@ -509,7 +482,7 @@ float armPingNumberOfTimes(int number_of_times){
   float times_counter;
   times_counter = number_of_times;
   while (times_counter != 0){
-    arm_ping = topPing();
+    arm_ping = armPing();
     total_ping_value += arm_ping;
     times_counter -= 1;
     delay(100);
@@ -519,8 +492,8 @@ float armPingNumberOfTimes(int number_of_times){
 }
 
 void countLight(){
-  //light_value = analogRead(right_light_sensor);
-  next_light_value = analogRead(right_light_sensor);
+  //light_value = analogRead(RIGHT_LIGHT_SENSOR);
+  next_light_value = analogRead(RIGHT_LIGHT_SENSOR);
   if(next_light_value < 50)
   {
     moveForwardDistance(1000);
@@ -530,13 +503,15 @@ void countLight(){
 
 boolean detectLight(){
   int light_value;
-  light_value = analogRead(right_light_sensor);
+  light_value = analogRead(RIGHT_LIGHT_SENSOR);
   Serial.print("Light value: ");
   Serial.println(light_value);
   if (light_value < 50){
+    Serial.println("Light detected");
     return true;
   }
   else{
+    Serial.println("No light detected");
     return false;
   }
 }
@@ -545,21 +520,21 @@ boolean detectLight(){
 // -------------------- MOVEMENT FUNCTIONS --------------------
 
 void turnLeftAngle(long angle){
-    calcLeftTurn(2300, angle);
-    while (!doneLeftTurn())
-    {
-      turnLeftOnSpot(200);
-    }
-    setNeutral();
+  calcLeftTurn(2300, angle);
+  while (!doneLeftTurn())
+  {
+    turnLeftOnSpot(200);
+  }
+  setNeutral();
 }
 
 void turnRightAngle(long angle){
-    calcRightTurn(2300, angle);
-    while (!doneRightTurn())
-    {
-      turnRightOnSpot(200);
-    }
-    setNeutral();
+  calcRightTurn(2300, angle);
+  while (!doneRightTurn())
+  {
+    turnRightOnSpot(200);
+  }
+  setNeutral();
 }
 
 void moveForwardFixed(){
@@ -668,7 +643,7 @@ void moveBackwards(long speedFactor){
 void moveBackDistance(long distance){
   leftEncoderStopTime = encoder_LeftMotor.getRawPosition();
   leftEncoderStopTime -= distance;
-  
+
   while (encoder_LeftMotor.getRawPosition() > leftEncoderStopTime)
   {
     Serial.println(leftEncoderStopTime);
@@ -835,50 +810,49 @@ boolean findBottle(){
   float arm_ping;
   float average_background_ping = (armPingNumberOfTimes(10) / 10);
 
-  while(true){
-    arm_ping = topPing();
-    if (arm_ping == 0){
-      continue;
-    }
-    else if ((average_background_ping - arm_ping) > 500){
-      Serial.println("Bottle detected");
-      return true;
-    }
-    else if (hitWall()){
-      Serial.println("Hit the wall");
-      return false;
-    }
-    else{
-      moveForwardDistance(500);
-      delay(500);
-    }
+  arm_ping = armPing();
+
+  while (arm_ping < 5){
+    arm_ping = armPing();
+  }
+  if ((average_background_ping - arm_ping) > 500){
+    Serial.println("Bottle detected");
+    return true;
+  }
+  else if (hitWall()){
+    Serial.println("Hit the wall");
+    return false;
+  }
+  else{
+    Serial.println("Moving forward");
+    moveForwardDistance(500);
+    delay(500);
   }
 }
 
 boolean detectLongWall(){
-  float back_ping;
-//  float average;
-  if (detectLight()){
-    Serial.println("Long edge of the table detected, ending loop");
-    return true;
-  }
-  back_ping = backPing();
-
   while (detectObjectRight()){
+    if (detectLight()){
+      Serial.println("Long edge of the table detected, ending loop");
+      setNeutral();
+      return true;
+    }
+    Serial.println("Moving forward");
     moveForwardDistance(400);
     delay(500);
   }
+  Serial.println("Long edge not detected");
   return false;
 }
 
 boolean detectObjectRight(){
   float back_ping;
   back_ping = backPing();
-  while (back_ping == 0){ // Re-ping if a null value is returned
+  while (back_ping < 5){ // Re-ping if a null value is returned
     back_ping = backPing();
-    delay(50);
+    delay(10);
   }
-  if (back_ping < 3000){
+  if (back_ping < 2000){
     Serial.println("Object detected");
     return true;
   }
@@ -890,8 +864,7 @@ boolean detectObjectRight(){
 
 // -------------------- WALL-FOLLOWING --------------------
 
-void updateUltrasonics() // updates both ultrasonics, should only be used once per iteration
-{
+void updateUltrasonics(){ // updates both ultrasonics, should only be used once per iteration
   frontReading = (float)frontPing();
   delay(10);
   Serial.println(backReading/70);
@@ -899,31 +872,27 @@ void updateUltrasonics() // updates both ultrasonics, should only be used once p
   delay(10);
 }
 
-float perpMinimum() // returns minimum perpendicular distance to wall
-{
+float perpMinimum(){ // returns minimum perpendicular distance to wall
   if (frontReading < backReading) // toward
     return (frontReading * sensorDistance) / (sqrt((float)sensorDistance * sensorDistance + (frontReading - backReading) * (frontReading - backReading)));
   else // away
     return (backReading * sensorDistance) / (sqrt((float)sensorDistance * sensorDistance + (frontReading - backReading) * (frontReading - backReading)));
 }
 
-float perpAverage()// returns average perpendicular distance to wall
-{
+float perpAverage(){ // returns average perpendicular distance to wall
   //perpAdd = (sensorDistance / 2) / (sqrt((float)sensorDistance * sensorDistance + (frontReading - backReading) * (frontReading - backReading)));
   //return perpMinimum() + perpAdd;
   return (frontReading + backReading)/2;
 }
 
-boolean square() // returns turn if square
-{
+boolean square(){ // returns turn if square
   if (abs(frontReading - backReading) < deltaTolerance)
     return true;
   else
     return false;
 }
 
-void followWall() // corrects robot so it is parallel to the wall and returns true if in tolerance
-{
+void followWall(){ // corrects robot so it is parallel to the wall and returns true if in tolerance
   // follow
   if(perpAverage() > 1000 || perpAverage() < 800)
   {
