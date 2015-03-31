@@ -20,11 +20,11 @@
 // 200ms = Brake
 
 Servo servo_RightMotor;
-Servo servo_RotMotor;//above 1500 is clockwise
+Servo servo_RotMotor;// Above 1500 is clockwise
 Servo servo_LeftMotor;
-Servo servo_ExtendMotor;//above 1500 is retract
-Servo servo_VerticleMotor;//Above 1500 is up
-Servo servo_ClawMotor;//Above 1500 is open
+Servo servo_ExtendMotor;// Above 1500 is retract
+Servo servo_VerticleMotor;// Above 1500 is up
+Servo servo_ClawMotor;// Above 1500 is open
 
 I2CEncoder encoder_RightMotor;
 I2CEncoder encoder_RotMotor;
@@ -36,12 +36,12 @@ const float speedConstant = 130;
 const float leftConstant = 70;
 const float rightConstant = 70;
 
-// dimensions
-const float sensorDistance = 2700; // distance between centre of sensors
-const float limitDistance = 700; // maximum distance from the wall
-const float backupDistance = 700; // distance to backup (encoder count)
+// Dimensions
+const float sensorDistance = 2700; // Distance between centre of sensors
+const float limitDistance = 700; // Maximum distance from the wall
+const float backupDistance = 700; // Distance to backup (encoder count)
 
-// working variable
+// Working variable
 const float deltaTolerance = 70;
 float frontReading = 0;
 float backReading = 0;
@@ -86,7 +86,7 @@ unsigned int Right_Motor_Stop = 1500;
 unsigned int Left_Motor_Stop = 1500;
 long leftEncoderStopTime = 0;
 long rightEncoderStopTime = 0;
-boolean loopStarted = false;// start loop for turning
+boolean loopStarted = false;// Start loop for turning
 int Left_Motor_Offset = 0;
 int Right_Motor_Offset = 30;
 
@@ -146,7 +146,6 @@ void setup(){
   pinMode(ULTRASONIC_IN_PIN_ARM, OUTPUT);
 
 
-
   //Set up encoders
   encoder_RotMotor.init(1.0 / 3.0 * MOTOR_393_SPEED_ROTATIONS, MOTOR_393_TIME_DELTA);
 
@@ -176,7 +175,7 @@ void loop() {
       findBottle
       */
       parallelPark();
-      stage = 30;
+      stage = 10;
 
     break;
 
@@ -818,15 +817,18 @@ void retractArm(){
 
 }
 
+// -------------------- AUDIO FEEDBACK FUNCTIONS --------------------
+
 
 // -------------------- COMBINED FUNCTIONS --------------------
 
 // Moves forward continuously and scans for a water bottle. Returns true if it detects the bottle, or false if it doesn't
 boolean findBottle(){
-  // Continually read the sensor on the arm and move forwards
-  // return true if found the bottle
   float arm_ping;
-  float average_background_ping = (armPingNumberOfTimes(10) / 10);
+
+  // Calculate the average background noise
+  float average_background_ping;
+  average_background_ping = (armPingNumberOfTimes(10) / 10);
 
   while(true){
     arm_ping = armPing();
@@ -834,6 +836,7 @@ boolean findBottle(){
       arm_ping = armPing();
       delay(10);
     }
+
     if ((average_background_ping - arm_ping) > 500){
       Serial.println("Bottle detected");
       setNeutral();
@@ -910,9 +913,8 @@ void parallelPark(){
       turnLeftAngle(10);
       delay(250);
     }
-    moveForwardDistance(100);
+    moveForwardDistance(200);
     pivotAlign();
     front_ping = frontPing();
   }
 }
-
