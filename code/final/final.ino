@@ -173,10 +173,15 @@ void loop() {
       // RESERVED FOR TESTING, PASTE CODE HERE AND SET STAGE = 0
       /* To test:
       detectLight
-      detectLongWall
+      detectLongSide
       findBottle
       */
-      if (detectLongWall() == false){
+      pivotAlign();
+      if (detectLongSide() == false){
+        setNeutral();
+        stage = 30;
+      }
+      if (detectLight()){
         setNeutral();
         stage = 30;
       }
@@ -246,7 +251,7 @@ void loop() {
       // Case status: IN PROGRESS by Daniel
       // Start case: Robot is parallel to the table, need to determine whether or not we're parallel to the long edge
       setNeutral();
-      if(detectLongWall()){
+      if(detectLongSide()){
         setNeutral();
         stage = 7;
       }
@@ -830,7 +835,7 @@ boolean findBottle(){
   }
 }
 
-boolean detectLongWall(){
+boolean detectLongSide(){
   while (detectObjectRight()){
     if (detectLight()){
       Serial.println("Long edge of the table detected, ending loop");
@@ -838,8 +843,8 @@ boolean detectLongWall(){
       return true;
     }
     Serial.println("Moving forward");
-    moveForwardDistance(400);
-    delay(500);
+    moveForward(100);
+    delay(25);
   }
   Serial.println("Long edge not detected");
   return false;
