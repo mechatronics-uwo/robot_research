@@ -171,37 +171,61 @@ void loop() {
   switch (stage) {
 
     // ==================== CASE 1-10 ====================
-
     case 0:
       // RESERVED FOR TESTING, PASTE CODE HERE AND SET STAGE = 0
+<<<<<<< HEAD
        
        
        topPing();
        
 
       break;
+=======
+      /* To test:
+      detectLongWall
+      detectObjectRight
+      findBottle
+      detectLight
+      */
+      stage=1;
+    break;
+>>>>>>> ebebf9fd58a713ef3746295df47e833baf7801fb
 
     case 1:
       // Case status: DONE by Daniel
-      // Start case: Robot is in the middle of the room
+      // Start case: Robot is in the middle of the room, unaligned
+      pivotAlign();
+      delay(100);
+      stage=1;
+      break;
+      // End case: robot is in the middle of the room, parallel to the wall or table
+
+    case 2:
+      // Case status: DONE by Daniel
+      // Start case: Robot is in the middle of the room, parallel to the wall or table
       moveForward(200);
       if(hitWall()){
         setNeutral();
         moveBackDistance(300);
         turnLeftAngle(87);
-        stage = 2;
+        stage = 3;
       }
       else if(hitTable()){
         setNeutral();
         moveBackDistance(300);
         turnLeftAngle(87);
-        stage = 3;
+        stage = 4;
       }
       break;
       // End case: Robot is parallel to the wall
 
+<<<<<<< HEAD
     case 2:
       // Case status: IN PROGRESS by Daniel
+=======
+    case 3:
+      // Case status: COMPLETE by Daniel
+>>>>>>> ebebf9fd58a713ef3746295df47e833baf7801fb
       // Start case: Wall is in front of robot, robot is parallel to it
       smartMoveForwards();
       if (hitWall()){
@@ -213,11 +237,12 @@ void loop() {
         setNeutral();
         moveBackDistance(300);
         turnLeftAngle(87);
-        stage = 3;
+        stage = 4;
       }
       // End case: Table is in front of robot, robot is parallel to it
       break;
 
+<<<<<<< HEAD
     case 3:
       
       break;
@@ -225,16 +250,55 @@ void loop() {
     case 4:
 
       break;
+=======
+    case 4:
+      // Case status: IN PROGRESS by Daniel
+      // Start case: Robot is parallel to table, need to move all the way to the back to the wall
+      setNeutral();
+      pivotAlign();
+      moveBackDistance(500);
+      stage = 5;
+
+      break;
+      // Robot is parallel to the table, at the far back, ready to scan for the light
+>>>>>>> ebebf9fd58a713ef3746295df47e833baf7801fb
 
     case 5:
+      // Case status: IN PROGRESS by Daniel
+      // Start case: Robot is parallel to the table, need to determine whether or not we're parallel to the long edge
+      setNeutral();
+      if (detectLongWall()){
+        setNeutral();
+        stage = 7;
+      }
+      else{
+        setNeutral();
+        stage = 6;
+      }
+
       break;
+      // End case: Robot is parallel to the long edge of the table
 
     case 6:
+      // Case status: IN PROGRESS by Daniel
+      // Start case: Robot has escaped the short edge of the table
+      moveForwardDistance(600);
+      delay(500);
+      turnRightAngle(87);
+      delay(500);
+      while(!detectLight()){
+        moveForwardDistance(600);
+      }
+      setNeutral();
+      stage = 7;
       break;
 
     case 7:
+      // case status: IN PROGRESS by Daniel
+      // Start case: Robot is parallel to the long edge of the table
       break;
 
+      // End case: Robot has arm raised and perpendicular to itself
     case 8:
       break;
 
@@ -248,8 +312,11 @@ void loop() {
     // ==================== CASE 11-20 ====================
 
     case 11:
+<<<<<<< HEAD
     
      
+=======
+>>>>>>> ebebf9fd58a713ef3746295df47e833baf7801fb
       light_value = analogRead(right_light_sensor);
       moveForward(150);
       next_light_value = analogRead(right_light_sensor);
@@ -279,9 +346,14 @@ void loop() {
          if(blinking)
            backUp();
          else
+<<<<<<< HEAD
            moveFowardDistance(300);
                
       }    
+=======
+           moveForwardDistance(300);
+      }
+>>>>>>> ebebf9fd58a713ef3746295df47e833baf7801fb
       break;
 
     case 12:
@@ -316,7 +388,7 @@ void loop() {
     case 21:
       smartMoveForwards();
       countLight();
-      
+
       if(count==1)
       {
         turnRightAngle(90);
@@ -333,8 +405,8 @@ void loop() {
         moveBackDistance(300);
         turnLeftAngle(87);
         stage = 2;
-      }  
-        
+      }
+
       break;
 
     case 23:
@@ -374,17 +446,25 @@ void loop() {
 
 // -------------------- SENSOR FUNCTIONS --------------------
 
+<<<<<<< HEAD
 // Ping ultrasonic
 // Send the Ultrasonic Range Finder a 10 microsecond pulse per tech spec
 
 int frontPing() {
+=======
+float frontPing() {
+>>>>>>> ebebf9fd58a713ef3746295df47e833baf7801fb
   //Front ultrasonic
   digitalWrite(ULTRASONIC_IN_PIN_FRONT, HIGH);
   delayMicroseconds(10); //The 10 microsecond pause where the pulse in "high"
   digitalWrite(ULTRASONIC_IN_PIN_FRONT, LOW);
+<<<<<<< HEAD
   // Serial.print("front: ");
   // Serial.println(ping_time1); //divide time by 58 to get
   float ping_time1 = pulseIn(ULTRASONIC_OUT_PIN_FRONT, HIGH, 10000);
+=======
+  float ping_time = pulseIn(ULTRASONIC_OUT_PIN_FRONT, HIGH, 10000);
+>>>>>>> ebebf9fd58a713ef3746295df47e833baf7801fb
 
   //Serial.print("cm: ");
   Serial.println(ping_time1); //divide time by 58 to get
@@ -392,11 +472,16 @@ int frontPing() {
   return ping_time1;
 }
 
+<<<<<<< HEAD
 int backPing() {
+=======
+float backPing(){
+>>>>>>> ebebf9fd58a713ef3746295df47e833baf7801fb
   //Back ultrasonic
   digitalWrite(ULTRASONIC_IN_PIN_BACK, HIGH);
   delayMicroseconds(10); //The 10 microsecond pause where the pulse in "high"
   digitalWrite(ULTRASONIC_IN_PIN_BACK, LOW);
+<<<<<<< HEAD
 
   // Use command pulseIn to listen to ultrasonic_Data pin to record the
   // time that it takes from when the Pin goes HIGH until it goes LOW
@@ -407,6 +492,13 @@ int backPing() {
 
   //Serial.print("cm: ");
   Serial.println(ping_time); //divide time by 58 to get distance in cm
+=======
+  float ping_time = pulseIn(ULTRASONIC_OUT_PIN_BACK, HIGH, 10000);
+
+  Serial.print("cm: ");
+  Serial.println(ping_time);
+
+>>>>>>> ebebf9fd58a713ef3746295df47e833baf7801fb
   return ping_time;
 }
 
@@ -429,6 +521,7 @@ int topPing() {
 }
 
 
+<<<<<<< HEAD
 void getEncoderPos()
 {
       Serial.print("Rot: ");
@@ -437,9 +530,18 @@ void getEncoderPos()
 			Serial.print(encoder_LeftMotor.getRawPosition());
 			Serial.print(", R: ");
 			Serial.print(encoder_RightMotor.getRawPosition());
+=======
+void getEncoderPos(){
+  Serial.print("Rot: ");
+	Serial.println(encoder_TopMotor.getRawPosition());
+	Serial.print("Encoders L: ");
+	Serial.print(encoder_LeftMotor.getRawPosition());
+	Serial.print(", R: ");
+	Serial.print(encoder_RightMotor.getRawPosition());
+>>>>>>> ebebf9fd58a713ef3746295df47e833baf7801fb
 }
 
-boolean hitTable() {
+boolean hitTable(){
   int bottom_lever = digitalRead(FRONT_BOTTOM_LEVER_SWITCH_PIN);
   
   if (bottom_lever == LOW){
@@ -460,13 +562,12 @@ boolean hitTable() {
   }
 }
 
-boolean hitWall() {
+boolean hitWall(){
   int bottom_lever = digitalRead(FRONT_BOTTOM_LEVER_SWITCH_PIN);
   int top_lever = digitalRead(FRONT_TOP_LEVER_SWITCH_PIN);
   if ((top_lever == LOW) && (bottom_lever == LOW)){
     Serial.println("Wall");
     return true;
-
   }
   else{
     Serial.println("Nothing");
@@ -475,25 +576,51 @@ boolean hitWall() {
 
 }
 
+<<<<<<< HEAD
+=======
+float armPingNumberOfTimes(int number_of_times){
+  float total_ping_value;
+  float arm_ping;
+  float times_counter;
+  times_counter = number_of_times;
+  while (times_counter != 0){
+    arm_ping = armPing();
+    total_ping_value += arm_ping;
+    times_counter -= 1;
+    delay(100);
+    Serial.println("Pinged the arm sensor");
+  }
+  return total_ping_value;
+}
+
+void countLight(){
+  //light_value = analogRead(right_light_sensor);
+  next_light_value = analogRead(right_light_sensor);
+  if(next_light_value < 50)
+  {
+    moveForwardDistance(1000);
+    count++;
+  }
+}
+>>>>>>> ebebf9fd58a713ef3746295df47e833baf7801fb
+
+boolean detectLight(){
+  int light_value;
+  light_value = analogRead(right_light_sensor);
+  Serial.print("Light value: ");
+  Serial.println(light_value);
+  if (light_value < 50){
+    return true;
+  }
+  else{
+    return false;
+  }
+}
+
 
 // -------------------- MOVEMENT FUNCTIONS --------------------
 
-
-// Smart movement functions
-
-void countLight()
-{
-      //light_value = analogRead(right_light_sensor);
-      next_light_value = analogRead(right_light_sensor);
-      if(next_light_value < 50)
-      {
-        moveFowardDistance(1000);
-        count++;
-      }
-}
-
-void turnLeftAngle(long angle)
-{
+void turnLeftAngle(long angle){
     calcLeftTurn(2300, angle);
     while (!doneLeftTurn())
     {
@@ -502,8 +629,7 @@ void turnLeftAngle(long angle)
     setNeutral();
 }
 
-void turnRightAngle(long angle)
-{
+void turnRightAngle(long angle){
     calcRightTurn(2300, angle);
     while (!doneRightTurn())
     {
@@ -511,6 +637,7 @@ void turnRightAngle(long angle)
     }
     setNeutral();
 }
+
 void moveForwardFixed(){
   Left_Motor_Speed = 1700;
   Right_Motor_Speed = 1700;
@@ -531,6 +658,13 @@ void smartMoveForwards(){
   float back_ping;
 
   if (waitMilliSecond(250)){
+    while (front_ping < 5){
+      front_ping = frontPing();
+    }
+    while (back_ping < 5){
+      back_ping = backPing();
+    }
+
     front_ping = frontPing();
     delay(10);
     back_ping = backPing();
@@ -571,6 +705,29 @@ void reAlign(float ping_value){
     }
 }
 
+void pivotAlign(){ //Aligns the robot parallel to whatever's on the right
+  float front_ping;
+  float back_ping;
+
+  front_ping = frontPing();
+  back_ping = backPing();
+
+  if (((front_ping - back_ping) < 50) && ((front_ping - back_ping) > (-50))){
+    Serial.println("Everything's OK");
+    return;
+  }
+  else if (front_ping > back_ping){
+    Serial.println("Gotta pivot right");
+    turnRightAngle(2);
+  }
+  else if (back_ping > front_ping){
+    Serial.println("Gotta pivot left");
+    turnLeftAngle(2);
+  }
+  delay(50);
+  pivotAlign();
+}
+
 void moveForward(long speedFactor)
 {
   Left_Motor_Speed = constrain((Left_Motor_Stop + speedFactor), 1500, 2100);
@@ -578,14 +735,13 @@ void moveForward(long speedFactor)
   implementMotorSpeed();
 }
 
-void moveBackwards(long speedFactor)
-{
+void moveBackwards(long speedFactor){
   Left_Motor_Speed = constrain((Left_Motor_Stop - speedFactor), 900, 1500);
   Right_Motor_Speed = constrain((Right_Motor_Stop - speedFactor), 900, 1500);
   implementMotorSpeed();
 }
-void moveBackDistance(long distance)
-{
+
+void moveBackDistance(long distance){
   leftEncoderStopTime = encoder_LeftMotor.getRawPosition();
   leftEncoderStopTime -= distance;
   
@@ -598,10 +754,9 @@ void moveBackDistance(long distance)
     implementMotorSpeed();
   }
   setNeutral();
-
 }
-void moveFowardDistance(long distance)
-{
+
+void moveForwardDistance(long distance){
   leftEncoderStopTime = encoder_LeftMotor.getRawPosition();
   while ((leftEncoderStopTime + distance) > encoder_LeftMotor.getRawPosition())
   {
@@ -612,7 +767,7 @@ void moveFowardDistance(long distance)
   setNeutral();
 }
 
-void backUp() {
+void backUp(){
   setNeutral();
   moveBackwardsFixed();
   delay(1500);
@@ -621,59 +776,50 @@ void backUp() {
 
 // Turn functions
 
-void veerRight(long speedFactor, long intensity)
-{
+void veerRight(long speedFactor, long intensity){
   Left_Motor_Speed = constrain((Left_Motor_Stop + speedFactor + intensity), 1500, 2100);
   Right_Motor_Speed = constrain((Right_Motor_Stop + speedFactor), 1500, 2100);
   implementMotorSpeed();
 }
 
-void veerLeft(long speedFactor, long intensity)
-{
+void veerLeft(long speedFactor, long intensity){
   Left_Motor_Speed = constrain((Left_Motor_Stop + speedFactor), 1500, 2100);
   Right_Motor_Speed = constrain((Right_Motor_Stop + speedFactor + intensity), 1500, 2100);
   implementMotorSpeed();
 }
 
-void turnLeftOnSpot(long speedFactor)
-{
+void turnLeftOnSpot(long speedFactor){
   Left_Motor_Speed = constrain((Left_Motor_Stop - speedFactor), 900, 1500);
   Right_Motor_Speed = constrain((Right_Motor_Stop + speedFactor), 1500, 2100);
   implementMotorSpeed();
 }
-void turnRightOnSpot(long speedFactor)
-{
+void turnRightOnSpot(long speedFactor){
   Left_Motor_Speed = constrain((Left_Motor_Stop + speedFactor), 1500, 2100);
   Right_Motor_Speed = constrain((Right_Motor_Stop - speedFactor), 900, 1500);
   implementMotorSpeed();
 }
-void calcLeftTurn(long fullCircle, int angle) // full circle should be around 2800
-{
+void calcLeftTurn(long fullCircle, int angle){ // full circle should be around 2800
   rightEncoderStopTime = encoder_RightMotor.getRawPosition();
   rightEncoderStopTime += (fullCircle * angle) / 360;
 }
-void calcRightTurn(long fullCircle, int angle)
-{
+void calcRightTurn(long fullCircle, int angle){
   leftEncoderStopTime = encoder_LeftMotor.getRawPosition();
   leftEncoderStopTime += (fullCircle * angle) / 360;
 }
 
-boolean doneLeftTurn()
-{
+boolean doneLeftTurn(){
   if (encoder_RightMotor.getRawPosition() > rightEncoderStopTime)
     return true;
   else
     return false;
 }
-boolean doneRightTurn()
-{
+boolean doneRightTurn(){
   if (encoder_LeftMotor.getRawPosition() > leftEncoderStopTime)
     return true;
   else
     return false;
 }
-boolean doneReverse()
-{
+boolean doneReverse(){
   if (encoder_LeftMotor.getRawPosition() < leftEncoderStopTime)
     return true;
   else
@@ -688,20 +834,18 @@ void turnClockwise(long speedFactor) {
 
 // Implementation movement functions
 
-void implementMotorSpeed()
-{
+void implementMotorSpeed(){
   servo_LeftMotor.writeMicroseconds(constrain((Left_Motor_Speed + Left_Motor_Offset), 900, 2100));
   servo_RightMotor.writeMicroseconds(constrain((Right_Motor_Speed + Right_Motor_Offset), 900, 2100));
 }
 
-void setNeutral() {
+void setNeutral(){
   Left_Motor_Speed = 1500;
-  Right_Motor_Speed = 1500; 
+  Right_Motor_Speed = 1500;
   implementMotorSpeed();
-
 }
 
-void brake() {
+void brake(){
   Left_Motor_Speed = 200;
   Right_Motor_Speed = 200;
   implementMotorSpeed();
@@ -712,15 +856,13 @@ void brake() {
 
 
 // Call startWaiting first, and then waitMilliSecond
-void startWaiting() {
+void startWaiting(){
   if (can_start_waiting) {
-
     time_previous = millis();
   }
 }
 
 boolean waitMilliSecond(unsigned int interval) {
-
   time_elapsed = millis();
   if ((time_elapsed - time_previous) > interval) {
     can_start_waiting = false;
@@ -731,6 +873,100 @@ boolean waitMilliSecond(unsigned int interval) {
   }
 }
 
+<<<<<<< HEAD
+=======
+// -------------------- ARM FUNCTIONS --------------------
+void raiseArm(){
+
+}
+
+void lowerArm(){
+
+}
+
+void pivotArmLeft(long encoder_count){
+
+}
+
+void pivotArmRight(long encoder_count){
+
+}
+
+void pivotArmPerpendicular(){
+  pivotArmLeft(100); // Dummy value
+}
+
+void extendArm(){
+
+}
+
+void retractArm(){
+
+}
+
+
+// -------------------- COMBINED FUNCTIONS --------------------
+
+boolean findBottle(){
+  // Continually read the sensor on the arm
+  // return true if found the bottle
+  float arm_ping;
+  float average_background_ping = (armPingNumberOfTimes(10) / 10);
+
+  while(true){
+    arm_ping = armPing();
+    if (arm_ping == 0){
+      continue;
+    }
+    else if ((average_background_ping - arm_ping) > 500){
+      Serial.println("Bottle detected");
+      return true;
+    }
+    else if (hitWall()){
+      Serial.println("Hit the wall");
+      return false;
+    }
+    else{
+      moveForwardDistance(500);
+      delay(500);
+    }
+  }
+}
+
+boolean detectLongWall(){
+  float back_ping;
+//  float average;
+  if (detectLight()){
+    Serial.println("Long edge of the table detected, ending loop");
+    return true;
+  }
+  back_ping = backPing();
+
+  while (detectObjectRight()){
+    moveForwardDistance(400);
+    delay(500);
+  }
+  return false;
+}
+
+boolean detectObjectRight(){
+  float back_ping;
+  back_ping = backPing();
+  while (back_ping == 0){ // Re-ping if a null value is returned
+    back_ping = backPing();
+    delay(50);
+  }
+  if (back_ping < 3000){
+    Serial.println("Object detected");
+    return true;
+  }
+  else {
+    Serial.println("No object detected");
+    return false;
+  }
+}
+
+>>>>>>> ebebf9fd58a713ef3746295df47e833baf7801fb
 // -------------------- WALL-FOLLOWING --------------------
 
 void updateUltrasonics() // updates both ultrasonics, should only be used once per iteration
@@ -740,7 +976,6 @@ void updateUltrasonics() // updates both ultrasonics, should only be used once p
   Serial.println(backReading/70);
   backReading = (float)backPing();
   delay(10);
-  
 }
 
 float perpMinimum() // returns minimum perpendicular distance to wall
