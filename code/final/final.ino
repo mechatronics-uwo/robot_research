@@ -168,17 +168,16 @@ void loop() {
 
   switch (stage) {
 
-    // ==================== CASE 1-10 ====================
+    // ==================== STAGE 1-10 ====================
     case 0:
       // RESERVED FOR TESTING, PASTE CODE HERE AND SET STAGE = 0
-      
       /* To test:
       findBottle
       */
       frontPing();
       backPing();
       delay(1000);
-      
+
     break;
 
     case 1:
@@ -187,6 +186,7 @@ void loop() {
       pivotAlign();
       delay(500);
       stage = 2;
+
       break;
       // End case: robot is in the middle of the room, parallel to the wall or table
 
@@ -206,6 +206,7 @@ void loop() {
         turnLeftAngle(87);
         stage = 4;
       }
+
       break;
       // End case: Robot is parallel to the wall
 
@@ -224,81 +225,76 @@ void loop() {
         turnLeftAngle(87);
         stage = 4;
       }
-      // End case: Table is in front of robot, robot is parallel to it
+
       break;
+      // End case: Table is in front of robot, robot is parallel to it
 
     case 4:
       // Case status: IN PROGRESS by Daniel
       // Start case: Robot is parallel to table, need to move all the way to the back to the wall
       setNeutral();
       pivotAlign();
-      backUp();
-      setNeutral();
       stage = 5;
 
       break;
       // Robot is parallel to the table, at the far back, ready to scan for the light
 
     case 5:
+      backUp();
+      setNeutral();
+
+    case 6:
       // Case status: IN PROGRESS by Daniel
-      // Start case: Robot is parallel to the table, need to determine whether or not we're parallel to the long edge
       if(detectLongSide()){
         setNeutral();
-        stage = 7;
+        stage = 8;
       }
       else{
         setNeutral();
-        stage = 6;
+        stage = 7;
       }
 
       break;
-      // End case: Robot is parallel to the long edge of the table
 
-    case 6:
+    case 7:
       // Case status: IN PROGRESS by Daniel
       // Start case: Robot has escaped the short edge of the table
       moveForwardDistance(170);
       delay(500);
       turnRightAngle(93);
       delay(500);
-      stage = 7;
+      stage = 8;
+
       break;
 
-    case 7:
-      // case status: IN PROGRESS by Daniel
+    case 8:
+      // Case status: IN PROGRESS by Daniel
       while(!detectLight()){
         moveForward(100);
       }
       setNeutral();
-      // Start case: Robot is parallel to the long edge of the table
-      break;
+      stage = 9;
 
-      // End case: Robot has arm raised and perpendicular to itself
-    case 8:
-      // Start case: Robot has arm raised and perpendicular to itself, and is also parallel to the long edge of the table
       break;
-      // End case: Water bottle is directly in front of the robot's claw
 
     case 9:
-      // Start case: Water bottle is directly in front of the robot's claw
+
       break;
 
-      // End case: Robot is holding the water bottle
     case 10:
-      // Start case: Robot is holding the water bottle, parallel to the long edge of the table
 
       break;
-      // End case: Robot has its arm retracted
 
 
-    // ==================== CASE 11-20 ====================
+
+    // ==================== STAGE 11-20 ====================
 
     case 11:
-      // Robot has its arm retracted
 
       break;
-      // Robot is now in front of the door
+
     case 12:
+
       break;
 
     case 13:
@@ -325,7 +321,7 @@ void loop() {
     case 20:
       break;
 
-    // ==================== CASE 21-30 ====================
+    // ==================== STAGE 21-30 ====================
 
     case 21:
       smartMoveForwards();
@@ -606,8 +602,8 @@ void pivotAlign(){ //Aligns the robot parallel to whatever's on the right
 
   front_ping = frontPing();
   back_ping = backPing();
-  
-  while ((abs(front_ping - back_ping)) > 100){   
+
+  while ((abs(front_ping - back_ping)) > 100){
     if (front_ping > back_ping){
       Serial.println("Gotta pivot right");
       turnRightAngle(2);
