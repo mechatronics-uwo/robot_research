@@ -67,8 +67,8 @@ const int ULTRASONIC_OUT_PIN_FRONT = 53;
 const int ULTRASONIC_IN_PIN_BACK = 50;
 const int ULTRASONIC_OUT_PIN_BACK = 51;
 
-const int ULTRASONIC_IN_PIN_TOP = 49;
-const int ULTRASONIC_OUT_PIN_TOP = 48;
+const int ULTRASONIC_IN_PIN_ARM = 49;
+const int ULTRASONIC_OUT_PIN_ARM = 48;
 
 const int RIGHT_LIGHT_SENSOR = A0;
 const int RIGHT_BOTTOM_LIGHT_SENSOR = A1;
@@ -142,8 +142,8 @@ void setup(){
   pinMode(ULTRASONIC_OUT_PIN_BACK, INPUT);
   pinMode(ULTRASONIC_IN_PIN_BACK, OUTPUT);
 
-  pinMode(ULTRASONIC_OUT_PIN_TOP, INPUT);
-  pinMode(ULTRASONIC_IN_PIN_TOP, OUTPUT);
+  pinMode(ULTRASONIC_OUT_PIN_ARM, INPUT);
+  pinMode(ULTRASONIC_IN_PIN_ARM, OUTPUT);
 
 
 
@@ -420,11 +420,11 @@ float backPing(){
 
 float armPing() {
   // Top ultrasonic
-  digitalWrite(ULTRASONIC_IN_PIN_TOP, HIGH);
+  digitalWrite(ULTRASONIC_IN_PIN_ARM, HIGH);
   delayMicroseconds(10);
-  digitalWrite(ULTRASONIC_IN_PIN_TOP, LOW);
+  digitalWrite(ULTRASONIC_IN_PIN_ARM, LOW);
 
-  float ping_time = pulseIn(ULTRASONIC_OUT_PIN_TOP, HIGH, 10000);
+  float ping_time = pulseIn(ULTRASONIC_OUT_PIN_ARM, HIGH, 10000);
 
   Serial.println(ping_time);
 
@@ -500,9 +500,26 @@ void countLight(){
   }
 }
 
+// Returns true if the top light sensor encounters a light source, otherwise false
 boolean detectLight(){
   int light_value;
   light_value = analogRead(RIGHT_LIGHT_SENSOR);
+  Serial.print("Light value: ");
+  Serial.println(light_value);
+  if (light_value < 50){
+    Serial.println("Light detected");
+    return true;
+  }
+  else{
+    Serial.println("No light detected");
+    return false;
+  }
+}
+
+// Returns true if the bottom light sensor encounters a light source, otherwise false
+boolean detectBottomLight(){
+  int light_value;
+  light_value = analogRead(RIGHT_BOTTOM_LIGHT_SENSOR);
   Serial.print("Light value: ");
   Serial.println(light_value);
   if (light_value < 50){
@@ -548,13 +565,14 @@ void moveBackwardsFixed(){
   implementMotorSpeed();
 }
 
+// Moves the robot forwards, ensuring it's parallel to whatever's on the right
 void smartMoveForwards(){
   // Keep between 800 and 450 for ping
   startWaiting();
 
   float front_ping;
   float back_ping;
-  
+
   front_ping = frontPing();
   delay(10);
   back_ping = backPing();
