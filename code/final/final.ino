@@ -173,14 +173,6 @@ void loop() {
     // ==================== CASE 1-10 ====================
     case 0:
       // RESERVED FOR TESTING, PASTE CODE HERE AND SET STAGE = 0
-<<<<<<< HEAD
-       
-       
-       topPing();
-       
-
-      break;
-=======
       /* To test:
       detectLongWall
       detectObjectRight
@@ -189,10 +181,10 @@ void loop() {
       */
       stage=1;
     break;
->>>>>>> ebebf9fd58a713ef3746295df47e833baf7801fb
+
 
     case 1:
-      // Case status: DONE by Daniel
+      // Case status: COMPLETE by Daniel
       // Start case: Robot is in the middle of the room, unaligned
       pivotAlign();
       delay(100);
@@ -201,7 +193,7 @@ void loop() {
       // End case: robot is in the middle of the room, parallel to the wall or table
 
     case 2:
-      // Case status: DONE by Daniel
+      // Case status: COMPLETE by Daniel
       // Start case: Robot is in the middle of the room, parallel to the wall or table
       moveForward(200);
       if(hitWall()){
@@ -219,13 +211,8 @@ void loop() {
       break;
       // End case: Robot is parallel to the wall
 
-<<<<<<< HEAD
-    case 2:
-      // Case status: IN PROGRESS by Daniel
-=======
     case 3:
       // Case status: COMPLETE by Daniel
->>>>>>> ebebf9fd58a713ef3746295df47e833baf7801fb
       // Start case: Wall is in front of robot, robot is parallel to it
       smartMoveForwards();
       if (hitWall()){
@@ -242,15 +229,6 @@ void loop() {
       // End case: Table is in front of robot, robot is parallel to it
       break;
 
-<<<<<<< HEAD
-    case 3:
-      
-      break;
-      
-    case 4:
-
-      break;
-=======
     case 4:
       // Case status: IN PROGRESS by Daniel
       // Start case: Robot is parallel to table, need to move all the way to the back to the wall
@@ -261,7 +239,6 @@ void loop() {
 
       break;
       // Robot is parallel to the table, at the far back, ready to scan for the light
->>>>>>> ebebf9fd58a713ef3746295df47e833baf7801fb
 
     case 5:
       // Case status: IN PROGRESS by Daniel
@@ -312,11 +289,6 @@ void loop() {
     // ==================== CASE 11-20 ====================
 
     case 11:
-<<<<<<< HEAD
-    
-     
-=======
->>>>>>> ebebf9fd58a713ef3746295df47e833baf7801fb
       light_value = analogRead(right_light_sensor);
       moveForward(150);
       next_light_value = analogRead(right_light_sensor);
@@ -346,14 +318,8 @@ void loop() {
          if(blinking)
            backUp();
          else
-<<<<<<< HEAD
-           moveFowardDistance(300);
-               
-      }    
-=======
            moveForwardDistance(300);
       }
->>>>>>> ebebf9fd58a713ef3746295df47e833baf7801fb
       break;
 
     case 12:
@@ -446,59 +412,32 @@ void loop() {
 
 // -------------------- SENSOR FUNCTIONS --------------------
 
-<<<<<<< HEAD
-// Ping ultrasonic
-// Send the Ultrasonic Range Finder a 10 microsecond pulse per tech spec
 
-int frontPing() {
-=======
 float frontPing() {
->>>>>>> ebebf9fd58a713ef3746295df47e833baf7801fb
   //Front ultrasonic
   digitalWrite(ULTRASONIC_IN_PIN_FRONT, HIGH);
-  delayMicroseconds(10); //The 10 microsecond pause where the pulse in "high"
+  delayMicroseconds(10);
   digitalWrite(ULTRASONIC_IN_PIN_FRONT, LOW);
-<<<<<<< HEAD
-  // Serial.print("front: ");
-  // Serial.println(ping_time1); //divide time by 58 to get
-  float ping_time1 = pulseIn(ULTRASONIC_OUT_PIN_FRONT, HIGH, 10000);
-=======
+
   float ping_time = pulseIn(ULTRASONIC_OUT_PIN_FRONT, HIGH, 10000);
->>>>>>> ebebf9fd58a713ef3746295df47e833baf7801fb
 
-  //Serial.print("cm: ");
-  Serial.println(ping_time1); //divide time by 58 to get
+  Serial.println(ping_time);
 
-  return ping_time1;
+  return ping_time;
 }
 
-<<<<<<< HEAD
-int backPing() {
-=======
+
 float backPing(){
->>>>>>> ebebf9fd58a713ef3746295df47e833baf7801fb
   //Back ultrasonic
   digitalWrite(ULTRASONIC_IN_PIN_BACK, HIGH);
   delayMicroseconds(10); //The 10 microsecond pause where the pulse in "high"
   digitalWrite(ULTRASONIC_IN_PIN_BACK, LOW);
-<<<<<<< HEAD
 
-  // Use command pulseIn to listen to ultrasonic_Data pin to record the
-  // time that it takes from when the Pin goes HIGH until it goes LOW
-  // Serial.print("back: ");
-  //Serial.println(ping_time); //divide time by 58 to get distance in cm
-  float ping_time = pulseIn(ULTRASONIC_OUT_PIN_BACK, HIGH, 10000);
-
-
-  //Serial.print("cm: ");
-  Serial.println(ping_time); //divide time by 58 to get distance in cm
-=======
   float ping_time = pulseIn(ULTRASONIC_OUT_PIN_BACK, HIGH, 10000);
 
   Serial.print("cm: ");
   Serial.println(ping_time);
 
->>>>>>> ebebf9fd58a713ef3746295df47e833baf7801fb
   return ping_time;
 }
 
@@ -512,38 +451,26 @@ int topPing() {
   // time that it takes from when the Pin goes HIGH until it goes LOW
   // Serial.print("back: ");
   // Serial.println(ping_time2); //divide time by 58 to get distance in cm
-  float ping_time2 = pulseIn(ULTRASONIC_OUT_PIN_TOP, HIGH, 10000);
+  float ping_time = pulseIn(ULTRASONIC_OUT_PIN_TOP, HIGH, 10000);
 
 
   //Serial.print("cm: ");
-  Serial.println(ping_time2); //divide time by 58 to get distance in cm
-  return ping_time2;
+  Serial.println(ping_time); //divide time by 58 to get distance in cm
+  return ping_time;
 }
 
-
-<<<<<<< HEAD
-void getEncoderPos()
-{
-      Serial.print("Rot: ");
-			Serial.println(encoder_RotMotor.getRawPosition());
-			Serial.print("Encoders L: ");
-			Serial.print(encoder_LeftMotor.getRawPosition());
-			Serial.print(", R: ");
-			Serial.print(encoder_RightMotor.getRawPosition());
-=======
 void getEncoderPos(){
   Serial.print("Rot: ");
-	Serial.println(encoder_TopMotor.getRawPosition());
+	Serial.println(encoder_RotMotor.getRawPosition());
 	Serial.print("Encoders L: ");
 	Serial.print(encoder_LeftMotor.getRawPosition());
 	Serial.print(", R: ");
 	Serial.print(encoder_RightMotor.getRawPosition());
->>>>>>> ebebf9fd58a713ef3746295df47e833baf7801fb
 }
 
 boolean hitTable(){
   int bottom_lever = digitalRead(FRONT_BOTTOM_LEVER_SWITCH_PIN);
-  
+
   if (bottom_lever == LOW){
     delay(300);
     int top_lever = digitalRead(FRONT_TOP_LEVER_SWITCH_PIN);
@@ -576,15 +503,13 @@ boolean hitWall(){
 
 }
 
-<<<<<<< HEAD
-=======
 float armPingNumberOfTimes(int number_of_times){
   float total_ping_value;
   float arm_ping;
   float times_counter;
   times_counter = number_of_times;
   while (times_counter != 0){
-    arm_ping = armPing();
+    arm_ping = topPing();
     total_ping_value += arm_ping;
     times_counter -= 1;
     delay(100);
@@ -602,7 +527,6 @@ void countLight(){
     count++;
   }
 }
->>>>>>> ebebf9fd58a713ef3746295df47e833baf7801fb
 
 boolean detectLight(){
   int light_value;
@@ -873,8 +797,6 @@ boolean waitMilliSecond(unsigned int interval) {
   }
 }
 
-<<<<<<< HEAD
-=======
 // -------------------- ARM FUNCTIONS --------------------
 void raiseArm(){
 
@@ -914,7 +836,7 @@ boolean findBottle(){
   float average_background_ping = (armPingNumberOfTimes(10) / 10);
 
   while(true){
-    arm_ping = armPing();
+    arm_ping = topPing();
     if (arm_ping == 0){
       continue;
     }
@@ -966,7 +888,6 @@ boolean detectObjectRight(){
   }
 }
 
->>>>>>> ebebf9fd58a713ef3746295df47e833baf7801fb
 // -------------------- WALL-FOLLOWING --------------------
 
 void updateUltrasonics() // updates both ultrasonics, should only be used once per iteration
