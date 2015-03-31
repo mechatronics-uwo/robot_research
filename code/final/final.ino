@@ -30,25 +30,6 @@ I2CEncoder encoder_RightMotor;
 I2CEncoder encoder_RotMotor;
 I2CEncoder encoder_LeftMotor;
 
-
-// -------------------- WALL-FOLLOWING --------------------
-const float speedConstant = 130;
-const float leftConstant = 70;
-const float rightConstant = 70;
-
-// Dimensions
-const float sensorDistance = 2700; // Distance between centre of sensors
-const float limitDistance = 700; // Maximum distance from the wall
-const float backupDistance = 700; // Distance to backup (encoder count)
-
-// Working variable
-const float deltaTolerance = 70;
-float frontReading = 0;
-float backReading = 0;
-float perpAdd = 0;
-
-
-
 // -------------------- SENSORS --------------------
 
 const int LEFT_MOTOR_PIN = 3;
@@ -579,9 +560,11 @@ void smartMoveForwards(){
   if (waitMilliSecond(250)){
     while (front_ping < 5){
       front_ping = frontPing();
+      delay(10);
     }
     while (back_ping < 5){
       back_ping = backPing();
+      delay(10);
     }
 
     if ((back_ping - front_ping) > 400){
@@ -627,6 +610,15 @@ void pivotAlign(){ //Aligns the robot parallel to whatever's on the right
   front_ping = frontPing();
   back_ping = backPing();
 
+  while(front_ping < 5){
+    front_ping = frontPing();
+    delay(10);
+  }
+  while(back_ping < 5){
+    back_ping = backPing();
+    delay(10);
+  }
+
   while ((abs(front_ping - back_ping)) > 100){
     if (front_ping > back_ping){
       Serial.println("Gotta pivot right");
@@ -637,8 +629,17 @@ void pivotAlign(){ //Aligns the robot parallel to whatever's on the right
       turnLeftAngle(2);
     }
     delay(50);
+
     front_ping = frontPing();
     back_ping = backPing();
+    while(front_ping < 5){
+      front_ping = frontPing();
+      delay(10);
+    }
+    while(back_ping < 5){
+      back_ping = backPing();
+      delay(10);
+    }
   }
   Serial.println("Everything OK");
 }
@@ -885,10 +886,12 @@ boolean detectLongSide(){
 boolean detectObjectRight(){
   float back_ping;
   back_ping = backPing();
+
   while (back_ping < 5){ // Re-ping if a null value is returned
     back_ping = backPing();
     delay(10);
   }
+
   if (back_ping < 2000){
     Serial.println("Object detected");
     return true;
@@ -904,17 +907,30 @@ void parallelPark(){
   float front_ping;
   front_ping = frontPing();
 
+  while (front_ping < 5){
+    front_ping = frontPing();
+    delay(10);
+  }
+
   while ((abs(front_ping - 1000) > 75)){
     if (front_ping > 1000){
-    turnRightAngle(10);
-    delay(250);
+      Serial.println("Too far, veering right");
+      turnRightAngle(10);
+      delay(250);
     }
     else if (front_ping < 1000){
+      Serial.println("Too close, veering left");
       turnLeftAngle(10);
       delay(250);
     }
+
     moveForwardDistance(200);
     pivotAlign();
+
     front_ping = frontPing();
+    while (front_ping < 5){
+      front_ping = frontPing();
+      delay(10);
+    }
   }
 }
