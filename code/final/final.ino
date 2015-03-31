@@ -166,9 +166,7 @@ void loop() {
       parallelPark
       findBottle
       */
-      parallelPark();
-      stage = 10;
-
+      stage = 1;
     break;
 
     case 1:
