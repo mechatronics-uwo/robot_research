@@ -3,9 +3,20 @@
 #include <I2CEncoder.h>
 #include <uSTimer2.h>
 
+// MSE 2202B Mechatronics Final Project
 // Authors: Danny, Tin, Daniel
-// Prepared for: MSE 2202B, Dr. Naish
+// Prepared for: Dr. Naish
 // School: The University of Western Ontario
+// Date: April 8th 2015
+
+/*
+
+INSTRUCTIONS
+
+1. Place robot in the middle of the room, ideally with the robot's right side facing a nearby wall
+2. Turn it on
+
+*/
 
 // --------------------------------------------------------------
 // ------------------------- !VARIABLES -------------------------
@@ -29,6 +40,7 @@ Servo servo_ClawMotor;// Above 1500 is open
 I2CEncoder encoder_RightMotor;
 I2CEncoder encoder_RotMotor;
 I2CEncoder encoder_LeftMotor;
+
 
 // -------------------- SENSORS --------------------
 
@@ -56,6 +68,7 @@ const int ULTRASONIC_OUT_PIN_ARM = 48;
 
 const int RIGHT_LIGHT_SENSOR = A0;
 const int RIGHT_BOTTOM_LIGHT_SENSOR = A1;
+
 
 // -------------------- VARIABLES --------------------
 int light_value = 0;
@@ -85,8 +98,6 @@ unsigned long time_elapsed = 0;
 boolean can_start_waiting = false; // Time function flag
 
 
-
-
 // -------------------- STAGE COUNTER --------------------
 // NOTE: Stage 0 is reserved for debugging
 
@@ -98,10 +109,9 @@ unsigned int stage = 30;
 void setup(){
 
   Wire.begin();
-  Serial.begin(9600);
+  Serial.begin(9600); // Start serial communication for debugging
 
   // Set-up motors
-
   pinMode(LEFT_MOTOR_PIN, OUTPUT);
   servo_LeftMotor.attach(LEFT_MOTOR_PIN);
   pinMode(RIGHT_MOTOR_PIN, OUTPUT);
@@ -115,9 +125,7 @@ void setup(){
   pinMode(CLAW_MOTOR_PIN, OUTPUT);
   servo_ClawMotor.attach(CLAW_MOTOR_PIN);
 
-
   // Set-up buttons
-
   pinMode(FRONT_TOP_LEVER_SWITCH_PIN, INPUT_PULLUP);
   pinMode(FRONT_BOTTOM_LEVER_SWITCH_PIN, INPUT_PULLUP);
 
@@ -165,8 +173,14 @@ void loop() {
       /* To test:
       parallelPark
       findBottle
+      openClaw
+      closeClaw
       */
+<<<<<<< HEAD
      
+=======
+      pivotAlign();
+>>>>>>> origin/master
     break;
 
     case 1:
@@ -219,22 +233,28 @@ void loop() {
       // End case: Table is in front of robot, robot is parallel to it
 
     case 4:
-      // Case status: IN PROGRESS by Daniel
-      // Start case: Robot is parallel to table, need to move all the way to the back to the wall
+      // Case status: COMPLETE by Daniel
+      // Start case: Robot is parallel to table, need to align itself to the table
       setNeutral();
       pivotAlign();
       stage = 5;
 
       break;
-      // Robot is parallel to the table, at the far back, ready to scan for the light
+      // Robot is parallel to the table
 
     case 5:
+      // Case status: COMPLETE by Daniel
+      // Start case: Robot is parallel to the table
       backUp();
       setNeutral();
       stage=6;
 
+      break;
+      // End case: Robot is parallel to the table, all the way at the end
+
     case 6:
-      // Case status: IN PROGRESS by Daniel
+      // Case status: COMPLETE by Daniel
+      // Start case: Robot is either on the short or long side of the table
       if(detectLongSide()){
         setNeutral();
         stage = 8;
@@ -245,9 +265,10 @@ void loop() {
       }
 
       break;
+      // End case: Robot is on the long end of the table, preparing to align itself and find the light
 
     case 7:
-      // Case status: IN PROGRESS by Daniel
+      // Case status: COMPLETE by Daniel
       // Start case: Robot has escaped the short edge of the table
       moveForwardDistance(180);
       delay(500);
@@ -256,44 +277,63 @@ void loop() {
       stage = 8;
 
       break;
+      // End case: Robot is preparing to find the light
 
     case 8:
-      // Case status: IN PROGRESS by Daniel
+      // Case status: COMPLETE by Daniel
+      // Start case: Robot is preparing to find the light on the table
       while(!detectLight()){
-        moveForward(100);
+        moveForward(150);
       }
       setNeutral();
       stage = 9;
 
       break;
+      // Robot is directly in front of the light of the long edge of the table, but needs to align itself at the correct distance
 
     case 9:
+      // Case status: COMPLETE by Daniel
+      // Start case: Robot is by the long edge of the table, needs to align itself at the correct distance
       parallelPark();
       setNeutral();
       stage = 10;
 
       break;
+      // End case: Robot is now at the appropriate distane away from the table, needs to do a final parallel align check
 
     case 10:
-      while(!detectLight()){
-        moveBackwards(100);
-      }
-      setNeutral();
+      // Case status: COMPLETE by Daniel
+      // Start case: Robot is now at the appropriate distane away from the table, needs to do a final parallel align check
+      pivotAlign();
       stage = 11;
 
       break;
+      // End case: Robot is now the correct distance away from the table, but needs to move to the edge
 
     // ==================== STAGE 11-20 ====================
     //Finding bottle
 
     case 11:
+<<<<<<< HEAD
     if(findBottle())
       stage=12;
     else
       moveForward(100);
+=======
+    // Case status: COMPLETE by Daniel
+    // Start case: Robot is now the correct distance away from the table, but needs to move to the edge
+      while(!detectLight()){
+        moveBackwards(150);
+      }
+      setNeutral();
+      stage = 11;
+
+>>>>>>> origin/master
       break;
+    // End case: Robot is now parallel with the table, at the correct distance, and at the edge of the table.
 
     case 12:
+<<<<<<< HEAD
      if(armPing()>250){
        moveOut();
        openClaw();
@@ -303,7 +343,13 @@ void loop() {
      closeClaw();
      stage=13;
      }
+=======
+    // Case status: IN PROGRESS by Daniel
+    // Start case: Robot is in the correct position with respect to the table. Robot needs to raise its arm
+
+>>>>>>> origin/master
       break;
+    // End case: Robot has its arm raised
 
     case 13:
     if(!hitTopFront())
@@ -439,10 +485,15 @@ void loop() {
       }
       break;
 
+    case 30:
+      break;
 
+<<<<<<< HEAD
   case 30:
   armPing();
     break;
+=======
+>>>>>>> origin/master
   }
 
 }
@@ -502,15 +553,6 @@ float armPing() {
   Serial.println(ping_time);
 
   return ping_time;
-}
-
-void getEncoderPos(){
-  Serial.print("Rot: ");
-	Serial.println(encoder_RotMotor.getRawPosition());
-	Serial.print("Encoders L: ");
-	Serial.print(encoder_LeftMotor.getRawPosition());
-	Serial.print(", R: ");
-	Serial.print(encoder_RightMotor.getRawPosition());
 }
 
 boolean hitTable(){
@@ -629,6 +671,15 @@ boolean detectBottomLight(){
   }
 }
 
+void getEncoderPos(){
+  Serial.print("Rot: ");
+  Serial.println(encoder_RotMotor.getRawPosition());
+  Serial.print("Encoders L: ");
+  Serial.print(encoder_LeftMotor.getRawPosition());
+  Serial.print(", R: ");
+  Serial.print(encoder_RightMotor.getRawPosition());
+}
+
 
 // -------------------- !MOVEMENT FUNCTIONS --------------------
 
@@ -660,105 +711,6 @@ void moveBackwardsFixed(){
   Left_Motor_Speed = 1300;
   Right_Motor_Speed = 1300;
   implementMotorSpeed();
-}
-
-// Moves the robot forwards, ensuring it's parallel to whatever's on the right
-void smartMoveForwards(){
-  // Keep between 800 and 450 for ping
-  startWaiting();
-
-  float front_ping;
-  float back_ping;
-
-  front_ping = frontPing();
-  delay(10);
-  back_ping = backPing();
-
-  if (waitMilliSecond(250)){
-    while (front_ping < 5){
-      front_ping = frontPing();
-      delay(10);
-    }
-    while (back_ping < 5){
-      back_ping = backPing();
-      delay(10);
-    }
-
-    if ((back_ping - front_ping) > 400){
-      reAlign(front_ping);
-      Serial.println("Realigning");
-    }
-    else if (front_ping > 900){
-      veerRight(100, 200);
-      Serial.println("Too far, need to veer right");
-    }
-    else if (front_ping < 650){
-//      setNeutral();
-//      turnLeftAngle(10);
-      veerLeft(100, 200);
-      Serial.println("Too close, need to veer left");
-    }
-    else {
-      moveForward(200);
-      Serial.println("Everything's perfect");
-    }
-  }
-}
-
-void reAlign(float ping_value){
-    float front_ping = ping_value;
-    if (front_ping < 300){
-      setNeutral();
-      turnLeftAngle(25);
-      moveForward(200);
-    }
-    else{
-      moveForward(200);
-      delay(1000);
-      setNeutral();
-      turnLeftAngle(20);
-    }
-}
-
-void pivotAlign(){ //Aligns the robot parallel to whatever's on the right
-  float front_ping;
-  float back_ping;
-
-  front_ping = frontPing();
-  back_ping = backPing();
-
-  while(front_ping < 5){
-    front_ping = frontPing();
-    delay(10);
-  }
-  while(back_ping < 5){
-    back_ping = backPing();
-    delay(10);
-  }
-
-  while ((abs(front_ping - back_ping)) > 100){
-    if (front_ping > back_ping){
-      Serial.println("Gotta pivot right");
-      turnRightAngle(2);
-    }
-    else if (back_ping > front_ping){
-      Serial.println("Gotta pivot left");
-      turnLeftAngle(2);
-    }
-    delay(50);
-
-    front_ping = frontPing();
-    back_ping = backPing();
-    while(front_ping < 5){
-      front_ping = frontPing();
-      delay(10);
-    }
-    while(back_ping < 5){
-      back_ping = backPing();
-      delay(10);
-    }
-  }
-  Serial.println("Everything OK");
 }
 
 void moveForward(long speedFactor)
@@ -797,13 +749,6 @@ void moveForwardDistance(long distance){
     Right_Motor_Speed = constrain((Right_Motor_Stop + 150), 1500, 2100);
     implementMotorSpeed();
   }
-  setNeutral();
-}
-
-void backUp(){
-  setNeutral();
-  moveBackwardsFixed();
-  delay(1500);
   setNeutral();
 }
 
@@ -884,25 +829,144 @@ void brake(){
   implementMotorSpeed();
 }
 
+void backUp(){
+  setNeutral();
+  moveBackwardsFixed();
+  delay(1500);
+  setNeutral();
+}
 
-// -------------------- TIME FUNCTIONS --------------------
+// ------------------- !SMART MOVEMENT FUNCTIONS -------------------
 
+void pivotAlign(){ //Aligns the robot parallel to whatever's on the right
+  float front_ping;
+  float back_ping;
 
-// Call startWaiting first, and then waitMilliSecond
-void startWaiting(){
-  if (can_start_waiting) {
-    time_previous = millis();
+  front_ping = frontPing();
+  back_ping = backPing();
+
+  while(front_ping < 5){
+    front_ping = frontPing();
+    delay(10);
+  }
+  while(back_ping < 5){
+    back_ping = backPing();
+    delay(10);
+  }
+
+  while ((abs(front_ping - back_ping)) > 50){
+    if (front_ping > back_ping){
+      Serial.println("Gotta pivot right");
+      turnRightAngle(2);
+    }
+    else if (back_ping > front_ping){
+      Serial.println("Gotta pivot left");
+      turnLeftAngle(2);
+    }
+    delay(50);
+
+    front_ping = frontPing();
+    back_ping = backPing();
+    while(front_ping < 5){
+      front_ping = frontPing();
+      delay(10);
+    }
+    while(back_ping < 5){
+      back_ping = backPing();
+      delay(10);
+    }
+  }
+  Serial.println("Everything OK");
+}
+
+void reAlign(float ping_value){
+    float front_ping = ping_value;
+    if (front_ping < 300){
+      setNeutral();
+      turnLeftAngle(25);
+      moveForward(200);
+    }
+    else{
+      moveForward(200);
+      delay(1000);
+      setNeutral();
+      turnLeftAngle(20);
+    }
+}
+
+// Aligns the robot parallel to whatever's on the right approximately 15 centimeters away
+void parallelPark(){
+  float front_ping;
+  front_ping = frontPing();
+
+  while (front_ping < 5){
+    front_ping = frontPing();
+    delay(10);
+  }
+
+  while ((abs(front_ping - 1000) > 75)){
+    if (front_ping > 1000){
+      Serial.println("Too far, veering right");
+      turnRightAngle(10);
+      delay(250);
+    }
+    else if (front_ping < 1000){
+      Serial.println("Too close, veering left");
+      turnLeftAngle(10);
+      delay(250);
+    }
+
+    moveForwardDistance(200);
+    delay(100);
+    pivotAlign();
+    delay(400);
+
+    front_ping = frontPing();
+    while (front_ping < 5){
+      front_ping = frontPing();
+      delay(10);
+    }
   }
 }
 
-boolean waitMilliSecond(unsigned int interval) {
-  time_elapsed = millis();
-  if ((time_elapsed - time_previous) > interval) {
-    can_start_waiting = false;
-    return true; // Done waiting!
-  }
-  else {
-    return false; // Not done waiting!
+// Moves the robot forwards, ensuring it's parallel to whatever's on the right
+void smartMoveForwards(){
+  // Keep between 800 and 450 for ping
+  startWaiting();
+
+  float front_ping;
+  float back_ping;
+
+  front_ping = frontPing();
+  delay(10);
+  back_ping = backPing();
+
+  if (waitMilliSecond(250)){
+    while (front_ping < 5){
+      front_ping = frontPing();
+      delay(10);
+    }
+    while (back_ping < 5){
+      back_ping = backPing();
+      delay(10);
+    }
+
+    if ((back_ping - front_ping) > 400){
+      reAlign(front_ping);
+      Serial.println("Realigning");
+    }
+    else if (front_ping > 900){
+      veerRight(100, 200);
+      Serial.println("Too far, need to veer right");
+    }
+    else if (front_ping < 650){
+      veerLeft(100, 200);
+      Serial.println("Too close, need to veer left");
+    }
+    else {
+      moveForward(200);
+      Serial.println("Everything's perfect");
+    }
   }
 }
 
@@ -957,16 +1021,41 @@ void horizontalStop(){
 }
 
 void openClaw(){
+  Serial.println("Opening the claw");
   servo_ClawMotor.writeMicroseconds(1650);
+  delay(1500);
 }
 
 void closeClaw(){
+  Serial.println("Closing the claw");
   servo_ClawMotor.writeMicroseconds(1400);
+  delay(1500);
 }
 
 void calcRotTurn(long fullCircle, int angle){
   rotEncoderStopTime = encoder_LeftMotor.getRawPosition();
   rotEncoderStopTime = (fullCircle * angle) / 360;
+}
+
+// -------------------- !TIME FUNCTIONS --------------------
+
+// Call startWaiting first, and then waitMilliSecond
+void startWaiting(){
+  if (can_start_waiting) {
+    time_previous = millis();
+  }
+}
+
+// Returns true if -interval- amount of milliseconds has passed since startWaiting
+boolean waitMilliSecond(unsigned int interval) {
+  time_elapsed = millis();
+  if ((time_elapsed - time_previous) > interval) {
+    can_start_waiting = false;
+    return true; // Done waiting!
+  }
+  else {
+    return false; // Not done waiting!
+  }
 }
 
 // ------------------- !AUDIO FEEDBACK FUNCTIONS -------------------
@@ -1049,38 +1138,5 @@ boolean detectObjectRight(){
   else {
     Serial.println("No object detected");
     return false;
-  }
-}
-
-// Aligns the robot parallel to whatever's on the right approximately 15 centimeters away
-void parallelPark(){
-  float front_ping;
-  front_ping = frontPing();
-
-  while (front_ping < 5){
-    front_ping = frontPing();
-    delay(10);
-  }
-
-  while ((abs(front_ping - 1000) > 75)){
-    if (front_ping > 1000){
-      Serial.println("Too far, veering right");
-      turnRightAngle(10);
-      delay(250);
-    }
-    else if (front_ping < 1000){
-      Serial.println("Too close, veering left");
-      turnLeftAngle(10);
-      delay(250);
-    }
-
-    moveForwardDistance(200);
-    pivotAlign();
-
-    front_ping = frontPing();
-    while (front_ping < 5){
-      front_ping = frontPing();
-      delay(10);
-    }
   }
 }
