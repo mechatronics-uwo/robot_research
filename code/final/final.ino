@@ -13,7 +13,7 @@
 
 INSTRUCTIONS
 
-1. Place robot in the middle of the room, ideally with the robot's right side facing a nearby wall
+1. Place robot in the middle of the room, ideally with the robot's right side parallel to a nearby wall
 2. Turn it on
 
 */
@@ -170,12 +170,16 @@ void loop() {
     // ==================== STAGE 1-10 ====================
     case 0:
       // RESERVED FOR TESTING, PASTE CODE HERE AND SET STAGE = 0
-      /* To test:
+      // stage = 1 // UNCOMMENT FOR PRODUCTION
+
+      /*
+      TESTING BACKLOG:
       parallelPark
       findBottle
       openClaw
       closeClaw
       */
+
       pivotAlign();
     break;
 
@@ -512,6 +516,7 @@ boolean hitTopFront(){
   }
 }
 
+// Ping the arm ultrasonic sensor -number_of_times- and returns the total value of the pings
 float armPingNumberOfTimes(int number_of_times){
   float total_ping_value;
   float arm_ping;
@@ -679,6 +684,7 @@ void calcLeftTurn(long fullCircle, int angle){ // full circle should be around 2
   rightEncoderStopTime = encoder_RightMotor.getRawPosition();
   rightEncoderStopTime += (fullCircle * angle) / 360;
 }
+
 void calcRightTurn(long fullCircle, int angle){
   leftEncoderStopTime = encoder_LeftMotor.getRawPosition();
   leftEncoderStopTime += (fullCircle * angle) / 360;
@@ -716,18 +722,21 @@ void implementMotorSpeed(){
   servo_RightMotor.writeMicroseconds(constrain((Right_Motor_Speed + Right_Motor_Offset), 900, 2100));
 }
 
+// Stops the robot
 void setNeutral(){
   Left_Motor_Speed = 1500;
   Right_Motor_Speed = 1500;
   implementMotorSpeed();
 }
 
+// Engages the motor brakes
 void brake(){
   Left_Motor_Speed = 200;
   Right_Motor_Speed = 200;
   implementMotorSpeed();
 }
 
+// Robot moves backwards
 void backUp(){
   setNeutral();
   moveBackwardsFixed();
@@ -737,7 +746,8 @@ void backUp(){
 
 // ------------------- !SMART MOVEMENT FUNCTIONS -------------------
 
-void pivotAlign(){ //Aligns the robot parallel to whatever's on the right
+// Aligns the robot parallel to whatever's on the right
+void pivotAlign(){
   float front_ping;
   float back_ping;
 
@@ -778,6 +788,7 @@ void pivotAlign(){ //Aligns the robot parallel to whatever's on the right
   Serial.println("Everything OK");
 }
 
+// Used to prevent the robot from crashing into the wall if it's angled too steeply
 void reAlign(float ping_value){
     float front_ping = ping_value;
     if (front_ping < 300){
@@ -881,6 +892,7 @@ void rotateAmount(long pos){
     servo_RotMotor.writeMicroseconds(1500);
 }
 
+// Pivots the arm until it's perpendicular to the robot
 void rotatePerpendicular(){
   if(encoder_RotMotor.getRawPosition() < 740)
     servo_RotMotor.writeMicroseconds(1700);
@@ -890,6 +902,7 @@ void rotatePerpendicular(){
     servo_RotMotor.writeMicroseconds(1500);
 }
 
+// Pivots the arm until it's parallel to the robot
 void rotateParallel(){
   if(encoder_RotMotor.getRawPosition() < -10)
     servo_RotMotor.writeMicroseconds(1700);
@@ -899,18 +912,22 @@ void rotateParallel(){
     servo_RotMotor.writeMicroseconds(1500);
 }
 
+// Raise the arm
 void moveUp(){
   servo_VerticleMotor.writeMicroseconds(1900);
 }
 
+// Lower the arm
 void moveDown(){
   servo_VerticleMotor.writeMicroseconds(1250);
 }
 
+// Extend the arm
 void moveOut(){
   servo_ExtendMotor.writeMicroseconds(1250);
 }
 
+// Retract the arm
 void moveIn(){
   servo_ExtendMotor.writeMicroseconds(1800);
 }
@@ -960,7 +977,7 @@ boolean waitMilliSecond(unsigned int interval) {
 // ------------------- !AUDIO FEEDBACK FUNCTIONS -------------------
 
 
-// -------------------- !COMBINED FUNCTIONS --------------------
+// -------------------- !INTEGRATION FUNCTIONS --------------------
 
 // Moves forward continuously and scans for a water bottle. Returns true if it detects the bottle, or false if it doesn't
 boolean findBottle(){
