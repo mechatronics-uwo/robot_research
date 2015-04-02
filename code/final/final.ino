@@ -90,7 +90,7 @@ boolean can_start_waiting = false; // Time function flag
 // -------------------- STAGE COUNTER --------------------
 // NOTE: Stage 0 is reserved for debugging
 
-unsigned int stage = 0;
+unsigned int stage = 30;
 
 // ******************************************************************
 // ************************* PROGRAM !SETUP *************************
@@ -166,7 +166,7 @@ void loop() {
       parallelPark
       findBottle
       */
-      stage = 1;
+     
     break;
 
     case 1:
@@ -231,6 +231,7 @@ void loop() {
     case 5:
       backUp();
       setNeutral();
+      stage=6;
 
     case 6:
       // Case status: IN PROGRESS by Daniel
@@ -283,16 +284,34 @@ void loop() {
       break;
 
     // ==================== STAGE 11-20 ====================
+    //Finding bottle
 
     case 11:
-
+    if(findBottle())
+      stage=12;
+    else
+      moveForward(100);
       break;
 
     case 12:
-
+     if(armPing()>250){
+       moveOut();
+       openClaw();
+     }
+     else{
+     horizontalStop();
+     closeClaw();
+     stage=13;
+     }
       break;
 
     case 13:
+    if(!hitTopFront())
+      moveIn();
+    else{
+    horizontalStop();
+    stage=14;
+    }
       break;
 
     case 14:
@@ -314,57 +333,115 @@ void loop() {
       break;
 
     case 20:
+    
       break;
 
     // ==================== STAGE 21-30 ====================
+    //Finding door from anywhere in the room
 
     case 21:
-      smartMoveForwards();
-      countLight();
+      // Case status:
+      // Start case: Robot is in the middle of the room, unaligned
+      pivotAlign();
+      delay(500);
+      stage = 22;
 
-      if(count==1)
-      {
-        turnRightAngle(90);
-        moveBackDistance(500);
-        count=0;
-        stage = 22;
-      }
       break;
 
     case 22:
-      moveForward(500);
-     if(hitWall()){
+      moveForward(200);
+      if(hitWall()){
         setNeutral();
         moveBackDistance(300);
         turnLeftAngle(87);
-        stage = 2;
+        stage = 23;
       }
+      else if(hitTable()){
+        setNeutral();
+        moveBackDistance(300);
+        turnLeftAngle(87);
+        stage = 24;
+      }      
 
       break;
 
     case 23:
+      smartMoveForwards();
+      if (hitWall()){
+        setNeutral();
+        moveBackDistance(300);
+        turnLeftAngle(87);
+      }
+      else if(hitTable()){
+        setNeutral();
+        moveBackDistance(300);
+        turnLeftAngle(87);
+        stage = 24;
+      }
       break;
 
     case 24:
+    //At table
+      setNeutral();
+      pivotAlign();
+      stage = 26;
       break;
 
     case 25:
+         
       break;
 
     case 26:
+      if(detectObjectRight())
+        moveForward(150);
+      else{
+        turnRightAngle(90);
+        setNeutral();
+        stage=27;
+      }      
+        
       break;
 
     case 27:
+      smartMoveForwards();
+      if(hitWall()){
+        setNeutral();
+        moveBackDistance(300);
+        turnLeftAngle(87); 
+        stage=28;
+      }
       break;
 
     case 28:
+      //Past table
+      smartMoveForwards();
+      if(hitWall()){
+        setNeutral();
+        moveBackDistance(300);
+        turnLeftAngle(87);
+      }
+      //Find door light
+      else if(detectLight())
+      {
+        moveForwardDistance(1000);
+        turnRightAngle(90);
+        moveBackDistance(500);
+        stage = 29;
+      }
       break;
 
     case 29:
+      moveForward(500);
+      if(hitWall()){
+        setNeutral();
+        moveBackDistance(300);
+        turnLeftAngle(87);
+      }
       break;
 
 
   case 30:
+  armPing();
     break;
   }
 
@@ -414,7 +491,14 @@ float armPing() {
   digitalWrite(ULTRASONIC_IN_PIN_ARM, LOW);
 
   float ping_time = pulseIn(ULTRASONIC_OUT_PIN_ARM, HIGH, 10000);
-
+  if(ping_time<10){
+    digitalWrite(ULTRASONIC_IN_PIN_ARM, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(ULTRASONIC_IN_PIN_ARM, LOW);
+    float ping_time = pulseIn(ULTRASONIC_OUT_PIN_ARM, HIGH, 10000);
+  }
+  
+  
   Serial.println(ping_time);
 
   return ping_time;
@@ -496,7 +580,7 @@ float armPingNumberOfTimes(int number_of_times){
     arm_ping = armPing();
     total_ping_value += arm_ping;
     times_counter -= 1;
-    delay(100);
+    delay(10);
     Serial.println("Pinged the arm sensor");
   }
   Serial.println("Done armPingNumberOfTimes");
@@ -709,8 +793,8 @@ void moveForwardDistance(long distance){
   leftEncoderStopTime = encoder_LeftMotor.getRawPosition();
   while ((leftEncoderStopTime + distance) > encoder_LeftMotor.getRawPosition())
   {
-    Left_Motor_Speed = constrain((Left_Motor_Stop + 200), 1500, 2100);
-    Right_Motor_Speed = constrain((Right_Motor_Stop + 200), 1500, 2100);
+    Left_Motor_Speed = constrain((Left_Motor_Stop + 150), 1500, 2100);
+    Right_Motor_Speed = constrain((Right_Motor_Stop + 150), 1500, 2100);
     implementMotorSpeed();
   }
   setNeutral();
@@ -891,23 +975,22 @@ void calcRotTurn(long fullCircle, int angle){
 // -------------------- !COMBINED FUNCTIONS --------------------
 
 // Moves forward continuously and scans for a water bottle. Returns true if it detects the bottle, or false if it doesn't
+
 boolean findBottle(){
   float arm_ping;
 
   // Calculate the average background noise
   float average_background_ping;
+  float moveDistance;
   average_background_ping = (armPingNumberOfTimes(10) / 10);
 
   while(true){
-    arm_ping = armPing();
-    while (arm_ping < 5){ // Re-ping if a null value is returned
-      arm_ping = armPing();
-      delay(10);
-    }
-
-    if ((average_background_ping - arm_ping) > 500){
+    average_background_ping = (armPingNumberOfTimes(10) / 10);
+    if (average_background_ping < 5000){
       Serial.println("Bottle detected");
       setNeutral();
+      moveDistance=(average_background_ping/70)*.1305;
+      moveForwardDistance(25*moveDistance);      
       return true;
     }
     else if (hitWall()){
@@ -923,7 +1006,7 @@ boolean findBottle(){
     else{
       Serial.println("Moving forward");
       moveForward(100);
-      delay(250);
+      
     }
   }
 }
