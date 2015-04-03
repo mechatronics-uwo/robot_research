@@ -57,6 +57,8 @@ const int FRONT_TOP_LEVER_SWITCH_PIN = 5;
 const int TOP_BACK_LEVER_SWITCH_PIN = 10;
 const int TOP_FRONT_LEVER_SWITCH_PIN = 11;
 
+const int ARM_SWITCH_PIN = 12;
+
 const int ULTRASONIC_IN_PIN_FRONT = 52;
 const int ULTRASONIC_OUT_PIN_FRONT = 53;
 
@@ -101,7 +103,7 @@ boolean can_start_waiting = false; // Time function flag
 // -------------------- STAGE COUNTER --------------------
 // NOTE: Stage 0 is reserved for debugging
 
-unsigned int stage = 30;
+unsigned int stage = 0;
 
 // ******************************************************************
 // ************************* PROGRAM !SETUP *************************
@@ -131,6 +133,8 @@ void setup(){
 
   pinMode(TOP_BACK_LEVER_SWITCH_PIN, INPUT_PULLUP);
   pinMode(TOP_FRONT_LEVER_SWITCH_PIN, INPUT_PULLUP);
+
+  pinMode(ARM_SWITCH_PIN, INPUT_PULLUP);
 
   digitalWrite(FRONT_TOP_LEVER_SWITCH_PIN, HIGH);
   digitalWrite(FRONT_BOTTOM_LEVER_SWITCH_PIN, HIGH);
@@ -180,6 +184,8 @@ void loop() {
       closeClaw
       */
       pivotAlign();
+      stage = 50;
+
     break;
 
     case 1:
@@ -269,9 +275,9 @@ void loop() {
     case 7:
       // Case status: COMPLETE by Daniel
       // Start case: Robot has escaped the short edge of the table
-      moveForwardDistance(180);
+      moveForwardDistance(200);
       delay(500);
-      turnRightAngle(92);
+      turnRightAngle(100);
       delay(500);
       stage = 8;
 
@@ -303,7 +309,9 @@ void loop() {
     case 10:
       // Case status: COMPLETE by Daniel
       // Start case: Robot is now at the appropriate distane away from the table, needs to do a final parallel align check
+      delay(500);
       pivotAlign();
+      delay(500);
       stage = 11;
 
       break;
@@ -319,7 +327,11 @@ void loop() {
         moveBackwards(150);
       }
       setNeutral();
-      stage = 11;
+      delay(500);
+      pivotAlign();
+      delay(500);
+      setNeutral();
+      stage = 12;
 
       break;
     // End case: Robot is now parallel with the table, at the correct distance, and at the edge of the table.
@@ -327,30 +339,25 @@ void loop() {
     case 12:
     // Case status: IN PROGRESS by Danny
     // Start case: Robot is in the correct position with respect to the table. Robot needs to raise its arm
-     if(armPing()>250){
-       moveOut();
-       openClaw();
-     }
-     else{
-     horizontalStop();
-     closeClaw();
-     stage=13;
-     }
-
+      moveUp();
+      delay(10000);
+      armStop();
+      delay(500);
+      stage = 13;
 
       break;
     // End case: Robot has its arm raised
 
     case 13:
-    if(!hitTopFront())
-      moveIn();
-    else{
-    horizontalStop();
-    stage=14;
-    }
+      rotatePerpendicular();
+      delay(7000);
+      stage = 50;
+
       break;
 
     case 14:
+      findBottle();
+      stage = 15;
       break;
 
     case 15:
@@ -366,9 +373,24 @@ void loop() {
       break;
 
     case 19:
+    if(!hitTopFront())
+      moveIn();
+    else{
+    horizontalStop();
+    stage=14;
+    }
       break;
 
     case 20:
+     if(armPing()>250){
+       moveOut();
+       openClaw();
+     }
+     else{
+     horizontalStop();
+     closeClaw();
+     stage=13;
+     }
 
       break;
 
@@ -499,6 +521,14 @@ float frontPing() {
 
   float ping_time = pulseIn(ULTRASONIC_OUT_PIN_FRONT, HIGH, 10000);
 
+  while (ping_time < 10){
+  digitalWrite(ULTRASONIC_IN_PIN_FRONT, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(ULTRASONIC_IN_PIN_FRONT, LOW);
+  ping_time = pulseIn(ULTRASONIC_OUT_PIN_FRONT, HIGH, 10000);
+  delayMicroseconds(10);
+  }
+
   Serial.println(ping_time);
 
   return ping_time;
@@ -512,6 +542,14 @@ float backPing(){
   digitalWrite(ULTRASONIC_IN_PIN_BACK, LOW);
 
   float ping_time = pulseIn(ULTRASONIC_OUT_PIN_BACK, HIGH, 10000);
+
+  while (ping_time < 10){
+  digitalWrite(ULTRASONIC_IN_PIN_BACK, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(ULTRASONIC_IN_PIN_BACK, LOW);
+  ping_time = pulseIn(ULTRASONIC_OUT_PIN_BACK, HIGH, 10000);
+  delayMicroseconds(10);
+  }
 
   Serial.println(ping_time);
 
@@ -531,6 +569,7 @@ float armPing() {
     delayMicroseconds(10);
     digitalWrite(ULTRASONIC_IN_PIN_ARM, LOW);
     ping_time = pulseIn(ULTRASONIC_OUT_PIN_ARM, HIGH, 10000);
+    delayMicroseconds(10);
   }
 
   Serial.println(ping_time);
@@ -588,6 +627,18 @@ boolean hitTopFront(){
   int topBackLever = digitalRead(TOP_FRONT_LEVER_SWITCH_PIN);
   if (topBackLever == LOW){
     Serial.println("Front");
+    return true;
+  }
+  else{
+    Serial.println("Nothing");
+    return false;
+  }
+}
+
+boolean hitArm(){
+  int arm_lever = digitalRead(ARM_SWITCH_PIN);
+  if (arm_lever == LOW){
+    Serial.println("Wall");
     return true;
   }
   else{
@@ -837,15 +888,6 @@ void pivotAlign(){
   front_ping = frontPing();
   back_ping = backPing();
 
-  while(front_ping < 5){
-    front_ping = frontPing();
-    delay(10);
-  }
-  while(back_ping < 5){
-    back_ping = backPing();
-    delay(10);
-  }
-
   while ((abs(front_ping - back_ping)) > 50){
     if (front_ping > back_ping){
       Serial.println("Gotta pivot right");
@@ -858,15 +900,8 @@ void pivotAlign(){
     delay(50);
 
     front_ping = frontPing();
+    delay(15);
     back_ping = backPing();
-    while(front_ping < 5){
-      front_ping = frontPing();
-      delay(10);
-    }
-    while(back_ping < 5){
-      back_ping = backPing();
-      delay(10);
-    }
   }
   Serial.println("Everything OK");
 }
@@ -892,20 +927,15 @@ void parallelPark(){
   float front_ping;
   front_ping = frontPing();
 
-  while (front_ping < 5){
-    front_ping = frontPing();
-    delay(10);
-  }
-
-  while ((abs(front_ping - 1000) > 75)){
+  while ((abs(front_ping - 1000) > 100)){
     if (front_ping > 1000){
       Serial.println("Too far, veering right");
-      turnRightAngle(10);
+      turnRightAngle(15);
       delay(250);
     }
     else if (front_ping < 1000){
       Serial.println("Too close, veering left");
-      turnLeftAngle(10);
+      turnLeftAngle(15);
       delay(250);
     }
 
@@ -915,16 +945,12 @@ void parallelPark(){
     delay(400);
 
     front_ping = frontPing();
-    while (front_ping < 5){
-      front_ping = frontPing();
-      delay(10);
-    }
   }
 }
 
 // Moves the robot forwards, ensuring it's parallel to whatever's on the right
 void smartMoveForwards(){
-  // Keep between 800 and 450 for ping
+  // Keep between 900 and 650 for ping
   startWaiting();
 
   float front_ping;
@@ -934,25 +960,17 @@ void smartMoveForwards(){
   delay(10);
   back_ping = backPing();
 
-  if (waitMilliSecond(250)){
-    while (front_ping < 5){
-      front_ping = frontPing();
-      delay(20);
-    }
-    while (back_ping < 5){
-      back_ping = backPing();
-      delay(20);
-    }
+  if (waitMilliSecond(150)){
 
     if ((back_ping - front_ping) > 400){
       reAlign(front_ping);
       Serial.println("Realigning");
     }
-    else if (front_ping > 900){
+    else if (front_ping > 875){
       veerRight(100, 200);
       Serial.println("Too far, need to veer right");
     }
-    else if (front_ping < 650){
+    else if (front_ping < 750){
       veerLeft(100, 200);
       Serial.println("Too close, need to veer left");
     }
@@ -977,12 +995,17 @@ void rotateAmount(long pos){
 
 // Pivots the arm until it's perpendicular to the robot
 void rotatePerpendicular(){
-  if(encoder_RotMotor.getRawPosition() < 740)
-    servo_RotMotor.writeMicroseconds(1700);
-  else if(encoder_RotMotor.getRawPosition() > 760)
-    servo_RotMotor.writeMicroseconds(1300);
-  else
-    servo_RotMotor.writeMicroseconds(1500);
+  if(encoder_RotMotor.getRawPosition() < 640){
+    while (encoder_RotMotor.getRawPosition() < 640){
+      servo_RotMotor.writeMicroseconds(1700); 
+    }
+  }
+  else if(encoder_RotMotor.getRawPosition() > 660){
+    while(encoder_RotMotor.getRawPosition() > 660){
+      servo_RotMotor.writeMicroseconds(1300);
+    }
+  }
+  servo_RotMotor.writeMicroseconds(1500);
 }
 
 // Pivots the arm until it's parallel to the robot
@@ -998,6 +1021,10 @@ void rotateParallel(){
 // Raise the arm
 void moveUp(){
   servo_VerticleMotor.writeMicroseconds(1900);
+}
+
+void armStop(){
+  servo_VerticleMotor.writeMicroseconds(1500);
 }
 
 // Lower the arm
@@ -1069,8 +1096,6 @@ void findBottle(){
   while(true){
     if (bottleDetected(5000)){
       Serial.println("Bottle detected, zooming in");
-      startWaiting();
-      zoomInBottle();
       setNeutral();
       return;
     }
@@ -1086,17 +1111,14 @@ void findBottle(){
     }
     else{
       Serial.println("Moving forward");
-      moveForward(125);
+      moveForward(150);
     }
   }
 }
 
 boolean bottleDetected(float ping_value){
-  float average_background_ping;
   float arm_ping;
-
-  average_background_ping = (armPingNumberOfTimes(10) / 10);
-  arm_ping = (armPingNumberOfTimes(3) / 3);
+  arm_ping = (armPingNumberOfTimes(5) / 5);
 
   if (arm_ping < ping_value){
     return true;
@@ -1106,14 +1128,36 @@ boolean bottleDetected(float ping_value){
   }
 }
 
-void zoomInBottle(){
-  while (!bottleDetected(750)){
-    setNeutral();
-    moveOut();
-    delay(2000);
-    horizontalStop();
-    moveForward(125);
-    delay(2000);
+void zoomIntoBottle(){
+  float arm_ping;
+  arm_ping = (armPingNumberOfTimes(10)/10);
+  
+  int extend_factor;
+  extend_factor = 10;
+
+  while(true){
+    if(arm_ping > 5000){
+    }
+    else if (arm_ping > 4500){
+    }
+    else if (arm_ping > 4000){
+    }
+    else if (arm_ping > 3500){
+    }
+    else if (arm_ping > 3000){
+    }
+    else if (arm_ping > 2500){
+    }
+    else if (arm_ping > 2000){
+    }
+    else if (arm_ping > 1500){
+    }
+    else if (arm_ping > 1000){
+    }
+    else if (arm_ping > 850){
+    }
+    else{
+    }
   }
 }
 
@@ -1131,7 +1175,7 @@ boolean detectLongSide(){
       return false;
     }
     Serial.println("Moving forward");
-    moveForward(100);
+    moveForward(150);
     delay(25);
   }
   Serial.println("Long edge not detected");
@@ -1142,11 +1186,6 @@ boolean detectLongSide(){
 boolean detectObjectRight(){
   float back_ping;
   back_ping = backPing();
-
-  while (back_ping < 5){ // Re-ping if a null value is returned
-    back_ping = backPing();
-    delay(10);
-  }
 
   if (back_ping < 2000){
     Serial.println("Object detected");
