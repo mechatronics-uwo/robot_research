@@ -1420,6 +1420,43 @@ boolean waitMilliSecond(unsigned int interval) {
 
 // Moves forward continuously and scans for a water bottle. Returns true if it detects the bottle, or false if it doesn't
 
+boolean differenceDetected(float first_value, float second_value){
+  if((abs(first_value - second_value)) > 1000){
+    return true;
+  }
+  else{
+    false;
+  }
+}
+
+void findBottleDifferenceMethod(){
+  float first_ping;
+  float second_ping;
+
+  first_ping = (armPingNumberOfTimes(5) / 5);
+
+  while (first_ping > 770){
+    first_ping = (armPingNumberOfTimes(5) / 5);
+    slowSmartMoveForwards();
+    delay(500);
+    second_ping = (armPingNumberOfTimes(5) / 5);
+
+    if differenceDetected(first_ping, second_ping){
+      moveForwardDistance(150);
+      setNeutral();
+      while (!differenceDetected(first_ping, second_ping) && (first_ping > 770)){
+        first_ping = (armPingNumberOfTimes(5) / 5);
+        extendArm();
+        delay(250);
+        second_ping = (armPingNumberOfTimes(5) / 5);
+      }
+      stopHorizontalArm();
+    }
+  }
+  setNeutral();
+  stopHorizontalArm();
+}
+
 void findBottle(){
 
   while(!bottleDetected(5000)){
