@@ -189,18 +189,18 @@ void loop() {
     break;
 
     case 1:
-      // Case status: COMPLETE by Daniel
-      // Start case: Robot is in the middle of the room, unaligned
+      // Stage status: COMPLETE by Daniel
+      // Start stage: Robot is in the middle of the room, unaligned
       pivotAlign();
       delay(500);
       stage = 2;
 
       break;
-      // End case: robot is in the middle of the room, parallel to the wall or table
+      // End stage: robot is in the middle of the room, parallel to the wall or table
 
     case 2:
-      // Case status: COMPLETE by Daniel
-      // Start case: Robot is in the middle of the room, parallel to the wall or table
+      // Stage status: COMPLETE by Daniel
+      // Start stage: Robot is in the middle of the room, parallel to the wall or table
       moveForward(200);
       if(hitWall()){
         setNeutral();
@@ -216,11 +216,11 @@ void loop() {
       }
 
       break;
-      // End case: Robot is parallel to the wall
+      // End stage: Robot is parallel to the wall
 
     case 3:
-      // Case status: COMPLETE by Daniel
-      // Start case: Wall is in front of robot, robot is parallel to it
+      // Stage status: COMPLETE by Daniel
+      // Start stage: Wall is in front of robot, robot is parallel to it
       smartMoveForwards();
       if (hitWall()){
         setNeutral();
@@ -235,31 +235,32 @@ void loop() {
       }
 
       break;
-      // End case: Table is in front of robot, robot is parallel to it
+      // End stage: Table is in front of robot, robot is parallel to it
 
     case 4:
-      // Case status: COMPLETE by Daniel
-      // Start case: Robot is parallel to table, need to align itself to the table
+      // Stage status: COMPLETE by Daniel
+      // Start stage: Robot is parallel to table, need to align itself to the table
       setNeutral();
       pivotAlign();
+      setNeutral();
       stage = 5;
 
       break;
       // Robot is parallel to the table
 
     case 5:
-      // Case status: COMPLETE by Daniel
-      // Start case: Robot is parallel to the table
+      // Stage status: COMPLETE by Daniel
+      // Start stage: Robot is parallel to the table
       backUp();
       setNeutral();
       stage=6;
 
       break;
-      // End case: Robot is parallel to the table, all the way at the end
+      // End stage: Robot is parallel to the table, all the way at the end
 
     case 6:
-      // Case status: COMPLETE by Daniel
-      // Start case: Robot is either on the short or long side of the table
+      // Stage status: COMPLETE by Daniel
+      // Start stage: Robot is either on the short or long side of the table
       if(detectLongSide()){
         setNeutral();
         stage = 8;
@@ -270,26 +271,30 @@ void loop() {
       }
 
       break;
-      // End case: Robot is on the long end of the table, preparing to align itself and find the light
+      // End stage: Robot is on the long end of the table, preparing to align itself and find the light
 
     case 7:
-      // Case status: COMPLETE by Daniel
-      // Start case: Robot has escaped the short edge of the table
-      moveForwardDistance(200);
+      // Stage status: COMPLETE by Daniel
+      // Start stage: Robot has escaped the short edge of the table
+      moveForwardDistance(300);
       delay(500);
       turnRightAngle(100);
       delay(500);
       stage = 8;
 
       break;
-      // End case: Robot is preparing to find the light
+      // End stage: Robot is preparing to find the light
 
     case 8:
-      // Case status: COMPLETE by Daniel
-      // Start case: Robot is preparing to find the light on the table
+      // Stage status: COMPLETE by Daniel
+      // Start stage: Robot is preparing to find the light on the table
       while(!detectLight()){
-        moveForward(150);
+        moveForward(130);
       }
+      setNeutral();
+      delay(1000);
+      moveForwardDistance(300);
+      delay(1000);
       setNeutral();
       stage = 9;
 
@@ -297,116 +302,405 @@ void loop() {
       // Robot is directly in front of the light of the long edge of the table, but needs to align itself at the correct distance
 
     case 9:
-      // Case status: COMPLETE by Daniel
-      // Start case: Robot is by the long edge of the table, needs to align itself at the correct distance
+      // Stage status: COMPLETE by Daniel
+      // Start stage: Robot is by the long edge of the table, needs to align itself at the correct distance
       parallelPark();
       setNeutral();
+      delay(1000);
       stage = 10;
 
       break;
-      // End case: Robot is now at the appropriate distane away from the table, needs to do a final parallel align check
+      // End stage: Robot is now at the appropriate distane away from the table, needs to do a final parallel align check
 
     case 10:
-      // Case status: COMPLETE by Daniel
-      // Start case: Robot is now at the appropriate distane away from the table, needs to do a final parallel align check
-      delay(500);
+      // Stage status: COMPLETE by Daniel
+      // Start stage: Robot is now at the appropriate distane away from the table, needs to do a final parallel align check
       pivotAlign();
       delay(500);
       stage = 11;
 
       break;
-      // End case: Robot is now the correct distance away from the table, but needs to move to the edge
+      // End stage: Robot is now the correct distance away from the table, but needs to move to the edge
 
     // ==================== STAGE 11-20 ====================
     //Finding bottle
 
     case 11:
-    // Case status: COMPLETE by Daniel
-    // Start case: Robot is now the correct distance away from the table, but needs to move to the edge
+    // Stage status: COMPLETE by Daniel
+    // Start stage: Robot is now the correct distance away from the table, but needs to move to the edge
       while(!detectLight()){
         moveBackwards(150);
       }
       setNeutral();
+
+      stage = 12;
+
+      break;
+    // End stage: Robot is now parallel with the table, at the correct distance, and at the edge of the table.
+
+    case 12:
       delay(500);
       pivotAlign();
       delay(500);
       setNeutral();
-      stage = 12;
 
-      break;
-    // End case: Robot is now parallel with the table, at the correct distance, and at the edge of the table.
-
-    case 12:
-    // Case status: IN PROGRESS by Danny
-    // Start case: Robot is in the correct position with respect to the table. Robot needs to raise its arm
-      moveUp();
-      delay(10000);
-      armStop();
-      delay(500);
       stage = 13;
 
       break;
-    // End case: Robot has its arm raised
 
     case 13:
-      rotatePerpendicular();
-      delay(7000);
-      stage = 50;
+    // Stage status: IN PROGRESS by Danny
+    // Start stage: Robot is in the correct position with respect to the table. Robot needs to raise its arm
+      raiseArm();
+      delay(15000);
+      stopArm();
+      delay(1500);
+      stage = 13;
 
       break;
+    // End stage: Robot has its arm raised
 
     case 14:
-      findBottle();
+      rotatePerpendicular();
+      delay(7500);
       stage = 15;
+
       break;
 
     case 15:
+      findBottle();
+      delay(1000);
+      stage = 16;
       break;
 
     case 16:
+      zoomIntoBottle();
+      delay(1000);
+      stage = 17;
       break;
 
+
     case 17:
+      grabBottle();
+      stage = 18;
       break;
 
     case 18:
+      while(!hitTopFront()){
+        retractArm();
+      }
+      stopHorizontalArm();
+      delay(1000);
+      stage = 19;
       break;
 
     case 19:
+      rotateParallel();
+      delay(7500);
+      stage = 20;
+      break;
+
+    case 20:
+      lowerArm();
+      delay(5000);
+      stopArm();
+      stage = 21;
+      break;
+
+
+    // ==================== STAGE 21-30 ====================
+
+    case 21:
+      smartMoveForwards();
+      if (hitWall()){
+        setNeutral();
+        moveBackDistance(300);
+        turnLeftAngle(87);
+      }
+      else if(!detectObjectRight()){
+        setNeutral();
+        delay(1000);
+        moveForwardDistance(300);
+        delay(500);
+        turnRightAngle(100);
+        delay(1000);
+        moveForwardDistance(500);
+      }
+      else if(detectLight())
+      {
+        moveForwardDistance(1000);
+        turnRightAngle(90);
+        moveBackDistance(500);
+        stage = 22;
+      }
+      break;
+
+    case 22:
+      moveForward(500);
+      delay(6000);
+      setNeutral();
+      stage = 23;
+      // if(hitWall()){
+      //  setNeutral();
+      //  moveBackDistance(300);
+      //  turnLeftAngle(87);
+      // }
+      break;
+
+    case 23:
+      turnRightAngle(180);
+      delay(3000);
+      stage = 24;
+      break;
+
+    case 24:
+      pivotAlign();
+      delay(1000);
+      stage = 25;
+      break;
+
+// *****************************************************************
+// ************************** END OF EPIC **************************
+// *****************************************************************
+
+    case 25:
+      moveForward(200);
+      if(hitWall()){
+        setNeutral();
+        moveBackDistance(300);
+        turnLeftAngle(87);
+        stage = 26;
+      }
+      else if(hitTable()){
+        setNeutral();
+        moveBackDistance(300);
+        turnLeftAngle(87);
+        stage = 27;
+      }
+      break;
+
+    case 26:
+      smartMoveForwards();
+      if (hitWall()){
+        setNeutral();
+        moveBackDistance(300);
+        turnLeftAngle(87);
+      }
+      else if(hitTable()){
+        setNeutral();
+        moveBackDistance(300);
+        turnLeftAngle(87);
+        stage = 27;
+      }
+      break;
+
+    case 27:
+      setNeutral();
+      pivotAlign();
+      setNeutral();
+      stage = 28;
+      break;
+
+    case 28:
+      backUp();
+      setNeutral();
+      stage = 29;
+      break;
+
+    case 29:
+      if(detectBottomLongSide()){
+        setNeutral();
+        stage = 31;
+      }
+      else{
+        setNeutral();
+        stage = 30;
+      }
+      break;
+
+    case 30:
+      moveForwardDistance(300);
+      delay(500);
+      turnRightAngle(100);
+      delay(500);
+      stage = 31;
+      break;
+
+
+    // ==================== STAGE 31-40 ====================
+
+
+    case 31:
+      while(!detectBottomLight()){
+        moveForward(130);
+      }
+      setNeutral();
+      delay(1000);
+      moveForwardDistance(300);
+      delay(1000);
+      setNeutral();
+
+      stage = 32;
+      break;
+
+    case 32:
+      parallelPark();
+      setNeutral();
+      delay(1000);
+
+      stage = 33;
+      break;
+
+    case 33:
+      pivotAlign();
+      delay(500);
+
+      stage = 34;
+      break;
+
+    case 34:
+      while(!detectBottomLight()){
+        moveBackwards(150);
+      }
+      setNeutral();
+
+      stage = 35;
+      break;
+
+    case 35:
+      delay(500);
+      pivotAlign();
+      delay(500);
+      setNeutral();
+
+      stage = 36;
+      break;
+
+    case 36:
+      rotatePerpendicular();
+      delay(7500);
+      stage = 37;
+      break;
+
+    case 37:
+      extendArm();
+      delay(3000);
+      stopHorizontalArm();
+      break;
+
+    case 38:
+      lowerArmUntilHit();
+      delay(1000);
+      stage = 39;
+      break;
+
+    case 39:
+      openClaw();
+      delay(3000);
+      stage = 40;
+      break;
+
+    case 40:
+      while(!hitTopFront()){
+        retractArm();
+      }
+      stopHorizontalArm();
+      delay(1000);
+      stage = 41;
+      break;
+
+    // ==================== STAGE 41-49 ====================
+
+    case 41:
+      moveForwardDistance(500);
+      delay(1000);
+      stage = 42;
+      break;
+
+    case 42:
+      findBottle();
+      delay(1000);
+      stage = 43;
+
+      break;
+
+    case 43:
+      zoomIntoBottle();
+      delay(1000);
+      stage = 44;
+      break;
+
+    case 44:
+      grabBottle();
+      stage = 45;
+      break;
+
+    case 45:
+      while(!hitTopFront()){
+        retractArm();
+      }
+      stopHorizontalArm();
+      delay(1000);
+
+      break;
+
+    case 46:
+
+      break;
+
+    case 47:
+
+      break;
+
+    case 48:
+
+      break;
+
+    case 49:
+
+      break;
+
+    case 50:
+
+      break;
+
+    // ==================== STAGE 41-49 ====================
+
+    case 150:
     if(!hitTopFront())
-      moveIn();
+      retractArm();
     else{
-    horizontalStop();
+    stopHorizontalArm();
     stage=14;
     }
       break;
 
-    case 20:
+    case 151:
      if(armPing()>250){
-       moveOut();
+       extendArm();
        openClaw();
      }
      else{
-     horizontalStop();
+     stopHorizontalArm();
      closeClaw();
      stage=13;
      }
 
       break;
 
-    // ==================== STAGE 21-30 ====================
+    // ==================== STAGE 31-40 ====================
     //Finding door from anywhere in the room
 
-    case 21:
-      // Case status:
-      // Start case: Robot is in the middle of the room, unaligned
+    case 152:
+      // Stage status:
+      // Start stage: Robot is in the middle of the room, unaligned
       pivotAlign();
       delay(500);
       stage = 22;
 
       break;
 
-    case 22:
+    case 153:
       moveForward(200);
       if(hitWall()){
         setNeutral();
@@ -419,11 +713,11 @@ void loop() {
         moveBackDistance(300);
         turnLeftAngle(87);
         stage = 24;
-      }      
+      }
 
       break;
 
-    case 23:
+    case 154:
       smartMoveForwards();
       if (hitWall()){
         setNeutral();
@@ -438,18 +732,18 @@ void loop() {
       }
       break;
 
-    case 24:
+    case 155:
     //At table
       setNeutral();
       pivotAlign();
       stage = 26;
       break;
 
-    case 25:
+    case 156:
 
       break;
 
-    case 26:
+    case 157:
       if(detectObjectRight())
         moveForward(150);
       else{
@@ -459,17 +753,17 @@ void loop() {
       }
       break;
 
-    case 27:
+    case 158:
       smartMoveForwards();
       if(hitWall()){
         setNeutral();
         moveBackDistance(300);
-        turnLeftAngle(87); 
+        turnLeftAngle(87);
         stage=28;
       }
       break;
 
-    case 28:
+    case 159:
       //Past table
       smartMoveForwards();
       if(hitWall()){
@@ -487,7 +781,7 @@ void loop() {
       }
       break;
 
-    case 29:
+    case 160:
       moveForward(500);
       if(hitWall()){
         setNeutral();
@@ -496,8 +790,9 @@ void loop() {
       }
       break;
 
-    case 30:
+    case 161:
       break;
+
 
   }
 
@@ -638,7 +933,7 @@ boolean hitTopFront(){
 boolean hitArm(){
   int arm_lever = digitalRead(ARM_SWITCH_PIN);
   if (arm_lever == LOW){
-    Serial.println("Wall");
+    Serial.println("Hit Arm");
     return true;
   }
   else{
@@ -746,8 +1041,8 @@ void moveForwardFixed(){
 }
 
 void moveBackwardsFixed(){
-  Left_Motor_Speed = 1300;
-  Right_Motor_Speed = 1300;
+  Left_Motor_Speed = 1350;
+  Right_Motor_Speed = 1350;
   implementMotorSpeed();
 }
 
@@ -874,7 +1169,7 @@ void brake(){
 void backUp(){
   setNeutral();
   moveBackwardsFixed();
-  delay(1500);
+  delay(1250);
   setNeutral();
 }
 
@@ -908,19 +1203,20 @@ void pivotAlign(){
 
 // Used to prevent the robot from crashing into the wall if it's angled too steeply
 void reAlign(float ping_value){
-    float front_ping = ping_value;
-    if (front_ping < 300){
-      setNeutral();
-      turnLeftAngle(25);
-      moveForward(200);
-    }
-    else{
-      moveForward(200);
-      delay(1000);
-      setNeutral();
-      turnLeftAngle(20);
-    }
+  float front_ping = ping_value;
+  if (front_ping < 300){
+    setNeutral();
+    turnLeftAngle(25);
+    moveForward(200);
+  }
+  else{
+    moveForward(200);
+    delay(1000);
+    setNeutral();
+    turnLeftAngle(20);
+  }
 }
+
 
 // Aligns the robot parallel to whatever's on the right approximately 15 centimeters away
 void parallelPark(){
@@ -931,18 +1227,18 @@ void parallelPark(){
     if (front_ping > 1000){
       Serial.println("Too far, veering right");
       turnRightAngle(15);
-      delay(250);
+      delay(500);
     }
     else if (front_ping < 1000){
       Serial.println("Too close, veering left");
       turnLeftAngle(15);
-      delay(250);
+      delay(500);
     }
 
     moveForwardDistance(200);
-    delay(100);
+    delay(500);
     pivotAlign();
-    delay(400);
+    delay(500);
 
     front_ping = frontPing();
   }
@@ -981,6 +1277,34 @@ void smartMoveForwards(){
   }
 }
 
+void slowSmartMoveForwards(){
+  // Keep between 900 and 650 for ping
+  startWaiting();
+
+  float front_ping;
+  float back_ping;
+
+  front_ping = frontPing();
+  delay(10);
+  back_ping = backPing();
+
+  if (waitMilliSecond(100)){
+
+    if (front_ping > 1050){
+      veerRight(50, 200);
+      Serial.println("Too far, need to veer right");
+    }
+    else if (front_ping < 950){
+      veerLeft(50, 200);
+      Serial.println("Too close, need to veer left");
+    }
+    else {
+      moveForward(130);
+      Serial.println("Everything's perfect");
+    }
+  }
+}
+
 // -------------------- !ARM FUNCTIONS --------------------
 
 void rotateAmount(long pos){
@@ -997,7 +1321,7 @@ void rotateAmount(long pos){
 void rotatePerpendicular(){
   if(encoder_RotMotor.getRawPosition() < 640){
     while (encoder_RotMotor.getRawPosition() < 640){
-      servo_RotMotor.writeMicroseconds(1700); 
+      servo_RotMotor.writeMicroseconds(1700);
     }
   }
   else if(encoder_RotMotor.getRawPosition() > 660){
@@ -1010,39 +1334,44 @@ void rotatePerpendicular(){
 
 // Pivots the arm until it's parallel to the robot
 void rotateParallel(){
-  if(encoder_RotMotor.getRawPosition() < -10)
-    servo_RotMotor.writeMicroseconds(1700);
-  else if(encoder_RotMotor.getRawPosition() > 10)
-    servo_RotMotor.writeMicroseconds(1300);
-  else
-    servo_RotMotor.writeMicroseconds(1500);
+  if(encoder_RotMotor.getRawPosition() < -10){
+    while(encoder_RotMotor.getRawPosition() < -10){
+      servo_RotMotor.writeMicroseconds(1700);
+    }
+  }
+  else if(encoder_RotMotor.getRawPosition() > 10){
+    while(encoder_RotMotor.getRawPosition() > 10){
+      servo_RotMotor.writeMicroseconds(1300);
+    }
+  }
+  servo_RotMotor.writeMicroseconds(1500);
 }
 
 // Raise the arm
-void moveUp(){
+void raiseArm(){
   servo_VerticleMotor.writeMicroseconds(1900);
 }
 
-void armStop(){
+void stopArm(){
   servo_VerticleMotor.writeMicroseconds(1500);
 }
 
 // Lower the arm
-void moveDown(){
+void lowerArm(){
   servo_VerticleMotor.writeMicroseconds(1250);
 }
 
 // Extend the arm
-void moveOut(){
+void extendArm(){
   servo_ExtendMotor.writeMicroseconds(1250);
 }
 
 // Retract the arm
-void moveIn(){
+void retractArm(){
   servo_ExtendMotor.writeMicroseconds(1800);
 }
 
-void horizontalStop(){
+void stopHorizontalArm(){
   servo_ExtendMotor.writeMicroseconds(1500);
 }
 
@@ -1093,13 +1422,8 @@ boolean waitMilliSecond(unsigned int interval) {
 
 void findBottle(){
 
-  while(true){
-    if (bottleDetected(5000)){
-      Serial.println("Bottle detected, zooming in");
-      setNeutral();
-      return;
-    }
-    else if (hitWall()){
+  while(!bottleDetected(5000)){
+    if (hitWall()){
       Serial.println("Hit the wall");
       setNeutral();
       return;
@@ -1111,9 +1435,12 @@ void findBottle(){
     }
     else{
       Serial.println("Moving forward");
-      moveForward(150);
+      slowSmartMoveForwards();
     }
   }
+  Serial.println("Bottle detected, zooming in");
+  setNeutral();
+  return;
 }
 
 boolean bottleDetected(float ping_value){
@@ -1130,35 +1457,138 @@ boolean bottleDetected(float ping_value){
 
 void zoomIntoBottle(){
   float arm_ping;
-  arm_ping = (armPingNumberOfTimes(10)/10);
-  
-  int extend_factor;
-  extend_factor = 10;
 
-  while(true){
+  int factor;
+  factor = 1.5;
+
+  while(!bottleDetected(770)){
+    arm_ping = (armPingNumberOfTimes(10)/10);
+    delay(1000);
     if(arm_ping > 5000){
+      Serial.println("5000");
+      Serial.println("5000");
+      moveForwardDistance(500*factor);
+      delay(500);
+      extendArm();
+      delay(5000);
+      stopHorizontalArm();
+      delay(1000);
     }
     else if (arm_ping > 4500){
+      Serial.println("4500");
+      moveForwardDistance(450*factor);
+      delay(500);
+      extendArm();
+      delay(4500);
+      stopHorizontalArm();
+      delay(1000);
     }
     else if (arm_ping > 4000){
+      Serial.println("4000");
+      moveForwardDistance(400*factor);
+      delay(500);
+      extendArm();
+      delay(4000);
+      stopHorizontalArm();
+      delay(1000);
     }
     else if (arm_ping > 3500){
+      Serial.println("3500");
+      moveForwardDistance(350*factor);
+      delay(500);
+      extendArm();
+      delay(3500);
+      stopHorizontalArm();
+      delay(1000);
     }
     else if (arm_ping > 3000){
+      Serial.println("3000");
+      moveForwardDistance(300*factor);
+      delay(500);
+      extendArm();
+      delay(3000);
+      stopHorizontalArm();
+      delay(1000);
     }
     else if (arm_ping > 2500){
+      Serial.println("2500");
+      moveForwardDistance(250*factor);
+      delay(500);
+      extendArm();
+      delay(2500);
+      stopHorizontalArm();
+      delay(1000);
     }
     else if (arm_ping > 2000){
+      Serial.println("2000");
+      moveForwardDistance(200*factor);
+      delay(500);
+      extendArm();
+      delay(2000);
+      stopHorizontalArm();
+      delay(1000);
     }
     else if (arm_ping > 1500){
+      Serial.println("1500");
+      moveForwardDistance(150*factor);
+      delay(500);
+      extendArm();
+      delay(1500);
+      stopHorizontalArm();
+      delay(1000);
     }
     else if (arm_ping > 1000){
+      Serial.println("1000");
+      moveForwardDistance(100*factor);
+      delay(500);
+      extendArm();
+      delay(1000);
+      stopHorizontalArm();
+      delay(1000);
     }
     else if (arm_ping > 850){
+      Serial.println("850");
+      moveForwardDistance(85*factor);
+      delay(500);
+      extendArm();
+      delay(850);
+      stopHorizontalArm();
+      delay(1000);
     }
-    else{
+    else if (arm_ping > 780){
+      Serial.println("780");
+      moveForwardDistance(78*factor);
+      delay(500);
+      extendArm();
+      delay(780);
+      stopHorizontalArm();
+      delay(1000);
     }
   }
+  Serial.println("Last moving forward...");
+  moveForwardDistance(250);
+  delay(1000);
+}
+
+void grabBottle(){
+  openClaw();
+  delay(4000);
+  while(!bottleDetected(250)){
+    extendArm();
+  }
+  stopHorizontalArm();
+  delay(1000);
+  lowerArmUntilHit();
+  delay(1000);
+  closeClaw();
+  delay(4000);
+}
+
+void lowerArmUntilHit(){
+  while(!hitArm()){
+    lowerArm();
+  }
+  stopArm();
 }
 
 // Moves forward continuously and scans for a light source. Returns true if it detects a light source, or false if it doesn't
@@ -1175,7 +1605,28 @@ boolean detectLongSide(){
       return false;
     }
     Serial.println("Moving forward");
-    moveForward(150);
+    moveForward(130);
+    delay(25);
+  }
+  Serial.println("Long edge not detected");
+  return false;
+}
+
+// Moves forward continuously and scans for a bottom light source. Returns true if it detects a light source, or false if it doesn't
+boolean detectBottomLongSide(){
+  while (detectObjectRight()){
+    if (detectBottomLight()){
+      Serial.println("Long edge of the table detected, ending loop");
+      setNeutral();
+      return true;
+    }
+    if (hitWall()){
+      Serial.println("Hit the wall, ending loop");
+      setNeutral();
+      return false;
+    }
+    Serial.println("Moving forward");
+    moveForward(130);
     delay(25);
   }
   Serial.println("Long edge not detected");
