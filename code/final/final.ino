@@ -1442,12 +1442,12 @@ void findBottleDifferenceMethod(){
     second_ping = (armPingNumberOfTimes(5) / 5);
 
     if differenceDetected(first_ping, second_ping){
-      moveForwardDistance(150);
+      moveForwardDistance(200);
       setNeutral();
       while (!differenceDetected(first_ping, second_ping) && (first_ping > 770)){
         first_ping = (armPingNumberOfTimes(5) / 5);
         extendArm();
-        delay(250);
+        delay(500);
         second_ping = (armPingNumberOfTimes(5) / 5);
       }
       stopHorizontalArm();
