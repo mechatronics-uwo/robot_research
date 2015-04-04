@@ -58,6 +58,7 @@ const int TOP_BACK_LEVER_SWITCH_PIN = 10;
 const int TOP_FRONT_LEVER_SWITCH_PIN = 11;
 
 const int ARM_SWITCH_PIN = 12;
+const int LOWER_ARM_SWITCH_PIN = 13;
 
 const int ULTRASONIC_IN_PIN_FRONT = 52;
 const int ULTRASONIC_OUT_PIN_FRONT = 53;
@@ -135,6 +136,7 @@ void setup(){
   pinMode(TOP_FRONT_LEVER_SWITCH_PIN, INPUT_PULLUP);
 
   pinMode(ARM_SWITCH_PIN, INPUT_PULLUP);
+  pinMode(LOWER_ARM_SWITCH_PIN, INPUT_PULLUP);
 
   digitalWrite(FRONT_TOP_LEVER_SWITCH_PIN, HIGH);
   digitalWrite(FRONT_BOTTOM_LEVER_SWITCH_PIN, HIGH);
@@ -183,8 +185,7 @@ void loop() {
       openClaw
       closeClaw
       */
-      pivotAlign();
-      stage = 50;
+      stage = 48;
 
     break;
 
@@ -355,33 +356,52 @@ void loop() {
       delay(15000);
       stopArm();
       delay(1500);
-      stage = 13;
+      stage = 14;
 
       break;
     // End stage: Robot has its arm raised
 
     case 14:
       rotatePerpendicular();
-      delay(7500);
+      delay(4000);
       stage = 15;
 
       break;
 
     case 15:
-      findBottle();
-      delay(1000);
-      stage = 16;
+//      findBottleDifferenceMethod();
+//      delay(1000);
+      if(findBottleDanny()){
+        stage = 16;
+      }
+//      stage = 17;
       break;
 
     case 16:
-      zoomIntoBottle();
-      delay(1000);
-      stage = 17;
+//      zoomIntoBottle();
+//      delay(1000);
+      if (armPing() > 260){
+        extendArm();
+        openClaw();
+      }
+      else {
+        stopHorizontalArm();
+        delay(50);
+        while(!hitArm()){
+          lowerArm();
+        }
+        stopArm();
+        delay(250);
+        closeClaw();
+        delay(3000);
+        stopClaw();
+        stage = 17;
+      }
       break;
 
 
     case 17:
-      grabBottle();
+      pivotAlign();
       stage = 18;
       break;
 
@@ -390,20 +410,26 @@ void loop() {
         retractArm();
       }
       stopHorizontalArm();
-      delay(1000);
+      delay(500);
       stage = 19;
       break;
 
     case 19:
+      lowerArm();
+      delay(1300);
+      stopHorizontalArm();
+      delay(100);
       rotateParallel();
-      delay(7500);
+      delay(500);
+      stopRotation();
       stage = 20;
       break;
 
     case 20:
       lowerArm();
-      delay(5000);
+      delay(6000);
       stopArm();
+      detatchArmMotors();
       stage = 21;
       break;
 
@@ -416,6 +442,7 @@ void loop() {
         setNeutral();
         moveBackDistance(300);
         turnLeftAngle(87);
+        count = 1;
       }
       else if(!detectObjectRight()){
         setNeutral();
@@ -424,10 +451,13 @@ void loop() {
         delay(500);
         turnRightAngle(100);
         delay(1000);
-        moveForwardDistance(500);
+        moveForwardDistance(800); // Set as 800 to clear table
       }
-      else if(detectLight())
+      else if((detectLight()) && (count == 1))
       {
+        setNeutral();
+        pivotAlign();
+        setNeutral();
         moveForwardDistance(1000);
         turnRightAngle(90);
         moveBackDistance(500);
@@ -436,9 +466,9 @@ void loop() {
       break;
 
     case 22:
-      moveForward(500);
+      count = 0;
+      moveForward(400);
       delay(6000);
-      setNeutral();
       stage = 23;
       // if(hitWall()){
       //  setNeutral();
@@ -448,8 +478,10 @@ void loop() {
       break;
 
     case 23:
-      turnRightAngle(180);
-      delay(3000);
+      setNeutral();
+      turnRightAngle(100);
+      delay(1000);
+      setNeutral();
       stage = 24;
       break;
 
@@ -472,6 +504,7 @@ void loop() {
         stage = 26;
       }
       else if(hitTable()){
+        attachArmMotors();
         setNeutral();
         moveBackDistance(300);
         turnLeftAngle(87);
@@ -495,9 +528,11 @@ void loop() {
       break;
 
     case 27:
+      attachArmMotors();
       setNeutral();
       pivotAlign();
       setNeutral();
+      delay(1000);
       stage = 28;
       break;
 
@@ -653,15 +688,45 @@ void loop() {
       break;
 
     case 48:
+      detatchArmMotors();
+      stage = 49;
 
       break;
 
     case 49:
-
+      smartMoveForwards();
+      if (hitWall()){
+        setNeutral();
+        moveBackDistance(300);
+        turnLeftAngle(87);
+        count = 1;
+      }
+      else if(!detectObjectRight()){
+        setNeutral();
+        delay(1000);
+        moveForwardDistance(300);
+        delay(500);
+        turnRightAngle(100);
+        delay(1000);
+        moveForwardDistance(800); // Set as 800 to clear table
+      }
+      else if((detectLight()) && (count == 1))
+      {
+        setNeutral();
+        pivotAlign();
+        setNeutral();
+        moveForwardDistance(400);
+        turnRightAngle(110);
+        moveBackDistance(500);
+        stage = 50;
+      }
       break;
 
     case 50:
-
+      count = 0;
+      moveForward(400);
+      delay(6000);
+      stage = 23;
       break;
 
     // ==================== STAGE 41-49 ====================
@@ -896,7 +961,7 @@ boolean hitTable(){
 boolean hitWall(){
   int bottom_lever = digitalRead(FRONT_BOTTOM_LEVER_SWITCH_PIN);
   int top_lever = digitalRead(FRONT_TOP_LEVER_SWITCH_PIN);
-  if ((top_lever == LOW) && (bottom_lever == LOW)){
+  if ((top_lever == LOW)){
     Serial.println("Wall");
     return true;
   }
@@ -942,6 +1007,18 @@ boolean hitArm(){
   }
 }
 
+boolean hitLowerArm(){
+  int arm_lever = digitalRead(LOWER_ARM_SWITCH_PIN);
+  if (arm_lever == LOW){
+    Serial.println("Hit Lower Arm");
+    return true;
+  }
+  else{
+    Serial.println("Nothing");
+    return false;
+  }
+}
+
 // Ping the arm ultrasonic sensor -number_of_times- and returns the total value of the pings
 float armPingNumberOfTimes(int number_of_times){
   float total_ping_value;
@@ -978,7 +1055,7 @@ boolean detectLight(){
   light_value = analogRead(RIGHT_LIGHT_SENSOR);
   Serial.print("Light value: ");
   Serial.println(light_value);
-  if (light_value < 50){
+  if (light_value < 100){
     Serial.println("Light detected");
     return true;
   }
@@ -994,7 +1071,7 @@ boolean detectBottomLight(){
   light_value = analogRead(RIGHT_BOTTOM_LIGHT_SENSOR);
   Serial.print("Light value: ");
   Serial.println(light_value);
-  if (light_value < 50){
+  if (light_value < 200){
     Serial.println("Light detected");
     return true;
   }
@@ -1183,7 +1260,7 @@ void pivotAlign(){
   front_ping = frontPing();
   back_ping = backPing();
 
-  while ((abs(front_ping - back_ping)) > 50){
+  while ((abs(front_ping - back_ping)) > 65){
     if (front_ping > back_ping){
       Serial.println("Gotta pivot right");
       turnRightAngle(2);
@@ -1206,7 +1283,7 @@ void reAlign(float ping_value){
   float front_ping = ping_value;
   if (front_ping < 300){
     setNeutral();
-    turnLeftAngle(25);
+    turnLeftAngle(20);
     moveForward(200);
   }
   else{
@@ -1235,7 +1312,7 @@ void parallelPark(){
       delay(500);
     }
 
-    moveForwardDistance(200);
+    moveForwardDistance(300);
     delay(500);
     pivotAlign();
     delay(500);
@@ -1347,6 +1424,10 @@ void rotateParallel(){
   servo_RotMotor.writeMicroseconds(1500);
 }
 
+void stopRotation(){
+  servo_RotMotor.writeMicroseconds(1500);
+}
+
 // Raise the arm
 void raiseArm(){
   servo_VerticleMotor.writeMicroseconds(1900);
@@ -1358,7 +1439,7 @@ void stopArm(){
 
 // Lower the arm
 void lowerArm(){
-  servo_VerticleMotor.writeMicroseconds(1250);
+  servo_VerticleMotor.writeMicroseconds(1100);
 }
 
 // Extend the arm
@@ -1385,6 +1466,10 @@ void closeClaw(){
   Serial.println("Closing the claw");
   servo_ClawMotor.writeMicroseconds(1400);
   delay(1500);
+}
+
+void stopClaw(){
+  servo_ClawMotor.writeMicroseconds(1500);
 }
 
 void calcRotTurn(long fullCircle, int angle){
@@ -1418,10 +1503,44 @@ boolean waitMilliSecond(unsigned int interval) {
 
 // -------------------- !INTEGRATION FUNCTIONS --------------------
 
+boolean findBottleDanny(){
+  float arm_ping;
+
+  // Calculate the average background noise
+  float average_background_ping;
+  float moveDistance;
+  average_background_ping = (armPingNumberOfTimes(10) / 10);
+
+  while(true){
+    average_background_ping = (armPingNumberOfTimes(10) / 10);
+    if (average_background_ping < 5000){
+      Serial.println("Bottle detected");
+      setNeutral();
+      moveDistance=(average_background_ping/71.00)*0.1005; // 0.1305
+      moveForwardDistance(25.00*moveDistance);
+      return true;
+    }
+    else if (hitWall()){
+      Serial.println("Hit the wall");
+      setNeutral();
+      return false;
+    }
+    else if (!detectObjectRight){
+      Serial.println("Drove past the table");
+      setNeutral();
+      return false;
+    }
+    else{
+      Serial.println("Moving forward");
+      moveForward(100);
+    }
+  }
+}
+
 // Moves forward continuously and scans for a water bottle. Returns true if it detects the bottle, or false if it doesn't
 
 boolean differenceDetected(float first_value, float second_value){
-  if((abs(first_value - second_value)) > 1000){
+  if((abs(first_value - second_value)) > 600){
     return true;
   }
   else{
@@ -1433,24 +1552,27 @@ void findBottleDifferenceMethod(){
   float first_ping;
   float second_ping;
 
-  first_ping = (armPingNumberOfTimes(5) / 5);
+  first_ping = (armPingNumberOfTimes(3)/3);
 
   while (first_ping > 770){
-    first_ping = (armPingNumberOfTimes(5) / 5);
-    slowSmartMoveForwards();
-    delay(500);
-    second_ping = (armPingNumberOfTimes(5) / 5);
+    Serial.println("Moving forward");
+    first_ping = (armPingNumberOfTimes(3)/3);
+    moveForward(110);
+    delay(1000);
+    second_ping = (armPingNumberOfTimes(3)/3);
 
-    if differenceDetected(first_ping, second_ping){
-      moveForwardDistance(200);
+    if (differenceDetected(first_ping, second_ping)){
+      Serial.println("Difference detected, entering inner loop");
       setNeutral();
-      while (!differenceDetected(first_ping, second_ping) && (first_ping > 770)){
+      while ((!differenceDetected(first_ping, second_ping)) && (first_ping > 770)){
+        Serial.println("Extending");
         first_ping = (armPingNumberOfTimes(5) / 5);
         extendArm();
-        delay(500);
+        delay(1000);
         second_ping = (armPingNumberOfTimes(5) / 5);
       }
       stopHorizontalArm();
+      Serial.println("Stopping the arm");
     }
   }
   setNeutral();
@@ -1472,7 +1594,7 @@ void findBottle(){
     }
     else{
       Serial.println("Moving forward");
-      slowSmartMoveForwards();
+      moveForwardDistance(300);
     }
   }
   Serial.println("Bottle detected, zooming in");
@@ -1497,6 +1619,9 @@ void zoomIntoBottle(){
 
   int factor;
   factor = 1.5;
+  
+  int extend_factor;
+  extend_factor = 2;
 
   while(!bottleDetected(770)){
     arm_ping = (armPingNumberOfTimes(10)/10);
@@ -1507,7 +1632,7 @@ void zoomIntoBottle(){
       moveForwardDistance(500*factor);
       delay(500);
       extendArm();
-      delay(5000);
+      delay(5000*extend_factor);
       stopHorizontalArm();
       delay(1000);
     }
@@ -1516,7 +1641,7 @@ void zoomIntoBottle(){
       moveForwardDistance(450*factor);
       delay(500);
       extendArm();
-      delay(4500);
+      delay(4500*extend_factor);
       stopHorizontalArm();
       delay(1000);
     }
@@ -1525,7 +1650,7 @@ void zoomIntoBottle(){
       moveForwardDistance(400*factor);
       delay(500);
       extendArm();
-      delay(4000);
+      delay(4000*extend_factor);
       stopHorizontalArm();
       delay(1000);
     }
@@ -1534,7 +1659,7 @@ void zoomIntoBottle(){
       moveForwardDistance(350*factor);
       delay(500);
       extendArm();
-      delay(3500);
+      delay(3500*extend_factor);
       stopHorizontalArm();
       delay(1000);
     }
@@ -1543,7 +1668,7 @@ void zoomIntoBottle(){
       moveForwardDistance(300*factor);
       delay(500);
       extendArm();
-      delay(3000);
+      delay(3000*extend_factor);
       stopHorizontalArm();
       delay(1000);
     }
@@ -1552,7 +1677,7 @@ void zoomIntoBottle(){
       moveForwardDistance(250*factor);
       delay(500);
       extendArm();
-      delay(2500);
+      delay(2500*extend_factor);
       stopHorizontalArm();
       delay(1000);
     }
@@ -1561,7 +1686,7 @@ void zoomIntoBottle(){
       moveForwardDistance(200*factor);
       delay(500);
       extendArm();
-      delay(2000);
+      delay(2000*extend_factor);
       stopHorizontalArm();
       delay(1000);
     }
@@ -1570,7 +1695,7 @@ void zoomIntoBottle(){
       moveForwardDistance(150*factor);
       delay(500);
       extendArm();
-      delay(1500);
+      delay(1500*extend_factor);
       stopHorizontalArm();
       delay(1000);
     }
@@ -1579,7 +1704,7 @@ void zoomIntoBottle(){
       moveForwardDistance(100*factor);
       delay(500);
       extendArm();
-      delay(1000);
+      delay(1000*extend_factor);
       stopHorizontalArm();
       delay(1000);
     }
@@ -1588,7 +1713,7 @@ void zoomIntoBottle(){
       moveForwardDistance(85*factor);
       delay(500);
       extendArm();
-      delay(850);
+      delay(850*extend_factor);
       stopHorizontalArm();
       delay(1000);
     }
@@ -1597,7 +1722,7 @@ void zoomIntoBottle(){
       moveForwardDistance(78*factor);
       delay(500);
       extendArm();
-      delay(780);
+      delay(780*extend_factor);
       stopHorizontalArm();
       delay(1000);
     }
@@ -1684,3 +1809,52 @@ boolean detectObjectRight(){
     return false;
   }
 }
+
+// Detatch and attach functions
+
+void detatchArmMotors(){
+  detatchRotMotor();
+  detatchExtendMotor();
+  detatchVerticalMotor();
+  detatchClawMotor();
+}
+
+void detatchRotMotor(){
+  servo_RotMotor.detach();
+}
+
+void detatchExtendMotor(){
+  servo_ExtendMotor.detach();
+}
+
+void detatchVerticalMotor(){
+  servo_VerticleMotor.detach();
+}
+
+void detatchClawMotor(){
+  servo_ClawMotor.detach();
+}
+
+void attachArmMotors(){
+  attachRotMotor();
+  attachExtendMotor();
+  attachVerticalMotor();
+  attachClawMotor();
+}
+
+void attachRotMotor(){
+  servo_RotMotor.attach(ROT_MOTOR_PIN);
+}
+
+void attachExtendMotor(){
+  servo_ExtendMotor.attach(EXTEND_MOTOR_PIN);
+}
+
+void attachVerticalMotor(){
+  servo_VerticleMotor.attach(VERTICLE_MOTOR_PIN);
+}
+
+void attachClawMotor(){
+  servo_ClawMotor.attach(CLAW_MOTOR_PIN);
+}
+
