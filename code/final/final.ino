@@ -185,7 +185,7 @@ void loop() {
       openClaw
       closeClaw
       */
-      stage = 48;
+      stage = 1;
 
     break;
 
@@ -653,7 +653,7 @@ void loop() {
       break;
 
     case 42:
-      findBottle();
+      findBottleDanny();
       delay(1000);
       stage = 43;
 
@@ -1055,7 +1055,7 @@ boolean detectLight(){
   light_value = analogRead(RIGHT_LIGHT_SENSOR);
   Serial.print("Light value: ");
   Serial.println(light_value);
-  if (light_value < 100){
+  if (light_value < 65){
     Serial.println("Light detected");
     return true;
   }
@@ -1071,7 +1071,7 @@ boolean detectBottomLight(){
   light_value = analogRead(RIGHT_BOTTOM_LIGHT_SENSOR);
   Serial.print("Light value: ");
   Serial.println(light_value);
-  if (light_value < 200){
+  if (light_value < 65){
     Serial.println("Light detected");
     return true;
   }
