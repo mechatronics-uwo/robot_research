@@ -185,6 +185,8 @@ void loop() {
       openClaw
       closeClaw
       */
+      detachArmMotors();
+      delay(250);
       stage = 1;
 
     break;
@@ -344,6 +346,8 @@ void loop() {
       pivotAlign();
       delay(500);
       setNeutral();
+      attachArmMotors();
+      delay(250);
 
       stage = 13;
 
@@ -353,7 +357,7 @@ void loop() {
     // Stage status: IN PROGRESS by Danny
     // Start stage: Robot is in the correct position with respect to the table. Robot needs to raise its arm
       raiseArm();
-      delay(15000);
+      delay(8000);
       stopArm();
       delay(1500);
       stage = 14;
@@ -363,18 +367,16 @@ void loop() {
 
     case 14:
       rotatePerpendicular();
-      delay(4000);
+      delay(3000);
       stage = 15;
 
       break;
 
     case 15:
-//      findBottleDifferenceMethod();
-//      delay(1000);
       if(findBottleDanny()){
         stage = 16;
       }
-//      stage = 17;
+
       break;
 
     case 16:
@@ -387,11 +389,8 @@ void loop() {
       else {
         stopHorizontalArm();
         delay(50);
-        while(!hitArm()){
-          lowerArm();
-        }
         stopArm();
-        delay(250);
+        delay(50);
         closeClaw();
         delay(3000);
         stopClaw();
@@ -427,10 +426,12 @@ void loop() {
 
     case 20:
       lowerArm();
-      delay(8000);
+      delay(6000);
       stopArm();
-      detatchArmMotors();
+      detachArmMotors();
+      delay(250);
       stage = 21;
+
       break;
 
 
@@ -480,7 +481,7 @@ void loop() {
     case 23:
       setNeutral();
       backUp();
-      turnRightAngle(110);
+      turnRightAngle(130);
       delay(1000);
       setNeutral();
       stage = 24;
@@ -528,10 +529,10 @@ void loop() {
       break;
 
     case 27:
-      attachArmMotors();
       setNeutral();
       pivotAlign();
       setNeutral();
+      delay(1000);
       stage = 28;
       break;
 
@@ -596,7 +597,7 @@ void loop() {
 
     case 34:
       while(!detectBottomLight()){
-        moveBackwards(150);
+        moveBackwards(130);
       }
       setNeutral();
 
@@ -608,6 +609,8 @@ void loop() {
       pivotAlign();
       delay(500);
       setNeutral();
+      attachArmMotors();
+      delay(250);
 
       stage = 36;
       break;
@@ -619,7 +622,7 @@ void loop() {
       stopArm();
       delay(1000);
       raiseArm();
-      delay(5000);
+      delay(3500);
       stopArm();
       stage = 37;
       break;
@@ -627,19 +630,18 @@ void loop() {
     case 37:
       rotatePerpendicular();
       delay(4500);
+      stopRotation();
       stage = 38;
       break;
 
     case 38:
       extendArm();
-      delay(5000);
+      delay(4000);
       stopHorizontalArm();
-      stage = 39;
+      stage = 40;
       break;
 
     case 39:
-      lowerArmUntilHit();
-      delay(1000);
       stage = 40;
       break;
 
@@ -647,6 +649,10 @@ void loop() {
       openClaw();
       delay(3000);
       stopClaw();
+      lowerArmUntilHit();
+      raiseArm();
+      delay(1500);
+      stopArm();
       stage = 41;
       break;
 
@@ -660,13 +666,13 @@ void loop() {
       }
       stopHorizontalArm();
       closeClaw();
-      delay(4500);
+      delay(3500);
       stopClaw();
       stage = 42;
       break;
 
     case 42:
-      moveForwardDistance(600);
+      moveForwardDistance(700);
       delay(1000);
       stage = 43;
       break;
@@ -684,12 +690,7 @@ void loop() {
       }
       else {
         stopHorizontalArm();
-        delay(50);
-        while(!hitArm()){
-          lowerArm();
-        }
-        stopArm();
-        delay(250);
+        delay(1000);
         closeClaw();
         delay(3000);
         stopClaw();
@@ -714,10 +715,6 @@ void loop() {
       break;
 
     case 47:
-      lowerArm();
-      delay(1300);
-      stopArm();
-      delay(100);
       rotateParallel();
       delay(500);
       stopRotation();
@@ -726,11 +723,8 @@ void loop() {
       break;
 
     case 48:
-      while(!hitLowerArm()){
-        lowerArm();
-      }
-      stopArm();
-      detatchArmMotors();
+      detachArmMotors();
+      delay(250);
       stage = 49;
 
       break;
@@ -782,7 +776,7 @@ void loop() {
 
     case 52:
       setNeutral();
-      turnRightAngle(110);
+      turnRightAngle(130);
       delay(1000);
       setNeutral();
       stage = 53;
@@ -801,15 +795,18 @@ void loop() {
         setNeutral();
         moveBackDistance(300);
         turnLeftAngle(87);
-        stage = 55;
+        stage = 56;
       }
       else if(hitTable()){
-        attachArmMotors();
         setNeutral();
         moveBackDistance(300);
         turnLeftAngle(87);
-        stage = 56;
+        stage = 57;
       }
+      break;
+
+    case 55:
+      stage = 56;
       break;
 
     case 56:
@@ -828,7 +825,6 @@ void loop() {
       break;
 
     case 57:
-      attachArmMotors();
       setNeutral();
       pivotAlign();
       setNeutral();
@@ -845,11 +841,11 @@ void loop() {
     case 59:
       if(detectLongSide()){
         setNeutral();
-        stage = 60;
+        stage = 61;
       }
       else{
         setNeutral();
-        stage = 61;
+        stage = 60;
       }
 
       break;
@@ -859,7 +855,7 @@ void loop() {
       delay(500);
       turnRightAngle(100);
       delay(500);
-      stage = 60;
+      stage = 61;
 
       break;
 
@@ -921,32 +917,33 @@ void loop() {
       stage = 67;
 
     case 67:
-      while (!hitLowerArm()){
-        lowerArm();
-      }
-      stopArm();
+      delay(50);
+      attachArmMotors();
+      delay(250);
       stage = 68;
       break;
 
     case 68:
       raiseArm();
-      delay(5000);
+      delay(2500);
       stopArm();
       stage = 69;
       break;
 
     case 69:
       rotatePerpendicular();
-      delay(4500);
+      delay(3000);
+      stopRotation();
       stage = 70;
       break;
 
     case 70:
       extendArm();
-      delay(6000);
+      delay(3750);
       stopArm();
+      delay(500);
       openClaw();
-      delay(4500);
+      delay(3000);
       stopClaw();
       stage = 71;
       break;
@@ -962,8 +959,18 @@ void loop() {
       delay(500);
       closeClaw();
       delay(4500);
-      stage = 999;
+      stopClaw();
+      stage = 72;
       break;
+
+    case 72:
+      rotateParallel();
+      delay(3000);
+      stopRotation();
+      detachArmMotors();
+      stage = 999;
+
+    break;
 
     // ==================== LEGACY STAGES ====================
 
@@ -2030,6 +2037,33 @@ boolean detectBottomLongSide(){
   return false;
 }
 
+boolean detectObjectRightAverage(){
+  float back_ping;
+  float back_sum;
+
+  back_sum = 0;
+
+  back_ping = backPing();
+  back_sum = back_ping;
+  delay(10);
+  back_ping = backPing();
+  back_sum = back_ping;
+  delay(10);
+  back_ping = backPing();
+  back_sum = back_ping;
+
+  back_sum = (back_sum / 3);
+
+  if (back_sum < 2000){
+    Serial.println("Object detected");
+    return true;
+  }
+  else {
+    Serial.println("No object detected");
+    return false;
+  }
+}
+
 // Returns true if there's an object on the right, otherwise it returns false
 boolean detectObjectRight(){
   float back_ping;
@@ -2045,55 +2079,28 @@ boolean detectObjectRight(){
   }
 }
 
-boolean detectObjectRightAverage(){
-  float back_ping;
-  float back_sum;
+// ------------------ Detach and attach functions ------------------
 
-  back_sum = 0;
-
-  back_ping = backPing();
-  back_sum += back_ping;
-  delay(10);
-  back_ping = backPing();
-  back_sum += back_ping;
-  delay(10);
-  back_ping = backPing();
-  back_sum += back_ping;
-
-  back_sum = (back_sum / 3);
-
-  if (back_sum < 2000){
-    Serial.println("Object detected");
-    return true;
-  }
-  else {
-    Serial.println("No object detected");
-    return false;
-  }
+void detachArmMotors(){
+  detachRotMotor();
+  detachExtendMotor();
+  detachVerticalMotor();
+  detachClawMotor();
 }
 
-// ------------------ Detatch and attach functions ------------------
-
-void detatchArmMotors(){
-  detatchRotMotor();
-  detatchExtendMotor();
-  detatchVerticalMotor();
-  detatchClawMotor();
-}
-
-void detatchRotMotor(){
+void detachRotMotor(){
   servo_RotMotor.detach();
 }
 
-void detatchExtendMotor(){
+void detachExtendMotor(){
   servo_ExtendMotor.detach();
 }
 
-void detatchVerticalMotor(){
+void detachVerticalMotor(){
   servo_VerticleMotor.detach();
 }
 
-void detatchClawMotor(){
+void detachClawMotor(){
   servo_ClawMotor.detach();
 }
 
