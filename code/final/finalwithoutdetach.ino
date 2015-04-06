@@ -181,9 +181,7 @@ void loop() {
       /*
       TESTING BACKLOG:
       */
-//      
 
-      
       stage = 1;
 
     break;
@@ -2040,9 +2038,40 @@ boolean detectBottomLongSide(){
 // Returns true if there's an object on the right, otherwise it returns false
 boolean detectObjectRight(){
   float back_ping;
+
+  delay(10);
+
   back_ping = backPing();
 
   if (back_ping < 2000){
+    Serial.println("Object detected");
+    return true;
+  }
+  else {
+    Serial.println("No object detected");
+    return false;
+  }
+}
+
+boolean detectObjectRightAverage(){
+  float back_ping;
+  float back_sum;
+
+  back_sum = 0;
+
+  delay(10);
+  back_ping = backPing();
+  back_sum = back_ping;
+  delay(10);
+  back_ping = backPing();
+  back_sum = back_ping;
+  delay(10);
+  back_ping = backPing();
+  back_sum = back_ping;
+
+  back_sum = (back_sum / 3);
+
+  if (back_sum < 2000){
     Serial.println("Object detected");
     return true;
   }
