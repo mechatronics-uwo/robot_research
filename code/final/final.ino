@@ -180,13 +180,12 @@ void loop() {
 
       /*
       TESTING BACKLOG:
-      parallelPark
-      findBottle
-      openClaw
-      closeClaw
       */
+//      
       detachArmMotors();
       delay(250);
+
+      
       stage = 1;
 
     break;
@@ -357,7 +356,7 @@ void loop() {
     // Stage status: IN PROGRESS by Danny
     // Start stage: Robot is in the correct position with respect to the table. Robot needs to raise its arm
       raiseArm();
-      delay(8000);
+      delay(12000);
       stopArm();
       delay(1500);
       stage = 14;
@@ -788,6 +787,10 @@ void loop() {
       delay(1000);
       stage = 54;
       break;
+
+// *****************************************************************
+// ************************** END OF EPIC **************************
+// *****************************************************************
 
     case 54:
       moveForward(200);
@@ -2018,7 +2021,7 @@ boolean detectLongSide(){
 
 // Moves forward continuously and scans for a bottom light source. Returns true if it detects a light source, or false if it doesn't
 boolean detectBottomLongSide(){
-  while (detectObjectRightAverage()){
+  while (detectObjectRight()){
     if (detectBottomLight()){
       Serial.println("Long edge of the table detected, ending loop");
       setNeutral();
@@ -2035,33 +2038,6 @@ boolean detectBottomLongSide(){
   }
   Serial.println("Long edge not detected");
   return false;
-}
-
-boolean detectObjectRightAverage(){
-  float back_ping;
-  float back_sum;
-
-  back_sum = 0;
-
-  back_ping = backPing();
-  back_sum = back_ping;
-  delay(10);
-  back_ping = backPing();
-  back_sum = back_ping;
-  delay(10);
-  back_ping = backPing();
-  back_sum = back_ping;
-
-  back_sum = (back_sum / 3);
-
-  if (back_sum < 2000){
-    Serial.println("Object detected");
-    return true;
-  }
-  else {
-    Serial.println("No object detected");
-    return false;
-  }
 }
 
 // Returns true if there's an object on the right, otherwise it returns false
