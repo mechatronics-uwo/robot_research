@@ -417,7 +417,7 @@ void loop() {
     case 19:
       lowerArm();
       delay(1300);
-      stopHorizontalArm();
+      stopArm();
       delay(100);
       rotateParallel();
       delay(500);
@@ -427,7 +427,7 @@ void loop() {
 
     case 20:
       lowerArm();
-      delay(6000);
+      delay(8000);
       stopArm();
       detatchArmMotors();
       stage = 21;
@@ -478,8 +478,9 @@ void loop() {
       break;
 
     case 23:
+      backUp();
       setNeutral();
-      turnRightAngle(100);
+      turnRightAngle(110);
       delay(1000);
       setNeutral();
       stage = 24;
@@ -504,7 +505,6 @@ void loop() {
         stage = 26;
       }
       else if(hitTable()){
-        attachArmMotors();
         setNeutral();
         moveBackDistance(300);
         turnLeftAngle(87);
@@ -532,7 +532,6 @@ void loop() {
       setNeutral();
       pivotAlign();
       setNeutral();
-      delay(1000);
       stage = 28;
       break;
 
@@ -543,6 +542,7 @@ void loop() {
       break;
 
     case 29:
+      // Need to test detectBottomLongSide
       if(detectBottomLongSide()){
         setNeutral();
         stage = 31;
@@ -559,6 +559,7 @@ void loop() {
       turnRightAngle(100);
       delay(500);
       stage = 31;
+
       break;
 
 
@@ -574,23 +575,23 @@ void loop() {
       moveForwardDistance(300);
       delay(1000);
       setNeutral();
-
       stage = 32;
+
       break;
 
     case 32:
       parallelPark();
       setNeutral();
       delay(1000);
-
       stage = 33;
+
       break;
 
     case 33:
       pivotAlign();
       delay(500);
-
       stage = 34;
+
       break;
 
     case 34:
@@ -612,82 +613,120 @@ void loop() {
       break;
 
     case 36:
-      rotatePerpendicular();
-      delay(7500);
+      while (!hitLowerArm()){
+        lowerArm();
+      }
+      stopArm();
+      delay(1000);
+      raiseArm();
+      delay(3000);
+      stopArm();
       stage = 37;
       break;
 
     case 37:
-      extendArm();
-      delay(3000);
-      stopHorizontalArm();
+      rotatePerpendicular();
+      delay(4500);
+      stage = 38;
       break;
 
     case 38:
-      lowerArmUntilHit();
-      delay(1000);
+      extendArm();
+      delay(4000);
+      stopHorizontalArm();
       stage = 39;
       break;
 
     case 39:
-      openClaw();
-      delay(3000);
+      lowerArmUntilHit();
+      delay(1000);
       stage = 40;
       break;
 
     case 40:
-      while(!hitTopFront()){
-        retractArm();
-      }
-      stopHorizontalArm();
-      delay(1000);
+      openClaw();
+      delay(3000);
+      stopClaw();
       stage = 41;
       break;
+
+
 
     // ==================== STAGE 41-49 ====================
 
     case 41:
-      moveForwardDistance(500);
-      delay(1000);
-      stage = 42;
-      break;
-
-    case 42:
-      findBottleDanny();
-      delay(1000);
-      stage = 43;
-
-      break;
-
-    case 43:
-      zoomIntoBottle();
-      delay(1000);
-      stage = 44;
-      break;
-
-    case 44:
-      grabBottle();
-      stage = 45;
-      break;
-
-    case 45:
       while(!hitTopFront()){
         retractArm();
       }
       stopHorizontalArm();
-      delay(1000);
+      closeClaw();
+      delay(4500);
+      stopClaw();
+      stage = 42;
+      break;
 
+    case 42:
+      moveForwardDistance(600);
+      delay(1000);
+      stage = 43;
+      break;
+
+    case 43:
+      if(findBottleDanny()){
+        stage = 44;
+      }
+      break;
+
+    case 44:
+      if (armPing() > 260){
+        extendArm();
+        openClaw();
+      }
+      else {
+        stopHorizontalArm();
+        delay(50);
+        while(!hitArm()){
+          lowerArm();
+        }
+        stopArm();
+        delay(250);
+        closeClaw();
+        delay(3000);
+        stopClaw();
+        stage = 45;
+      }
+      break;
+
+    case 45:
+      pivotAlign();
+      stage = 46;
       break;
 
     case 46:
-
+      while(!hitTopFront()){
+        retractArm();
+      }
+      stopHorizontalArm();
+      delay(500);
+      stage = 47;
       break;
 
     case 47:
-
+      lowerArm();
+      delay(1300);
+      stopArm();
+      delay(100);
+      rotateParallel();
+      delay(500);
+      stopRotation();
+      stage = 48;
       break;
 
     case 48:
+      while(!hitLowerArm()){
+        lowerArm();
+      }
+      stopArm();
       detatchArmMotors();
       stage = 49;
 
@@ -726,10 +765,10 @@ void loop() {
       count = 0;
       moveForward(400);
       delay(6000);
-      stage = 23;
+      stage = 51;
       break;
 
-    // ==================== STAGE 41-49 ====================
+    // ==================== STAGE 51-60 ====================
 
     case 150:
     if(!hitTopFront())
@@ -1776,7 +1815,7 @@ boolean detectLongSide(){
 
 // Moves forward continuously and scans for a bottom light source. Returns true if it detects a light source, or false if it doesn't
 boolean detectBottomLongSide(){
-  while (detectObjectRight()){
+  while (detectObjectRightAverage()){
     if (detectBottomLight()){
       Serial.println("Long edge of the table detected, ending loop");
       setNeutral();
@@ -1810,7 +1849,34 @@ boolean detectObjectRight(){
   }
 }
 
-// Detatch and attach functions
+boolean detectObjectRightAverage(){
+  float back_ping;
+  float back_sum;
+
+  back_sum = 0;
+
+  back_ping = backPing();
+  back_sum += back_ping;
+  delay(10);
+  back_ping = backPing();
+  back_sum += back_ping;
+  delay(10);
+  back_ping = backPing();
+  back_sum += back_ping;
+
+  back_sum = (back_sum / 3);
+
+  if (back_sum < 2000){
+    Serial.println("Object detected");
+    return true;
+  }
+  else {
+    Serial.println("No object detected");
+    return false;
+  }
+}
+
+// ------------------ Detatch and attach functions ------------------
 
 void detatchArmMotors(){
   detatchRotMotor();
