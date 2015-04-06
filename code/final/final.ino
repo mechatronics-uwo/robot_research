@@ -478,8 +478,8 @@ void loop() {
       break;
 
     case 23:
-      backUp();
       setNeutral();
+      backUp();
       turnRightAngle(110);
       delay(1000);
       setNeutral();
@@ -619,7 +619,7 @@ void loop() {
       stopArm();
       delay(1000);
       raiseArm();
-      delay(3000);
+      delay(5000);
       stopArm();
       stage = 37;
       break;
@@ -632,7 +632,7 @@ void loop() {
 
     case 38:
       extendArm();
-      delay(4000);
+      delay(5000);
       stopHorizontalArm();
       stage = 39;
       break;
@@ -700,6 +700,7 @@ void loop() {
     case 45:
       pivotAlign();
       stage = 46;
+
       break;
 
     case 46:
@@ -709,6 +710,7 @@ void loop() {
       stopHorizontalArm();
       delay(500);
       stage = 47;
+
       break;
 
     case 47:
@@ -720,6 +722,7 @@ void loop() {
       delay(500);
       stopRotation();
       stage = 48;
+
       break;
 
     case 48:
@@ -768,7 +771,191 @@ void loop() {
       stage = 51;
       break;
 
+
     // ==================== STAGE 51-60 ====================
+
+    case 51:
+      backUp();
+      stage = 52;
+
+      break;
+
+    case 52:
+      setNeutral();
+      turnRightAngle(110);
+      delay(1000);
+      setNeutral();
+      stage = 53;
+
+      break;
+
+    case 53:
+      pivotAlign();
+      delay(1000);
+      stage = 54;
+      break;
+
+    case 54:
+      moveForward(200);
+      if(hitWall()){
+        setNeutral();
+        moveBackDistance(300);
+        turnLeftAngle(87);
+        stage = 55;
+      }
+      else if(hitTable()){
+        attachArmMotors();
+        setNeutral();
+        moveBackDistance(300);
+        turnLeftAngle(87);
+        stage = 56;
+      }
+      break;
+
+    case 56:
+      smartMoveForwards();
+      if (hitWall()){
+        setNeutral();
+        moveBackDistance(300);
+        turnLeftAngle(87);
+      }
+      else if(hitTable()){
+        setNeutral();
+        moveBackDistance(300);
+        turnLeftAngle(87);
+        stage = 57;
+      }
+      break;
+
+    case 57:
+      attachArmMotors();
+      setNeutral();
+      pivotAlign();
+      setNeutral();
+      delay(1000);
+      stage = 58;
+      break;
+
+    case 58:
+      backUp();
+      setNeutral();
+      stage = 59;
+      break;
+
+    case 59:
+      if(detectLongSide()){
+        setNeutral();
+        stage = 60;
+      }
+      else{
+        setNeutral();
+        stage = 61;
+      }
+
+      break;
+
+    case 60:
+      moveForwardDistance(300);
+      delay(500);
+      turnRightAngle(100);
+      delay(500);
+      stage = 60;
+
+      break;
+
+    // ==================== STAGE 61-70 ====================
+
+    case 61:
+      while(!detectLight()){
+        moveForward(130);
+      }
+      setNeutral();
+      delay(1000);
+      moveForwardDistance(300);
+      delay(1000);
+      setNeutral();
+      stage = 62;
+
+      break;
+
+    case 62:
+      parallelPark();
+      setNeutral();
+      delay(1000);
+      stage = 63;
+
+      break;
+
+    case 63:
+      pivotAlign();
+      delay(500);
+      stage = 64;
+
+      break;
+
+    case 64:
+      while(!detectLight()){
+        moveBackwards(150);
+      }
+      setNeutral();
+
+      stage = 65;
+
+      break;
+
+    case 65:
+      delay(500);
+      pivotAlign();
+      delay(500);
+      setNeutral();
+
+      stage = 66;
+
+      break;
+
+    case 66:
+      while (!hitLowerArm()){
+        lowerArm();
+      }
+      stopArm();
+      stage = 67;
+      break;
+
+    case 67:
+      raiseArm();
+      delay(5000);
+      stopArm();
+      stage = 68;
+      break;
+
+    case 68:
+      rotatePerpendicular();
+      delay(4500);
+      stage = 69;
+      break;
+
+    case 69:
+      extendArm();
+      delay(6000);
+      stopArm();
+      openClaw();
+      delay(4500);
+      stopClaw();
+      stage = 70;
+      break;
+
+    case 70:
+      while(!hitTopFront()){
+        retractArm();
+      }
+      stopHorizontalArm();
+      delay(500);
+      closeClaw();
+      delay(4500);
+      stage = 999;
+      break;
+
+    // ==================== LEGACY STAGES ====================
 
     case 150:
     if(!hitTopFront())
@@ -792,7 +979,6 @@ void loop() {
 
       break;
 
-    // ==================== STAGE 31-40 ====================
     //Finding door from anywhere in the room
 
     case 152:
