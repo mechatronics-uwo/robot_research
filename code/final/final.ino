@@ -914,37 +914,47 @@ void loop() {
       break;
 
     case 66:
+      while(!detectBottomLight()){
+        moveForward(130);
+      }
+      setNeutral();
+      stage = 67;
+
+    case 67:
       while (!hitLowerArm()){
         lowerArm();
       }
-      stopArm();
-      stage = 67;
-      break;
-
-    case 67:
-      raiseArm();
-      delay(5000);
       stopArm();
       stage = 68;
       break;
 
     case 68:
-      rotatePerpendicular();
-      delay(4500);
+      raiseArm();
+      delay(5000);
+      stopArm();
       stage = 69;
       break;
 
     case 69:
+      rotatePerpendicular();
+      delay(4500);
+      stage = 70;
+      break;
+
+    case 70:
       extendArm();
       delay(6000);
       stopArm();
       openClaw();
       delay(4500);
       stopClaw();
-      stage = 70;
+      stage = 71;
       break;
 
-    case 70:
+
+    // ==================== STAGE 71-80 ====================
+
+    case 71:
       while(!hitTopFront()){
         retractArm();
       }
