@@ -181,11 +181,10 @@ void loop() {
       /*
       TESTING BACKLOG:
       */
-//      
-      detachArmMotors();
+
+      detachArmMotors(); // Detach unecessarry motors to save power
       delay(250);
 
-      
       stage = 1;
 
     break;
@@ -353,7 +352,7 @@ void loop() {
       break;
 
     case 13:
-    // Stage status: IN PROGRESS by Danny
+    // Stage status: COMPLETE by Danny
     // Start stage: Robot is in the correct position with respect to the table. Robot needs to raise its arm
       raiseArm();
       delay(12000);
@@ -365,22 +364,28 @@ void loop() {
     // End stage: Robot has its arm raised
 
     case 14:
+    // Stage status: COMPLETE
+    // Start stage: Robot has its arm raised
       rotatePerpendicular();
       delay(3000);
       stage = 15;
 
       break;
+      // End stage: Robot's arm is perpendicular to itself
 
     case 15:
-      if(findBottleDanny()){
+      // Stage status: COMPLETE by Daniel
+      // Start stage: Robot is ready to scan for the bottle
+      if(findBottle()){
         stage = 16;
       }
 
       break;
+      // End stage: Robot has located the water bottle
 
     case 16:
-//      zoomIntoBottle();
-//      delay(1000);
+      // Stage status: COMPLETE by Danny
+      // Start stage: Robot has located the water bottle
       if (armPing() > 260){
         extendArm();
         openClaw();
@@ -396,14 +401,17 @@ void loop() {
         stage = 17;
       }
       break;
-
+      // End stage: Robot is holding the water bottle
 
     case 17:
+      // Align the robot parallel to the table
       pivotAlign();
       stage = 18;
       break;
 
     case 18:
+      // Stage status: COMPLETE by Danny
+      // Stage status: Robot is holding the water bottle
       while(!hitTopFront()){
         retractArm();
       }
@@ -411,8 +419,11 @@ void loop() {
       delay(500);
       stage = 19;
       break;
+      // End stage: Robot has fully retracted its arm
 
     case 19:
+      // Stage status: COMPLETE by Daniel
+      // Start stage: Robot is holding the water bottle
       lowerArm();
       delay(1300);
       stopArm();
@@ -422,8 +433,10 @@ void loop() {
       stopRotation();
       stage = 20;
       break;
+      // End stage: Robot has rotated its arm parallel to itself
 
     case 20:
+      // Robot lowers its arm
       lowerArm();
       delay(6000);
       stopArm();
@@ -437,6 +450,8 @@ void loop() {
     // ==================== STAGE 21-30 ====================
 
     case 21:
+      // Stage status: COMPLETE by Daniel
+      // Start stage: Robot is holding the bottle and is ready to look for the door
       smartMoveForwards();
       if (hitWall()){
         setNeutral();
@@ -464,17 +479,15 @@ void loop() {
         stage = 22;
       }
       break;
+      // End stage: Robot has loacated the door
 
     case 22:
+      // Stage status: COMPLETE by Danny
+      // Start stage: Robot is preparing to move through the door
       count = 0;
       moveForward(400);
       delay(6000);
       stage = 23;
-      // if(hitWall()){
-      //  setNeutral();
-      //  moveBackDistance(300);
-      //  turnLeftAngle(87);
-      // }
       break;
 
     case 23:
@@ -485,18 +498,23 @@ void loop() {
       setNeutral();
       stage = 24;
       break;
+      // End stage: Robot has moved through the door
 
     case 24:
+      // Stage status: COMPLETE by Daniel
+      // Start stage: Robot is in the second room and needs to align itself parallel to a wall
       pivotAlign();
       delay(1000);
       stage = 25;
       break;
+      // End stage: Robot is parallel to a wall
 
 // *****************************************************************
 // ************************** END OF EPIC **************************
 // *****************************************************************
 
     case 25:
+      // Repeat code from epic 1
       moveForward(200);
       if(hitWall()){
         setNeutral();
@@ -513,6 +531,7 @@ void loop() {
       break;
 
     case 26:
+      // Repeat code from epic 1
       smartMoveForwards();
       if (hitWall()){
         setNeutral();
@@ -528,6 +547,7 @@ void loop() {
       break;
 
     case 27:
+      // Repeat code from epic 1
       setNeutral();
       pivotAlign();
       setNeutral();
@@ -536,13 +556,15 @@ void loop() {
       break;
 
     case 28:
+      // Repeat code from epic 1
       backUp();
       setNeutral();
       stage = 29;
       break;
 
     case 29:
-      // Need to test detectBottomLongSide
+      // Stage status: COMPLETE by Daniel
+      // Start stage: Robot is by the lower table and needs to align itself against the long side of the table
       if(detectBottomLongSide()){
         setNeutral();
         stage = 31;
@@ -552,8 +574,10 @@ void loop() {
         stage = 30;
       }
       break;
+      // End stage: Robot has found the long edge of the table
 
     case 30:
+      // Repeat code from epic 1
       moveForwardDistance(300);
       delay(500);
       turnRightAngle(100);
@@ -567,6 +591,7 @@ void loop() {
 
 
     case 31:
+      // Repeat code from epic 1
       while(!detectBottomLight()){
         moveForward(130);
       }
@@ -580,6 +605,7 @@ void loop() {
       break;
 
     case 32:
+      // Repeat code from epic 1
       parallelPark();
       setNeutral();
       delay(1000);
@@ -588,6 +614,7 @@ void loop() {
       break;
 
     case 33:
+      // Repeat code from epic 1
       pivotAlign();
       delay(500);
       stage = 34;
@@ -595,6 +622,7 @@ void loop() {
       break;
 
     case 34:
+      // Repeat code from epic 1
       while(!detectBottomLight()){
         moveBackwards(130);
       }
@@ -604,6 +632,7 @@ void loop() {
       break;
 
     case 35:
+      // Repeat code from epic 1
       delay(500);
       pivotAlign();
       delay(500);
@@ -615,6 +644,8 @@ void loop() {
       break;
 
     case 36:
+      // Stage status: COMPLETE by Daniel
+      // Start stage: Robot is by the lower table and needs to lower its arm to an appropriate height
       while (!hitLowerArm()){
         lowerArm();
       }
@@ -625,8 +656,10 @@ void loop() {
       stopArm();
       stage = 37;
       break;
+      // End stage: Robot has lowered its arm to an approrpiate height
 
     case 37:
+      // Repeat code from epic 1
       rotatePerpendicular();
       delay(4500);
       stopRotation();
@@ -634,17 +667,23 @@ void loop() {
       break;
 
     case 38:
+      // Stage status: COMPLETE by Danny
+      // Start stage: robot needs to extend its arm above the lower table
       extendArm();
       delay(4000);
       stopHorizontalArm();
       stage = 40;
       break;
+      // End stage: Robot has its arm extended above the lower table and needs to drop the water bottle
 
     case 39:
+      // Transition stage
       stage = 40;
       break;
 
     case 40:
+      // Stage status: COMPLETE by Daniel
+      // Start stage: Robot has its arm extended above the lower table and needs to drop the water bottle
       openClaw();
       delay(3000);
       stopClaw();
@@ -654,12 +693,14 @@ void loop() {
       stopArm();
       stage = 41;
       break;
+      // End stage: Robot has dropped the water bottle on the lower table
 
 
 
     // ==================== STAGE 41-49 ====================
 
     case 41:
+      // Repeat code from epic 1
       while(!hitTopFront()){
         retractArm();
       }
@@ -671,18 +712,21 @@ void loop() {
       break;
 
     case 42:
+      // Robot moves away from the recently dropped water bottle
       moveForwardDistance(700);
       delay(1000);
       stage = 43;
       break;
 
     case 43:
-      if(findBottleDanny()){
+      // Repeat code from epic 1
+      if(findBottle()){
         stage = 44;
       }
       break;
 
     case 44:
+      // Repeat code from epic 1
       if (armPing() > 260){
         extendArm();
         openClaw();
@@ -698,12 +742,14 @@ void loop() {
       break;
 
     case 45:
+      // Repeat code from epic 1
       pivotAlign();
       stage = 46;
 
       break;
 
     case 46:
+      // Repeat code from epic 1
       while(!hitTopFront()){
         retractArm();
       }
@@ -714,6 +760,7 @@ void loop() {
       break;
 
     case 47:
+      // Repeat code from epic 1
       rotateParallel();
       delay(500);
       stopRotation();
@@ -722,6 +769,7 @@ void loop() {
       break;
 
     case 48:
+      // Repeat code from epic 1
       detachArmMotors();
       delay(250);
       stage = 49;
@@ -729,6 +777,7 @@ void loop() {
       break;
 
     case 49:
+      // Repeat code from epic 1
       smartMoveForwards();
       if (hitWall()){
         setNeutral();
@@ -758,6 +807,7 @@ void loop() {
       break;
 
     case 50:
+      // Repeat code from epic 1
       count = 0;
       moveForward(400);
       delay(6000);
@@ -768,12 +818,14 @@ void loop() {
     // ==================== STAGE 51-60 ====================
 
     case 51:
+      // Repeat code from epic 1
       backUp();
       stage = 52;
 
       break;
 
     case 52:
+      // Repeat code from epic 1
       setNeutral();
       turnRightAngle(130);
       delay(1000);
@@ -783,16 +835,19 @@ void loop() {
       break;
 
     case 53:
+      // Repeat code from epic 1
       pivotAlign();
       delay(1000);
       stage = 54;
       break;
+      // End stage: Robot is aligned to a wall in room 1 with the empty water bottle in its hand
 
 // *****************************************************************
 // ************************** END OF EPIC **************************
 // *****************************************************************
 
     case 54:
+      // Repeat code from epic 1
       moveForward(200);
       if(hitWall()){
         setNeutral();
@@ -809,10 +864,12 @@ void loop() {
       break;
 
     case 55:
+      // Transition stage
       stage = 56;
       break;
 
     case 56:
+      // Repeat code from epic 1
       smartMoveForwards();
       if (hitWall()){
         setNeutral();
@@ -828,6 +885,7 @@ void loop() {
       break;
 
     case 57:
+      // Repeat code from epic 1
       setNeutral();
       pivotAlign();
       setNeutral();
@@ -836,12 +894,14 @@ void loop() {
       break;
 
     case 58:
+      // Repeat code from epic 1
       backUp();
       setNeutral();
       stage = 59;
       break;
 
     case 59:
+      // Repeat code from epic 1
       if(detectLongSide()){
         setNeutral();
         stage = 61;
@@ -854,6 +914,7 @@ void loop() {
       break;
 
     case 60:
+      // Repeat code from epic 1
       moveForwardDistance(300);
       delay(500);
       turnRightAngle(100);
@@ -865,6 +926,7 @@ void loop() {
     // ==================== STAGE 61-70 ====================
 
     case 61:
+      // Repeat code from epic 1
       while(!detectLight()){
         moveForward(130);
       }
@@ -878,6 +940,7 @@ void loop() {
       break;
 
     case 62:
+      // Repeat code from epic 1
       parallelPark();
       setNeutral();
       delay(1000);
@@ -886,6 +949,7 @@ void loop() {
       break;
 
     case 63:
+      // Repeat code from epic 1
       pivotAlign();
       delay(500);
       stage = 64;
@@ -893,6 +957,7 @@ void loop() {
       break;
 
     case 64:
+      // Repeat code from epic 1
       while(!detectLight()){
         moveBackwards(150);
       }
@@ -903,6 +968,7 @@ void loop() {
       break;
 
     case 65:
+      // Repeat code from epic 1
       delay(500);
       pivotAlign();
       delay(500);
@@ -913,6 +979,7 @@ void loop() {
       break;
 
     case 66:
+      // Repeat code from epic 1
       while(!detectBottomLight()){
         moveForward(130);
       }
@@ -920,6 +987,7 @@ void loop() {
       stage = 67;
 
     case 67:
+      // Repeat code from epic 1
       delay(50);
       attachArmMotors();
       delay(250);
@@ -927,20 +995,28 @@ void loop() {
       break;
 
     case 68:
+      // Stage status: COMPLETE by Daniel
+      // Start stage: Robot is parallel to the long edge of the table in room 1 and is holding the empty water bottle
       raiseArm();
       delay(2500);
       stopArm();
       stage = 69;
       break;
+      // End stage: Robot has its arm raised to an adequate height beside the recycling bin
 
     case 69:
+      // Stage status: COMPLETE by Daniel
+      // Start stage: Robot has its arm raised to an adequate height beside the recycling bin
       rotatePerpendicular();
       delay(3000);
       stopRotation();
       stage = 70;
       break;
+      // End status: Robot has its arm raised and perpendicular to itself
 
     case 70:
+      // Stage status: COMPLETE by Daniel
+      // Start stage: Robot has its arm raised and perpendicular to itself
       extendArm();
       delay(3750);
       stopArm();
@@ -950,11 +1026,13 @@ void loop() {
       stopClaw();
       stage = 71;
       break;
+      // End stage: Robot has extended its arm directly above the recycling bin and dropped the bottle in the bin
 
 
     // ==================== STAGE 71-80 ====================
 
     case 71:
+      // Repeat code from epic 2
       while(!hitTopFront()){
         retractArm();
       }
@@ -967,6 +1045,7 @@ void loop() {
       break;
 
     case 72:
+      // Repeat code from epic 2
       rotateParallel();
       delay(3000);
       stopRotation();
@@ -974,6 +1053,8 @@ void loop() {
       stage = 999;
 
     break;
+
+    // End stage: Finish.
 
     // ==================== LEGACY STAGES ====================
 
@@ -1100,10 +1181,6 @@ void loop() {
       }
       break;
 
-    case 161:
-      break;
-
-
   }
 
 }
@@ -1118,8 +1195,8 @@ void loop() {
 // -------------------- !SENSOR FUNCTIONS --------------------
 
 
+// Ping the ultrasonic sensor near the front of the robot
 float frontPing() {
-  // Front ultrasonic
   digitalWrite(ULTRASONIC_IN_PIN_FRONT, HIGH);
   delayMicroseconds(10);
   digitalWrite(ULTRASONIC_IN_PIN_FRONT, LOW);
@@ -1139,11 +1216,10 @@ float frontPing() {
   return ping_time;
 }
 
-
+// Ping the ultrasonic sensor near the rear of the robot
 float backPing(){
-  // Back ultrasonic
   digitalWrite(ULTRASONIC_IN_PIN_BACK, HIGH);
-  delayMicroseconds(10); //The 10 microsecond pause where the pulse in "high"
+  delayMicroseconds(10);
   digitalWrite(ULTRASONIC_IN_PIN_BACK, LOW);
 
   float ping_time = pulseIn(ULTRASONIC_OUT_PIN_BACK, HIGH, 10000);
@@ -1161,6 +1237,8 @@ float backPing(){
   return ping_time;
 }
 
+
+// Returns the value of the ultrasonic ping on the robot's arm
 float armPing() {
   // Top ultrasonic
   digitalWrite(ULTRASONIC_IN_PIN_ARM, HIGH);
@@ -1182,6 +1260,7 @@ float armPing() {
   return ping_time;
 }
 
+// Returns true if the robot hits a table
 boolean hitTable(){
   int bottom_lever = digitalRead(FRONT_BOTTOM_LEVER_SWITCH_PIN);
 
@@ -1203,6 +1282,7 @@ boolean hitTable(){
   }
 }
 
+// Returns true if the robot hits the wall
 boolean hitWall(){
   int bottom_lever = digitalRead(FRONT_BOTTOM_LEVER_SWITCH_PIN);
   int top_lever = digitalRead(FRONT_TOP_LEVER_SWITCH_PIN);
@@ -1216,6 +1296,7 @@ boolean hitWall(){
   }
 }
 
+// Returns true if the arm can't be extended anymore
 boolean hitTopBack(){
   int topBackLever = digitalRead(TOP_BACK_LEVER_SWITCH_PIN);
   if (topBackLever == LOW){
@@ -1228,6 +1309,7 @@ boolean hitTopBack(){
   }
 }
 
+// Returns true if the arm can't be retracted anymore
 boolean hitTopFront(){
   int topBackLever = digitalRead(TOP_FRONT_LEVER_SWITCH_PIN);
   if (topBackLever == LOW){
@@ -1240,6 +1322,7 @@ boolean hitTopFront(){
   }
 }
 
+// Returns true if the claw can't be lowered anymore
 boolean hitArm(){
   int arm_lever = digitalRead(ARM_SWITCH_PIN);
   if (arm_lever == LOW){
@@ -1252,6 +1335,7 @@ boolean hitArm(){
   }
 }
 
+// Returns true if the arm can't be lowered anymore
 boolean hitLowerArm(){
   int arm_lever = digitalRead(LOWER_ARM_SWITCH_PIN);
   if (arm_lever == LOW){
@@ -1284,6 +1368,7 @@ float armPingNumberOfTimes(int number_of_times){
   return total_ping_value;
 }
 
+// Increases the count global variable if a light is detected
 void countLight(){
   //light_value = analogRead(RIGHT_LIGHT_SENSOR);
   next_light_value = analogRead(RIGHT_LIGHT_SENSOR);
@@ -1326,6 +1411,7 @@ boolean detectBottomLight(){
   }
 }
 
+// Returns encoder values for left and right wheel motors
 void getEncoderPos(){
   Serial.print("Rot: ");
   Serial.println(encoder_RotMotor.getRawPosition());
@@ -1407,8 +1493,7 @@ void moveForwardDistance(long distance){
   setNeutral();
 }
 
-// Turn functions
-
+// Turning functions
 void veerRight(long speedFactor, long intensity){
   Left_Motor_Speed = constrain((Left_Motor_Stop + speedFactor + intensity), 1500, 2100);
   Right_Motor_Speed = constrain((Right_Motor_Stop + speedFactor), 1500, 2100);
@@ -1466,8 +1551,7 @@ void turnClockwise(long speedFactor) {
   implementMotorSpeed();
 }
 
-// Implementation movement functions
-
+// Sets the motors to a certain speed
 void implementMotorSpeed(){
   servo_LeftMotor.writeMicroseconds(constrain((Left_Motor_Speed + Left_Motor_Offset), 900, 2100));
   servo_RightMotor.writeMicroseconds(constrain((Right_Motor_Speed + Right_Motor_Offset), 900, 2100));
@@ -1599,33 +1683,6 @@ void smartMoveForwards(){
   }
 }
 
-void slowSmartMoveForwards(){
-  // Keep between 900 and 650 for ping
-  startWaiting();
-
-  float front_ping;
-  float back_ping;
-
-  front_ping = frontPing();
-  delay(10);
-  back_ping = backPing();
-
-  if (waitMilliSecond(100)){
-
-    if (front_ping > 1050){
-      veerRight(50, 200);
-      Serial.println("Too far, need to veer right");
-    }
-    else if (front_ping < 950){
-      veerLeft(50, 200);
-      Serial.println("Too close, need to veer left");
-    }
-    else {
-      moveForward(130);
-      Serial.println("Everything's perfect");
-    }
-  }
-}
 
 // -------------------- !ARM FUNCTIONS --------------------
 
@@ -1748,7 +1805,8 @@ boolean waitMilliSecond(unsigned int interval) {
 
 // -------------------- !INTEGRATION FUNCTIONS --------------------
 
-boolean findBottleDanny(){
+// Calculates the appropriate distance using a right angled triangle and the angle of the ultrasonic signal
+boolean findBottle(){
   float arm_ping;
 
   // Calculate the average background noise
@@ -1761,6 +1819,8 @@ boolean findBottleDanny(){
     if (average_background_ping < 5000){
       Serial.println("Bottle detected");
       setNeutral();
+
+      // Move forward a distance to compensate for innacurate ultrasonic
       moveDistance=(average_background_ping/71.00)*0.1005; // 0.1305
       moveForwardDistance(25.00*moveDistance);
       return true;
@@ -1782,8 +1842,8 @@ boolean findBottleDanny(){
   }
 }
 
-// Moves forward continuously and scans for a water bottle. Returns true if it detects the bottle, or false if it doesn't
 
+// Returns true if the difference between the two values is greater than 600
 boolean differenceDetected(float first_value, float second_value){
   if((abs(first_value - second_value)) > 600){
     return true;
@@ -1793,10 +1853,12 @@ boolean differenceDetected(float first_value, float second_value){
   }
 }
 
+// Finds the bottle based on a change in ultrasonic signals
 void findBottleDifferenceMethod(){
   float first_ping;
   float second_ping;
 
+  // Obtain an average ping for a more accurate result
   first_ping = (armPingNumberOfTimes(3)/3);
 
   while (first_ping > 770){
@@ -1824,29 +1886,7 @@ void findBottleDifferenceMethod(){
   stopHorizontalArm();
 }
 
-void findBottle(){
-
-  while(!bottleDetected(5000)){
-    if (hitWall()){
-      Serial.println("Hit the wall");
-      setNeutral();
-      return;
-    }
-    else if (!detectObjectRight){
-      Serial.println("Drove past the table");
-      setNeutral();
-      return;
-    }
-    else{
-      Serial.println("Moving forward");
-      moveForwardDistance(300);
-    }
-  }
-  Serial.println("Bottle detected, zooming in");
-  setNeutral();
-  return;
-}
-
+// Detects the bottle based on a minimum value given
 boolean bottleDetected(float ping_value){
   float arm_ping;
   arm_ping = (armPingNumberOfTimes(5) / 5);
@@ -1859,128 +1899,11 @@ boolean bottleDetected(float ping_value){
   }
 }
 
-void zoomIntoBottle(){
-  float arm_ping;
-
-  int factor;
-  factor = 1.5;
-  
-  int extend_factor;
-  extend_factor = 2;
-
-  while(!bottleDetected(770)){
-    arm_ping = (armPingNumberOfTimes(10)/10);
-    delay(1000);
-    if(arm_ping > 5000){
-      Serial.println("5000");
-      Serial.println("5000");
-      moveForwardDistance(500*factor);
-      delay(500);
-      extendArm();
-      delay(5000*extend_factor);
-      stopHorizontalArm();
-      delay(1000);
-    }
-    else if (arm_ping > 4500){
-      Serial.println("4500");
-      moveForwardDistance(450*factor);
-      delay(500);
-      extendArm();
-      delay(4500*extend_factor);
-      stopHorizontalArm();
-      delay(1000);
-    }
-    else if (arm_ping > 4000){
-      Serial.println("4000");
-      moveForwardDistance(400*factor);
-      delay(500);
-      extendArm();
-      delay(4000*extend_factor);
-      stopHorizontalArm();
-      delay(1000);
-    }
-    else if (arm_ping > 3500){
-      Serial.println("3500");
-      moveForwardDistance(350*factor);
-      delay(500);
-      extendArm();
-      delay(3500*extend_factor);
-      stopHorizontalArm();
-      delay(1000);
-    }
-    else if (arm_ping > 3000){
-      Serial.println("3000");
-      moveForwardDistance(300*factor);
-      delay(500);
-      extendArm();
-      delay(3000*extend_factor);
-      stopHorizontalArm();
-      delay(1000);
-    }
-    else if (arm_ping > 2500){
-      Serial.println("2500");
-      moveForwardDistance(250*factor);
-      delay(500);
-      extendArm();
-      delay(2500*extend_factor);
-      stopHorizontalArm();
-      delay(1000);
-    }
-    else if (arm_ping > 2000){
-      Serial.println("2000");
-      moveForwardDistance(200*factor);
-      delay(500);
-      extendArm();
-      delay(2000*extend_factor);
-      stopHorizontalArm();
-      delay(1000);
-    }
-    else if (arm_ping > 1500){
-      Serial.println("1500");
-      moveForwardDistance(150*factor);
-      delay(500);
-      extendArm();
-      delay(1500*extend_factor);
-      stopHorizontalArm();
-      delay(1000);
-    }
-    else if (arm_ping > 1000){
-      Serial.println("1000");
-      moveForwardDistance(100*factor);
-      delay(500);
-      extendArm();
-      delay(1000*extend_factor);
-      stopHorizontalArm();
-      delay(1000);
-    }
-    else if (arm_ping > 850){
-      Serial.println("850");
-      moveForwardDistance(85*factor);
-      delay(500);
-      extendArm();
-      delay(850*extend_factor);
-      stopHorizontalArm();
-      delay(1000);
-    }
-    else if (arm_ping > 780){
-      Serial.println("780");
-      moveForwardDistance(78*factor);
-      delay(500);
-      extendArm();
-      delay(780*extend_factor);
-      stopHorizontalArm();
-      delay(1000);
-    }
-  }
-  Serial.println("Last moving forward...");
-  moveForwardDistance(250);
-  delay(1000);
-}
-
+// Extends the arm, opens the claw, and grabs the bottle
 void grabBottle(){
   openClaw();
   delay(4000);
-  while(!bottleDetected(250)){
+  while(!bottleDetected(260)){
     extendArm();
   }
   stopHorizontalArm();
@@ -1991,6 +1914,7 @@ void grabBottle(){
   delay(4000);
 }
 
+// Lowers the arm until the button on the arm is hit
 void lowerArmUntilHit(){
   while(!hitArm()){
     lowerArm();
@@ -2057,6 +1981,7 @@ boolean detectObjectRight(){
 
 // ------------------ Detach and attach functions ------------------
 
+// Detatch all the arm motorsr to save power
 void detachArmMotors(){
   detachRotMotor();
   detachExtendMotor();
@@ -2080,6 +2005,7 @@ void detachClawMotor(){
   servo_ClawMotor.detach();
 }
 
+// Re-attach all the arm motors when needed
 void attachArmMotors(){
   attachRotMotor();
   attachExtendMotor();
