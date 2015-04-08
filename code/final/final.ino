@@ -1979,7 +1979,7 @@ boolean detectObjectRight(){
   }
 }
 
-// ------------------ Detach and attach functions ------------------
+// ------------------ !DETACH AND ATTACH FUNCTIONS ------------------
 
 // Detatch all the arm motorsr to save power
 void detachArmMotors(){
